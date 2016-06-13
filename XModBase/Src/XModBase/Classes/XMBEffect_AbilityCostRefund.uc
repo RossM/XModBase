@@ -6,6 +6,12 @@
 //  certain conditions to be automatically refunded. This can be used to create effects
 //  that work like Serial.
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  SlamFire
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

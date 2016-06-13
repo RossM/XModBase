@@ -12,6 +12,12 @@
 //  default.HeightAdvantageCondition		The target is higher than the shooter
 //  default.HeightDisadvantageCondition		The target is lower than the shooter
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  DamnGoodGround
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

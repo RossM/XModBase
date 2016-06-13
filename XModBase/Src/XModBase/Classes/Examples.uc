@@ -9,6 +9,11 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(HitAndRunTrigger());
+	Templates.AddItem(Assassin());
+	Templates.AddItem(AssassinTrigger());
+	Templates.AddItem(SlamFire());
+	Templates.AddItem(DamnGoodGround());
+	Templates.AddItem(MovingTarget());
 
 	return Templates;
 }
@@ -136,4 +141,163 @@ static function X2AbilityTemplate HitAndRunTrigger()
 
 	// Create the template using a helper function. It will be triggered by the Hit and Run passive defined in HitAndRun();
 	return SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", Effect, 'HitAndRun', true);
+}
+
+// Perk name:		Assassin
+// Perk effect:		When you kill a flanked or uncovered enemy with your primary weapon, you gain concealment.
+// Localized text:	"When you kill a flanked or uncovered enemy with your <Ability:WeaponName/>, you gain concealment."
+// Config:			(AbilityName="XMBExample_Assassin", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+static function X2AbilityTemplate Assassin()
+{
+	local X2AbilityTemplate						Template;
+	local XMBEffect_AbilityTriggered			Effect;
+
+	// Create an effect that listens for ability activations and triggers an event
+	Effect = new class'XMBEffect_AbilityTriggered';
+	Effect.EffectName = 'Assassin';
+	Effect.TriggeredEvent = 'Assassin';
+
+	// Require that the activated ability use the weapon associated with this ability
+	Effect.bRequireAbilityWeapon = true;
+
+	// Require that the target of the ability is now dead
+	Effect.AbilityTargetConditions.AddItem(default.DeadCondition);
+
+	// Require that the target of the ability was flanked or uncovered
+	Effect.AbilityTargetConditions.AddItem(default.NoCoverCondition);
+
+	// Create the template using a helper function
+	Template = Passive('XMBExample_Assassin', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+
+	// We need an additional ability to actually listen for the trigger
+	Template.AdditionalAbilities.AddItem('XMBExample_AssassinTrigger');
+
+	return Template;
+}
+
+// This is part of the Assassin effect, above
+static function X2AbilityTemplate AssassinTrigger()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_RangerStealth StealthEffect;
+
+	// Create a standard stealth effect
+	StealthEffect = new class'X2Effect_RangerStealth';
+	StealthEffect.BuildPersistentEffect(1, true, true, false, eGameRule_PlayerTurnEnd);
+	StealthEffect.bRemoveWhenTargetConcealmentBroken = true;
+
+	// Create the template using a helper function
+	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", StealthEffect, 'Assassin');
+
+	// Require that the unit be able to enter stealth
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_Stealth');
+
+	// Add an additional effect that causes the AI to forget where the unit was
+	Template.AddTargetEffect(class'X2Effect_Spotted'.static.CreateUnspottedEffect());
+
+	// Have the unit say it's entering concealment
+	Template.ActivationSpeech = 'ActivateConcealment';
+
+	return Template;
+}
+
+// Perk name:		Slam Fire
+// Perk effect:		For the rest of the turn, whenever you get a critical hit with your primary weapon, your actions are refunded.
+// Localized text:	"For the rest of the turn, whenever you get a critical hit with your <Ability:WeaponName/>, your actions are refunded."
+// Config:			(AbilityName="XMBExample_SlamFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+static function X2AbilityTemplate SlamFire()
+{
+	local X2AbilityTemplate					Template;
+	local XMBEffect_AbilityCostRefund       SlamFireEffect;
+
+	// Create an effect that refunds the action point cost of abilities
+	SlamFireEffect = new class'XMBEffect_AbilityCostRefund';
+	SlamFireEffect.EffectName = 'SlamFire';
+	SlamFireEffect.TriggeredEvent = 'SlamFire';
+
+	// Require that the activated ability use the weapon associated with this ability
+	SlamFireEffect.bRequireAbilityWeapon = true;
+
+	// Require that the activated ability get a critical hit
+	SlamFireEffect.AbilityTargetConditions.AddItem(default.CritCondition);
+
+	// The effect lasts until the end of the turn
+	SlamFireEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
+
+	// Create the template for an activated ability using a helper function.
+	Template = SelfTargetActivated('XMBExample_SlamFire', "img:///UILibrary_PerkIcons.UIPerk_command", true, SlamFireEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, false, eCost_Free, 4);
+
+	// Don't allow multiple ability-refunding abilities to be used in the same turn (e.g. Slam Fire and Serial)
+	class'X2Ability_RangerAbilitySet'.static.SuperKillRestrictions(Template, 'Serial_SuperKillCheck');
+
+	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
+	Template.AddShooterEffectExclusions();
+
+	return Template;
+}
+
+// Perk name:		Damn Good Ground
+// Perk effect:		You get an additional +10 Aim and +10 Defense against targets at lower elevation.
+// Localized text:	"You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
+// Config:			(AbilityName="XMBExample_DamnGoodGround")
+static function X2AbilityTemplate DamnGoodGround()
+{
+	local XMBEffect_ConditionalBonus Effect;
+
+	// Create a conditional bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'DamnGoodGround';
+
+	// The bonus adds +10 Aim and +10 Defense
+	Effect.AddToHitModifier(10);
+	Effect.AddToHitAsTargetModifier(-10);
+
+	// When being attacked, require that the unit have height advantage
+	Effect.SelfConditions.AddItem(default.HeightAdvantageCondition);
+
+	// When attacking, require that the target have height disadvantage
+	Effect.OtherConditions.AddItem(default.HeightDisadvantageCondition);
+
+	// Create the template using a helper function
+	return Passive('XMBExample_DamnGoodGround', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
+// Perk name:		Moving Target
+// Perk effect:		You get an additional +30 Defense and +50 Dodge against reaction fire.
+// Localized text:	"You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
+// Config:			(AbilityName="XMBExample_MovingTarget")
+static function X2AbilityTemplate MovingTarget()
+{
+	local XMBEffect_ConditionalBonus Effect;
+
+	// Create a conditional bonus
+	Effect = new class'XMBEffect_ConditionalBonus';
+
+	// The bonus adds +30 Defense and +50 Dodge
+	Effect.AddToHitAsTargetModifier(-30);
+	Effect.AddToHitAsTargetModifier(50, eHit_Graze);
+
+	// Require that the incoming attack is reaction fire
+	Effect.SelfConditions.AddItem(default.ReactionFireCondition);
+
+	// Create the template using a helper function
+	return Passive('XMBExample_MovingTarget', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+}
+
+// Perk name:		Danger Zone
+// Perk effect:		The radius of all your grenades is increased by 2.
+// Localized text:	"The radius of all your grenades is increased by 2."
+// Config:			(AbilityName="XMBExample_DangerZone")
+static function X2AbilityTemplate DangerZone()
+{
+	local XMBEffect_BonusRadius Effect;
+
+	// Create a bonus radius effect
+	Effect = new class'XMBEffect_BonusRadius';
+	Effect.EffectName = 'DangerZone';
+
+	// Add 2m (1.33 tiles) to the radius of all grenades
+	Effect.fBonusRadius = 2;
+
+	return Passive('XMBExample_DangerZone', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }

@@ -13,6 +13,12 @@
 //
 //  default.DeadCondition					The target is dead
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  Assassin
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

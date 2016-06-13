@@ -16,6 +16,8 @@
 //
 //  Weaponmaster
 //  AbsolutelyCritical
+//  DamnGoodGround
+//  MovingTarget
 //
 //  INSTALLATION
 //
