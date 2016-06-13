@@ -8,6 +8,12 @@
 //  used, such as with XMBCondition_ReactionFire, and lets you check the properties of
 //  the target even when the ability to be triggered is self-targeting.
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  HitAndRun
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

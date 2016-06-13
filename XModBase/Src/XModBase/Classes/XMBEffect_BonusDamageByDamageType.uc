@@ -6,7 +6,11 @@
 //  counts both effects which actually deal that damage type, and things like grenades
 //  and ammo which actually do generic damage but apply a typed damage-over-time effect.
 //
-//  USAGE
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  Pyromaniac
 //
 //  INSTALLATION
 //

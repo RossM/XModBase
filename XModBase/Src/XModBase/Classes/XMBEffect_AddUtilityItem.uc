@@ -6,7 +6,11 @@
 //  the duration of the battle. Optionally, can also grant bonus charges to any equipped
 //  items of the same kind already in the unit's inventory.
 //
-//  USAGE
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  Pyromaniac
 //
 //  INSTALLATION
 //

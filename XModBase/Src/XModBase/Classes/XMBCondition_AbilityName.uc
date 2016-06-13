@@ -6,7 +6,11 @@
 //  named abilities. This is intended for use with persistent effects that check
 //  conditions, such as XMBEffect_ConditionalBonus.
 //
-//  USAGE
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  HitAndRun
 //
 //  INSTALLATION
 //

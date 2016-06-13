@@ -12,22 +12,10 @@
 //
 //  EXAMPLES
 //
-//  +4 damage against flanked targets:
-//    ConditionalBonusEffect = new class'XMBEffect_ConditionalBonus';
-//    ConditionalBonusEffect.OtherConditions.AddItem(default.FlankedCondition);
-//    ConditionalBonusEffect.AddDamageModifier(4);
+//  The following examples in Examples.uc use this class:
 //
-//  +100 dodge against reaction fire:
-//    ConditionalBonusEffect = new class'XMBEffect_ConditionalBonus';
-//    ConditionalBonusEffect.SelfConditions.AddItem(default.ReactionFireCondition);
-//    ConditionalBonusEffect.AddToHitAsTargetModifier(100, eHit_Graze);
-//
-//  +10/15/20 crit chance with associated weapon, based on weapon tech:
-//    ConditionalBonusEffect = new class'XMBEffect_ConditionalBonus';
-//    ConditionalBonusEffect.bRequireAbilityWeapon = true;
-//    ConditionalBonusEffect.AddToHitModifier(10, eHit_Crit, 'conventional');
-//    ConditionalBonusEffect.AddToHitModifier(15, eHit_Crit, 'magnetic');
-//    ConditionalBonusEffect.AddToHitModifier(20, eHit_Crit, 'beam');
+//  Weaponmaster
+//  AbsolutelyCritical
 //
 //  INSTALLATION
 //

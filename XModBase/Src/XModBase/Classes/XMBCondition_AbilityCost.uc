@@ -6,7 +6,11 @@
 //  actual number of action points spent (including discounts, abilities that consume
 //  all remaining points, etc).
 //
-//  USAGE
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  HitAndRun
 //
 //  INSTALLATION
 //

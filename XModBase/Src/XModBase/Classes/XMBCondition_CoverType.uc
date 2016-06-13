@@ -14,6 +14,12 @@
 //  default.NoCoverCondition		The target is not in cover
 //  default.FlankedCondition		The target is not in cover and can be flanked
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  AbsolutelyCritical
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 
