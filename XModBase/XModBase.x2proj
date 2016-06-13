@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Guid>57113cdc-0290-4ad4-9571-5b27647e3bc1</Guid>
     <Name>XModBase</Name>
-    <Description>Description of My XCOM 2 Mod.</Description>
+    <Description>XModBase (XMB) is a library for mod authors, designed to make it easier to create interesting and unique perks. It provides a collection of effects and conditions which can be combined to create a huge variety of different perks. It takes care of annoying details like filling out all the boring-but-necessary fields of X2AbilityTemplate, and provides support for localization tags so you can change your abilities' values in one place and have their descriptions update automatically.</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>XModBase</AssemblyName>
     <RootNamespace>XModBase</RootNamespace>
