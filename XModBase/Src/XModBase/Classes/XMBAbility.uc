@@ -37,6 +37,8 @@ enum EActionPointCost
 	eCost_WeaponConsumeAll,		// Costs as much as a weapon shot, ends the turn.
 	eCost_Overwatch,			// No action point cost, but displays as ending the turn. Used for 
 								// abilities that have an X2Effect_ReserveActionPoints or similar.
+	eCost_None,					// No action point cost. For abilities which may be triggered during
+								// the enemy turn. You should use eCost_Free for activated abilities.
 };
 
 // Predefined conditions for use with XMBEffect_ConditionalBonus and similar effects.
@@ -151,6 +153,7 @@ static function X2AbilityCost_ActionPoints ActionPointCost(EActionPointCost Cost
 	case eCost_Weapon:				AbilityCost.iNumPoints = 0; AbilityCost.bAddWeaponTypicalCost = true; break;
 	case eCost_WeaponConsumeAll:	AbilityCost.iNumPoints = 0; AbilityCost.bAddWeaponTypicalCost = true; AbilityCost.bConsumeAllPoints = true; break;
 	case eCost_Overwatch:			AbilityCost.iNumPoints = 1; AbilityCost.bConsumeAllPoints = true; AbilityCost.bFreeCost = true; break;
+	case eCost_None:				AbilityCost.iNumPoints = 0; break;
 	}
 
 	return AbilityCost;
@@ -183,7 +186,10 @@ static function X2AbilityTemplate SelfTargetActivated(name DataName, string Icon
 		Template.AbilityCooldown = AbilityCooldown;
 	}
 
-	Template.AbilityCosts.AddItem(ActionPointCost(Cost));
+	if (Cost != eCost_None)
+	{
+		Template.AbilityCosts.AddItem(ActionPointCost(Cost));
+	}
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 
@@ -205,6 +211,8 @@ static function X2AbilityTemplate SelfTargetActivated(name DataName, string Icon
 static function HidePerkIcon(X2AbilityTemplate Template)
 {
 	local X2Effect Effect;
+
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 
 	foreach Template.AbilityTargetEffects(Effect)
 	{
@@ -261,7 +269,10 @@ static function X2AbilityTemplate TypicalAttackAbility(name DataName, string Ico
 		Template.AbilityCosts.AddItem(AmmoCost);
 	}
 
-	Template.AbilityCosts.AddItem(ActionPointCost(Cost));	
+	if (Cost != eCost_None)
+	{
+		Template.AbilityCosts.AddItem(ActionPointCost(Cost));	
+	}
 
 	Template.bAllowAmmoEffects = true;
 	Template.bAllowBonusWeaponEffects = true;

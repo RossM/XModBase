@@ -16,6 +16,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(MovingTarget());
 	Templates.AddItem(PowerShot());
 	Templates.AddItem(PowerShotBonuses());
+	Templates.AddItem(CloseCombatSpecialist());
+	Templates.AddItem(CloseCombatSpecialistShot());
 
 	return Templates;
 }
@@ -313,9 +315,9 @@ static function X2AbilityTemplate PowerShot()
 	local X2AbilityTemplate Template;
 
 	// Create the template using a helper function
-	Template = TypicalAttackAbility('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Weapon, 3, 1);
+	Template = TypicalAttackAbility('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_WeaponConsumeAll, 3, 1);
 
-	// Add a function to provide bonuses on the shot
+	// Add a secondary ability to provide bonuses on the shot
 	Template.AdditionalAbilities.AddItem('XMBExample_PowerShotBonuses');
 
 	return Template;
@@ -349,6 +351,91 @@ static function X2AbilityTemplate PowerShotBonuses()
 
 	// The Power Shot ability will show up as an active ability, so hide the icon for passive damage effect
 	HidePerkIcon(Template);
+
+	return Template;
+}
+
+static function X2AbilityTemplate CloseCombatSpecialist()
+{
+	local X2AbilityTemplate Template;
+
+	// Create a pure passive which displays the passive perk icon
+	Template = PurePassive('XMBExample_CloseCombatSpecialist', "img:///UILibrary_PerkIcons.UIPerk_command", true);
+
+	// Add the actual shot ability
+	Template.AdditionalAbilities.AddItem('XMBExample_CloseCombatSpecialistShot');
+
+	return Template;
+}
+
+static function X2AbilityTemplate CloseCombatSpecialistShot()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityToHitCalc_StandardAim ToHit;
+	local X2AbilityTrigger_Event Trigger;
+	local X2Condition_UnitProperty UnitPropertyCondition;
+	local X2Effect_Persistent PersistentEffect;
+	local X2Condition_UnitEffectsWithAbilitySource EffectsCondition;
+
+	// Create the template using a helper function
+	Template = TypicalAttackAbility('XMBExample_CloseCombatSpecialistShot', "img:///UILibrary_PerkIcons.UIPerk_command", false, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
+	
+	// Reaction fire shouldn't show up as an activatable ability
+	HidePerkIcon(Template);
+
+	// Set the shot to be considered reaction fire
+	ToHit = new class'X2AbilityToHitCalc_StandardAim';
+	ToHit.bReactionFire = true;
+	Template.AbilityToHitCalc = ToHit;
+
+	// Remove the default trigger of being activated by the player
+	Template.AbilityTriggers.Length = 0;
+
+	// Add a trigger that activates the ability on enemy movement
+	Trigger = new class'X2AbilityTrigger_Event';
+	Trigger.EventObserverClass = class'X2TacticalGameRuleset_MovementObserver';
+	Trigger.MethodName = 'InterruptGameState';
+	Template.AbilityTriggers.AddItem(Trigger);
+
+	// X2Condition_UnitProperty has a lot of checks for various things. In this case, we want to
+	// restrict the shot to units within 4 tiles.
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.RequireWithinRange = true;
+	// WithinRange is measured in Unreal units, so we need to convert 4 tiles to units.
+	UnitPropertyCondition.WithinRange = `TILESTOUNITS(4);
+	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);	
+
+	// Since the attack has no cost, if we don't do anything else, it will be able to attack many
+	// times per turn (until we run out of ammo). We use an X2Effect_Persistent that does nothing
+	// to mark our target unit, and a condition to prevent taking a second attack on a marked
+	// target in the same turn.
+
+	// Create a persistent effect
+	PersistentEffect = new class'X2Effect_Persistent';
+	// The effect name here doesn't matter, but it does have to match the name that
+	// EffectsCondition uses below.
+	PersistentEffect.EffectName = 'CCSTarget';
+	// The effect lasts until the end of the turn
+	PersistentEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
+	// Apply the effect whether the attack hits or misses
+	PersistentEffect.bApplyOnHit = true;
+	PersistentEffect.bApplyOnMiss = true;
+	Template.AddTargetEffect(PersistentEffect);
+
+	// Create a condition that checks for the presence of a certain effect. There are three
+	// similar classes that do this: X2Condition_UnitEffects,
+	// X2Condition_UnitEffectsWithAbilitySource, and X2Condition_UnitEffectsWithAbilityTarget.
+	// The first one looks for any effect with the right name, the second only for effects
+	// with that were applied by the unit using this ability, and the third only for effects
+	// that apply to the unit using this ability. Since we want to match the persistent effect
+	// we applied as a mark - but not the same effect applied by any other unit - we use
+	// X2Condition_UnitEffectsWithAbilitySource.
+	EffectsCondition = new class'X2Condition_UnitEffectsWithAbilitySource';
+	// AA_ codes indicate why an ability can't be used. They're listed in XComGameData.ini
+	// under [XComGame.X2AbilityTemplateManager]. AA_UnitIsImmune is a good choice when no more
+	// specific code applies.
+	EffectsCondition.AddExcludeEffect('CCSTarget', 'AA_UnitIsImmune');
+	Template.AbilityTargetConditions.AddItem(EffectsCondition);
 
 	return Template;
 }
