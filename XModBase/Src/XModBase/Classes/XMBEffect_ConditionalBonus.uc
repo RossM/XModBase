@@ -18,6 +18,7 @@
 //  AbsolutelyCritical
 //  DamnGoodGround
 //  MovingTarget
+//  PowerShot
 //
 //  INSTALLATION
 //

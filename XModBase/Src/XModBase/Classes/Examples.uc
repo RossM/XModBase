@@ -355,6 +355,10 @@ static function X2AbilityTemplate PowerShotBonuses()
 	return Template;
 }
 
+// Perk name:		Close Combat Specialist
+// Perk effect:		Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch.
+// Localized text:	"Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch."
+// Config:			(AbilityName="XMBExample_CloseCombatSpecialis", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate CloseCombatSpecialist()
 {
 	local X2AbilityTemplate Template;
@@ -368,6 +372,7 @@ static function X2AbilityTemplate CloseCombatSpecialist()
 	return Template;
 }
 
+// This is part of the Close Combat Specialist, above
 static function X2AbilityTemplate CloseCombatSpecialistShot()
 {
 	local X2AbilityTemplate Template;
