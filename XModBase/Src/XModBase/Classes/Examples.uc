@@ -14,6 +14,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(DamnGoodGround());
 	Templates.AddItem(MovingTarget());
+	Templates.AddItem(PowerShot());
+	Templates.AddItem(PowerShotBonuses());
 
 	return Templates;
 }
@@ -300,4 +302,53 @@ static function X2AbilityTemplate DangerZone()
 	Effect.fBonusRadius = 2;
 
 	return Passive('XMBExample_DangerZone', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
+// Perk name:		Power Shot
+// Perk effect:		Make an attack that has +20 crit chance and deals +3/4/5 damage on crit.
+// Localized text:	"Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
+// Config:			(AbilityName="XMBExample_PowerShot", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+static function X2AbilityTemplate PowerShot()
+{
+	local X2AbilityTemplate Template;
+
+	// Create the template using a helper function
+	Template = TypicalAttackAbility('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Weapon, 3, 1);
+
+	// Add a function to provide bonuses on the shot
+	Template.AdditionalAbilities.AddItem('XMBExample_PowerShotBonuses');
+
+	return Template;
+}
+
+// This is part of the Power Shot effect, above
+static function X2AbilityTemplate PowerShotBonuses()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalBonus Effect;
+	local XMBCondition_AbilityName Condition;
+
+	// Create a conditional bonus effect
+	Effect = new class'XMBEffect_ConditionalBonus';
+
+	// The bonus adds +20 Crit chance
+	Effect.AddToHitModifier(20, eHit_Crit);
+
+	// The bonus adds +3/4/5 damage on crit dependent on tech level
+	Effect.AddDamageModifier(3, eHit_Crit, 'conventional');
+	Effect.AddDamageModifier(4, eHit_Crit, 'magnetic');
+	Effect.AddDamageModifier(5, eHit_Crit, 'beam');
+
+	// The bonus only applies to the Power Shot ability
+	Condition = new class'XMBCondition_AbilityName';
+	Condition.IncludeAbilityNames.AddItem('XMBExample_PowerShot');
+	Effect.OtherConditions.AddItem(Condition);
+
+	// Create the template using a helper function
+	Template = Passive('XMBExample_PowerShotBonuses', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+
+	// The Power Shot ability will show up as an active ability, so hide the icon for passive damage effect
+	HidePerkIcon(Template);
+
+	return Template;
 }

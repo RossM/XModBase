@@ -202,6 +202,105 @@ static function X2AbilityTemplate SelfTargetActivated(name DataName, string Icon
 	return Template;
 }
 
+static function HidePerkIcon(X2AbilityTemplate Template)
+{
+	local X2Effect Effect;
+
+	foreach Template.AbilityTargetEffects(Effect)
+	{
+		if (X2Effect_Persistent(Effect) != none)
+			X2Effect_Persistent(Effect).bDisplayInUI = false;
+	}
+}
+
+static function X2AbilityTemplate TypicalAttackAbility(name DataName, string IconImage, bool bCrossClassEligible, int ShotHUDPriority, optional EActionPointCost Cost = eCost_Single, optional int Cooldown = 0, optional int Ammo = 1)
+{
+	local X2AbilityTemplate                 Template;	
+	local X2AbilityCost_Ammo                AmmoCost;
+	local X2AbilityCooldown                 AbilityCooldown;
+	local X2Effect_Knockback				KnockbackEffect;
+	local X2Condition_Visibility            VisibilityCondition;
+
+	// Macro to do localisation and stuffs
+	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
+
+	// Icon Properties
+	Template.bDontDisplayInAbilitySummary = true;
+	Template.IconImage = IconImage;
+	Template.ShotHUDPriority = ShotHUDPriority;
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.DisplayTargetHitChance = true;
+	Template.AbilitySourceName = 'eAbilitySource_Perk'; 
+
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.AddShooterEffectExclusions();
+
+	VisibilityCondition = new class'X2Condition_Visibility';
+	VisibilityCondition.bRequireGameplayVisible = true;
+	VisibilityCondition.bAllowSquadsight = true;
+
+	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+
+	if (Cooldown > 0)
+	{
+		AbilityCooldown = new class'X2AbilityCooldown';
+		AbilityCooldown.iNumTurns = Cooldown;
+		Template.AbilityCooldown = AbilityCooldown;
+	}
+
+	if (Ammo > 0)
+	{
+		AmmoCost = new class'X2AbilityCost_Ammo';	
+		AmmoCost.iAmmo = Ammo;
+		Template.AbilityCosts.AddItem(AmmoCost);
+	}
+
+	Template.AbilityCosts.AddItem(ActionPointCost(Cost));	
+
+	Template.bAllowAmmoEffects = true;
+	Template.bAllowBonusWeaponEffects = true;
+
+	Template.bAllowFreeFireWeaponUpgrade = true;
+
+	//  Put holo target effect first because if the target dies from this shot, it will be too late to notify the effect.
+	Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.HoloTargetEffect());
+	//  Various Soldier ability specific effects - effects check for the ability before applying	
+	Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect());
+	
+	Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
+
+	Template.AbilityToHitCalc = default.SimpleStandardAim;
+	Template.AbilityToHitOwnerOnMissCalc = default.SimpleStandardAim;
+		
+	Template.TargetingMethod = class'X2TargetingMethod_OverTheShoulder';
+	Template.bUsesFiringCamera = true;
+	Template.CinescriptCameraType = "StandardGunFiring";	
+
+	Template.AssociatedPassives.AddItem('HoloTargeting');
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;	
+	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;
+
+	Template.bDisplayInUITooltip = false;
+	Template.bDisplayInUITacticalText = false;
+
+	KnockbackEffect = new class'X2Effect_Knockback';
+	KnockbackEffect.KnockbackDistance = 2;
+	KnockbackEffect.bUseTargetLocation = true;
+	Template.AddTargetEffect(KnockbackEffect);
+
+	Template.bCrossClassEligible = bCrossClassEligible;
+
+	return Template;	
+}
+
 // Set this as the VisualizationFn on an X2Effect_Persistent to have it display a flyover over the target when applied.
 simulated static function EffectFlyOver_Visualization(XComGameState VisualizeGameState, out VisualizationTrack BuildTrack, const name EffectApplyResult)
 {
