@@ -312,6 +312,25 @@ static function X2AbilityTemplate TypicalAttackAbility(name DataName, string Ico
 	return Template;	
 }
 
+simulated static function X2Condition_UnitProperty TargetWithinTiles(int Tiles)
+{
+	local X2Condition_UnitProperty UnitPropertyCondition;
+
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.RequireWithinRange = true;
+	// WithinRange is measured in Unreal units, so we need to convert tiles to units.
+	UnitPropertyCondition.WithinRange = `TILESTOUNITS(Tiles);
+
+	// Remove default checks
+	UnitPropertyCondition.ExcludeDead = false;
+	UnitPropertyCondition.ExcludeFriendlyToSource = false;
+	UnitPropertyCondition.ExcludeCosmetic = false;
+	UnitPropertyCondition.ExcludeInStasis = false;
+
+	return UnitPropertyCondition;
+}
+
+
 // Set this as the VisualizationFn on an X2Effect_Persistent to have it display a flyover over the target when applied.
 simulated static function EffectFlyOver_Visualization(XComGameState VisualizeGameState, out VisualizationTrack BuildTrack, const name EffectApplyResult)
 {

@@ -11,6 +11,8 @@
 //  The following examples in Examples.uc use this class:
 //
 //  HitAndRun
+//  PowerShot
+//  CloseAndPersonal
 //
 //  INSTALLATION
 //

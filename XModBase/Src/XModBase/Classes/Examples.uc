@@ -18,6 +18,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PowerShotBonuses());
 	Templates.AddItem(CloseCombatSpecialist());
 	Templates.AddItem(CloseCombatSpecialistShot());
+	Templates.AddItem(CloseAndPersonal());
 
 	return Templates;
 }
@@ -332,6 +333,7 @@ static function X2AbilityTemplate PowerShotBonuses()
 
 	// Create a conditional bonus effect
 	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'PowerShotBonuses';
 
 	// The bonus adds +20 Crit chance
 	Effect.AddToHitModifier(20, eHit_Crit);
@@ -358,7 +360,7 @@ static function X2AbilityTemplate PowerShotBonuses()
 // Perk name:		Close Combat Specialist
 // Perk effect:		Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch.
 // Localized text:	"Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch."
-// Config:			(AbilityName="XMBExample_CloseCombatSpecialis", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+// Config:			(AbilityName="XMBExample_CloseCombatSpecialist", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate CloseCombatSpecialist()
 {
 	local X2AbilityTemplate Template;
@@ -402,13 +404,8 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 	Trigger.MethodName = 'InterruptGameState';
 	Template.AbilityTriggers.AddItem(Trigger);
 
-	// X2Condition_UnitProperty has a lot of checks for various things. In this case, we want to
-	// restrict the shot to units within 4 tiles.
-	UnitPropertyCondition = new class'X2Condition_UnitProperty';
-	UnitPropertyCondition.RequireWithinRange = true;
-	// WithinRange is measured in Unreal units, so we need to convert 4 tiles to units.
-	UnitPropertyCondition.WithinRange = `TILESTOUNITS(4);
-	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);	
+	// Restrict the shot to units within 4 tiles
+	Template.AbilityTargetConditions.AddItem(TargetWithinTiles(4));
 
 	// Since the attack has no cost, if we don't do anything else, it will be able to attack many
 	// times per turn (until we run out of ammo). We use an X2Effect_Persistent that does nothing
@@ -443,4 +440,37 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
 
 	return Template;
+}
+
+// Perk name:		Close and Personal
+// Perk effect:		The first standard shot made within 4 tiles of the target does not cost an action.
+// Localized text:	"The first standard shot made within 4 tiles of the target does not cost an action."
+// Config:			(AbilityName="XMBExample_CloseAndPersonal")
+static function X2AbilityTemplate CloseAndPersonal()
+{
+	local XMBEffect_AbilityCostRefund Effect;
+	local XMBCondition_AbilityName AbilityNameCondition;
+	local X2Condition_UnitProperty UnitPropertyCondition;
+	
+	// Create an effect that will refund the cost of attacks
+	Effect = new class'XMBEffect_AbilityCostRefund';
+	Effect.EffectName = 'CloseAndPersonal';
+	Effect.TriggeredEvent = 'CloseAndPersonal';
+
+	// Only refund once per turn
+	Effect.CountValueName = 'CloseAndPersonalShots';
+	Effect.MaxRefundsPerTurn = 1;
+
+	// The bonus only applies to standard shots
+	AbilityNameCondition = new class'XMBCondition_AbilityName';
+	AbilityNameCondition.IncludeAbilityNames.AddItem('StandardShot');
+	AbilityNameCondition.IncludeAbilityNames.AddItem('SniperStandardFire');
+	AbilityNameCondition.IncludeAbilityNames.AddItem('PistolStandardShot');
+	Effect.AbilityTargetConditions.AddItem(AbilityNameCondition);
+
+	// Restrict the shot to units within 4 tiles
+	Effect.AbilityTargetConditions.AddItem(TargetWithinTiles(4));
+
+	// Create the template using a helper function
+	return Passive('XMBExample_CloseAndPersonal', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
