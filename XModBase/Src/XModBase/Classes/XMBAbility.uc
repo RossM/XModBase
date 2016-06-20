@@ -230,6 +230,9 @@ static function X2AbilityTemplate Attack(name DataName, string IconImage, option
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 
+	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
+	Template.AddShooterEffectExclusions();
+
 	Template.AbilityTargetStyle = default.SimpleSingleTarget;
 
 	if (Cost != eCost_None)
@@ -260,10 +263,10 @@ static function X2AbilityTemplate Attack(name DataName, string IconImage, option
 		Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.HoloTargetEffect());
 		//  Various Soldier ability specific effects - effects check for the ability before applying	
 		Template.AddTargetEffect(class'X2Ability_GrenadierAbilitySet'.static.ShredderDamageEffect());
+
+		Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
 	}
 	
-	Template.AddTargetEffect(default.WeaponUpgradeMissDamage);
-
 	Template.AbilityToHitCalc = default.SimpleStandardAim;
 	Template.AbilityToHitOwnerOnMissCalc = default.SimpleStandardAim;
 		
@@ -283,6 +286,65 @@ static function X2AbilityTemplate Attack(name DataName, string IconImage, option
 	Template.bCrossClassEligible = bCrossClassEligible;
 
 	return Template;	
+}
+
+static function X2AbilityTemplate MeleeAttack(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect Effect = none, optional int ShotHUDPriority = default.AUTO_PRIORITY, optional EActionPointCost Cost = eCost_SingleConsumeAll)
+{
+	local X2AbilityTemplate                 Template;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_AlwaysShow;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.CinescriptCameraType = "Ranger_Reaper";
+	Template.IconImage = IconImage;
+	Template.ShotHUDPriority = ShotHUDPriority;
+
+	if (Cost != eCost_None)
+	{
+		Template.AbilityCosts.AddItem(ActionPointCost(Cost));	
+	}
+
+	Template.AbilityToHitCalc = new class'X2AbilityToHitCalc_StandardMelee';
+
+	Template.AbilityTargetStyle = new class'X2AbilityTarget_MovingMelee';
+	Template.TargetingMethod = class'X2TargetingMethod_MeleePath';
+
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+	Template.AbilityTriggers.AddItem(new class'X2AbilityTrigger_EndOfMove');
+
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
+	Template.AbilityTargetConditions.AddItem(default.MeleeVisibilityCondition);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
+	Template.AddShooterEffectExclusions();
+
+	if (Effect != none)
+	{
+		Template.AddTargetEffect(Effect);
+	}
+	else
+	{
+		Template.AddTargetEffect(new class'X2Effect_ApplyWeaponDamage');
+	}
+
+	Template.bAllowBonusWeaponEffects = true;
+	Template.bSkipMoveStop = true;
+	
+	// Voice events
+	//
+	Template.SourceMissSpeech = 'SwordMiss';
+
+	Template.BuildNewGameStateFn = TypicalMoveEndAbility_BuildGameState;
+	Template.BuildInterruptGameStateFn = TypicalMoveEndAbility_BuildInterruptGameState;
+
+	Template.bCrossClassEligible = bCrossClassEligible;
+
+	return Template;
 }
 
 // Helper function for creating an ability that targets a visible enemy and has 100% hit chance.
@@ -309,6 +371,9 @@ static function X2AbilityTemplate TargetedDebuff(name DataName, string IconImage
 	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
+	Template.AddShooterEffectExclusions();
 
 	// 100% chance to hit
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -357,6 +422,9 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 	Template.AbilityTargetConditions.AddItem(default.LivingFriendlyTargetProperty);
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
+	Template.AddShooterEffectExclusions();
 
 	// 100% chance to hit
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -467,6 +535,39 @@ static function AddAttackTrigger(X2AbilityTemplate Template)
 	Trigger.EventObserverClass = class'X2TacticalGameRuleset_AttackObserver';
 	Trigger.MethodName = 'InterruptGameState';
 	Template.AbilityTriggers.AddItem(Trigger);
+}
+
+static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iTurns = 1, optional name CooldownEffectName = '', optional GameRuleStateChange GameRule = eGameRule_PlayerTurnEnd)
+{
+	local X2Effect_Persistent PersistentEffect;
+	local X2Condition_UnitEffectsWithAbilitySource EffectsCondition;
+
+	if (CooldownEffectName == '')
+	{
+		CooldownEffectName = name(Template.DataName $ "_CooldownEffect");
+	}
+
+	PersistentEffect = new class'X2Effect_Persistent';
+	PersistentEffect.EffectName = CooldownEffectName;
+	PersistentEffect.DuplicateResponse = eDupe_Refresh;
+	PersistentEffect.BuildPersistentEffect(iTurns, false, true, false, GameRule);
+	PersistentEffect.bApplyOnHit = true;
+	PersistentEffect.bApplyOnMiss = true;
+	Template.AddTargetEffect(PersistentEffect);
+
+	// Create a condition that checks for the presence of a certain effect. There are three
+	// similar classes that do this: X2Condition_UnitEffects,
+	// X2Condition_UnitEffectsWithAbilitySource, and X2Condition_UnitEffectsWithAbilityTarget.
+	// The first one looks for any effect with the right name, the second only for effects
+	// with that were applied by the unit using this ability, and the third only for effects
+	// that apply to the unit using this ability. Since we want to match the persistent effect
+	// we applied as a mark - but not the same effect applied by any other unit - we use
+	// X2Condition_UnitEffectsWithAbilitySource.
+
+	EffectsCondition = new class'X2Condition_UnitEffectsWithAbilitySource';
+	EffectsCondition.AddExcludeEffect(CooldownEffectName, 'AA_UnitIsImmune');
+	Template.AbilityTargetConditions.AddItem(EffectsCondition);
+
 }
 
 static function PreventStackingEffects(X2AbilityTemplate Template)

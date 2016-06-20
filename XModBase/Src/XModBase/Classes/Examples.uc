@@ -23,6 +23,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(InspireAgilityTrigger());
 	Templates.AddItem(ReverseEngineering());
 	Templates.AddItem(ReverseEngineeringTrigger());
+	Templates.AddItem(BullRush());
+	Templates.AddItem(BullRushTrigger());
 
 	return Templates;
 }
@@ -245,9 +247,6 @@ static function X2AbilityTemplate SlamFire()
 	// Don't allow multiple ability-refunding abilities to be used in the same turn (e.g. Slam Fire and Serial)
 	class'X2Ability_RangerAbilitySet'.static.SuperKillRestrictions(Template, 'Serial_SuperKillCheck');
 
-	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
-	Template.AddShooterEffectExclusions();
-
 	return Template;
 }
 
@@ -390,8 +389,6 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 {
 	local X2AbilityTemplate Template;
 	local X2AbilityToHitCalc_StandardAim ToHit;
-	local X2Effect_Persistent PersistentEffect;
-	local X2Condition_UnitEffectsWithAbilitySource EffectsCondition;
 
 	// Create the template using a helper function
 	Template = Attack('XMBExample_CloseCombatSpecialistShot', "img:///UILibrary_PerkIcons.UIPerk_command", false, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
@@ -414,36 +411,10 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 	Template.AbilityTargetConditions.AddItem(TargetWithinTiles(4));
 
 	// Since the attack has no cost, if we don't do anything else, it will be able to attack many
-	// times per turn (until we run out of ammo). We use an X2Effect_Persistent that does nothing
-	// to mark our target unit, and a condition to prevent taking a second attack on a marked
-	// target in the same turn.
-
-	// Create a persistent effect
-	PersistentEffect = new class'X2Effect_Persistent';
-	// The effect name here doesn't matter, but it does have to match the name that
-	// EffectsCondition uses below.
-	PersistentEffect.EffectName = 'CCSTarget';
-	// The effect lasts until the end of the turn
-	PersistentEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
-	// Apply the effect whether the attack hits or misses
-	PersistentEffect.bApplyOnHit = true;
-	PersistentEffect.bApplyOnMiss = true;
-	Template.AddTargetEffect(PersistentEffect);
-
-	// Create a condition that checks for the presence of a certain effect. There are three
-	// similar classes that do this: X2Condition_UnitEffects,
-	// X2Condition_UnitEffectsWithAbilitySource, and X2Condition_UnitEffectsWithAbilityTarget.
-	// The first one looks for any effect with the right name, the second only for effects
-	// with that were applied by the unit using this ability, and the third only for effects
-	// that apply to the unit using this ability. Since we want to match the persistent effect
-	// we applied as a mark - but not the same effect applied by any other unit - we use
-	// X2Condition_UnitEffectsWithAbilitySource.
-	EffectsCondition = new class'X2Condition_UnitEffectsWithAbilitySource';
-	// AA_ codes indicate why an ability can't be used. They're listed in XComGameData.ini
-	// under [XComGame.X2AbilityTemplateManager]. AA_UnitIsImmune is a good choice when no more
-	// specific code applies.
-	EffectsCondition.AddExcludeEffect('CCSTarget', 'AA_UnitIsImmune');
-	Template.AbilityTargetConditions.AddItem(EffectsCondition);
+	// times per turn (until we run out of ammo). AddPerTargetCooldown uses an X2Effect_Persistent
+	// that does nothing to mark our target unit, and a condition to prevent taking a second 
+	// attack on a marked target in the same turn.
+	AddPerTargetCooldown(Template, 1);
 
 	return Template;
 }
@@ -549,4 +520,46 @@ static function X2AbilityTemplate ReverseEngineeringTrigger()
 	Effect.AddStatChange(eStat_Hacking, 5);
 
 	return SelfTargetTrigger('XMBExample_ReverseEngineeringTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'ReverseEngineering');
+}
+
+static function X2AbilityTemplate BullRush()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_ApplyWeaponDamage DamageEffect;
+	local X2Effect StunnedEffect;
+	local X2AbilityToHitCalc_StandardMelee ToHitCalc;
+
+	DamageEffect = new class'X2Effect_ApplyWeaponDamage';
+
+	// Deals 1-2 damage, 50% chance of 1 and 50% chance of 2
+	DamageEffect.EffectDamageValue.Damage = 1;
+	DamageEffect.EffectDamageValue.PlusOne = 50;
+	DamageEffect.bIgnoreBaseDamage = true;
+
+	Template = MeleeAttack('XMBExample_BullRush', "img:///UILibrary_PerkIcons.UIPerk_command", true, DamageEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_SingleConsumeAll);
+	AddCooldown(Template, 5);
+
+	ToHitCalc = new class'X2AbilityToHitCalc_StandardMelee';
+	ToHitCalc.BuiltInHitMod = 20;
+	Template.AbilityToHitCalc = ToHitCalc;
+
+	StunnedEffect = class'X2StatusEffects'.static.CreateStunnedStatusEffect(2, 100, false);
+	Template.AddTargetEffect(StunnedEffect);
+
+	Template.CustomFireAnim = 'FF_Melee';
+
+	Template.AdditionalAbilities.AddItem('XMBExample_BullRushTrigger');
+
+	return Template;
+}
+
+static function X2AbilityTemplate BullRushTrigger()
+{
+	local X2Effect_ReduceCooldowns Effect;
+
+	Effect = new class'X2Effect_ReduceCooldowns';
+	Effect.AbilitiesToTick.AddItem('XMBExample_BullRush');
+	Effect.ReduceAll = true;
+
+	return SelfTargetTrigger('XMBExample_BullRushTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'UnitTakeEffectDamage');
 }
