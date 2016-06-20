@@ -37,7 +37,7 @@ simulated function RegisterListener(XComGameState_Ability AbilityState, Object F
 	if (Target == none)
 	{
 		Target = XMBGameState_EventTarget(NewGameState.CreateStateObject(class'XMBGameState_EventTarget'));
-		Parent = XComGameState_Unit(NewGameState.CreateStateObject(Parent.class, Parent.ObjectID));
+		Parent = NewGameState.CreateStateObject(Parent.class, Parent.ObjectID);
 
 		Parent.AddComponentObject(Target);
 
