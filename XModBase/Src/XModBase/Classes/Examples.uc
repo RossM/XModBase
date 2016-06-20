@@ -39,7 +39,7 @@ static function X2AbilityTemplate Weaponmaster()
 	// The bonus adds 2 damage to attacks
 	Effect.AddDamageModifier(2);
 
-	// The bonus only applies to attacks with the weapon associated with this ability	Effect.bRequireAbilityWeapon = true;
+	// The bonus only applies to attacks with the weapon associated with this ability
 	Effect.OtherConditions.AddItem(default.MatchingWeaponCondition);
 
 	// Create the template using a helper function
@@ -400,6 +400,10 @@ static function X2AbilityTemplate CloseAndPersonal()
 	return Passive('XMBExample_CloseAndPersonal', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+// Perk name:		Inspire Agility
+// Perk effect:		Give a friendly unit +50 Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge.
+// Localized text:	"Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+// Config:			(AbilityName="XMBExample_InspireAgility")
 static function X2AbilityTemplate InspireAgility()
 {
 	local X2Effect_PersistentStatChange Effect;
@@ -427,6 +431,7 @@ static function X2AbilityTemplate InspireAgility()
 	return Template;
 }
 
+// This is part of the Inspire Agility effect, above
 static function X2AbilityTemplate InspireAgilityTrigger()
 {
 	local XMBEffect_AddAbilityCharges Effect;
@@ -438,6 +443,10 @@ static function X2AbilityTemplate InspireAgilityTrigger()
 	return SelfTargetTrigger('XMBExample_InspireAgilityTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
 }
 
+// Perk name:		Reverse Engineering
+// Perk effect:		When you kill an enemy robotic unit you gain a permanent Hacking increase of 5.
+// Localized text:	"When you kill an enemy robotic unit you gain a permanent Hacking increase of <Ability:Hacking/>."
+// Config:			(AbilityName="XMBExample_ReverseEngineering")
 static function X2AbilityTemplate ReverseEngineering()
 {
 	local XMBEffect_PermanentStatChange Effect;
@@ -455,11 +464,17 @@ static function X2AbilityTemplate ReverseEngineering()
 	Condition = new class'X2Condition_UnitProperty';
 	Condition.ExcludeOrganic = true;
 	Condition.ExcludeDead = false;
+	Condition.ExcludeFriendlyToSource = true;
+	Condition.ExcludeHostileToSource = false;
 	AddTriggerTargetCondition(Template, Condition);
 
 	return Template;
 }
 
+// Perk name:		Bull Rush
+// Perk effect:		Make an unarmed melee attack that stuns the target. Whenever you take damage, this ability's cooldown resets.
+// Localized text:	"Make an unarmed melee attack that stuns the target. Whenever you take damage, this ability's cooldown resets."
+// Config:			(AbilityName="XMBExample_BullRush")
 static function X2AbilityTemplate BullRush()
 {
 	local X2AbilityTemplate Template;
@@ -481,9 +496,13 @@ static function X2AbilityTemplate BullRush()
 	ToHitCalc.BuiltInHitMod = 20;
 	Template.AbilityToHitCalc = ToHitCalc;
 
+	// Create a stun effect that removes 2 actions and has a 100% chance of success if the attack hits.
 	StunnedEffect = class'X2StatusEffects'.static.CreateStunnedStatusEffect(2, 100, false);
 	Template.AddTargetEffect(StunnedEffect);
 
+	// The default fire animation depends on the ability's associated weapon - shooting for a gun or 
+	// slashing for a sword. If the ability has no associated weapon, no animation plays. Use an
+	// alternate animation, FF_Melee, which is a generic melee attack that works with any weapon.
 	Template.CustomFireAnim = 'FF_Melee';
 
 	Template.AdditionalAbilities.AddItem('XMBExample_BullRushTrigger');
@@ -491,6 +510,7 @@ static function X2AbilityTemplate BullRush()
 	return Template;
 }
 
+// This is part of the Bull Rush effect, above
 static function X2AbilityTemplate BullRushTrigger()
 {
 	local X2Effect_ReduceCooldowns Effect;
