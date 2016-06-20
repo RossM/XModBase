@@ -323,7 +323,7 @@ static function X2AbilityTemplate PowerShotBonuses()
 	// Create the template using a helper function
 	Template = Passive('XMBExample_PowerShotBonuses', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 
-	// The Power Shot ability will show up as an active ability, so hide the icon for passive damage effect
+	// The Power Shot ability will show up as an active ability, so hide the icon for the passive damage effect
 	HidePerkIcon(Template);
 
 	return Template;
@@ -417,13 +417,17 @@ static function X2AbilityTemplate InspireAgility()
 	// The effect lasts until the beginning of the player's next turn
 	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
 
+	// Add a visualization that plays a flyover over the target unit
 	Effect.VisualizationFn = EffectFlyOver_Visualization;
 
 	// Create the template using a helper function
 	Template = TargetedBuff('XMBExample_InspireAgility', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Free);
 
+	// The ability starts out with a single charge
 	AddCharges(Template, 1);
 
+	// By default, you can target a unit with an ability even if it already has the effect the
+	// ability adds. This helper function prevents targetting units that already have the effect.
 	PreventStackingEffects(Template);
 
 	Template.AdditionalAbilities.AddItem('XMBExample_InspireAgilityTrigger');
@@ -461,6 +465,7 @@ static function X2AbilityTemplate ReverseEngineering()
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
 
+	// Restrict to robotic enemies
 	Condition = new class'X2Condition_UnitProperty';
 	Condition.ExcludeOrganic = true;
 	Condition.ExcludeDead = false;
@@ -482,16 +487,24 @@ static function X2AbilityTemplate BullRush()
 	local X2Effect StunnedEffect;
 	local X2AbilityToHitCalc_StandardMelee ToHitCalc;
 
+	// Create a damage effect. X2Effect_ApplyWeaponDamage is used to apply all types of damage, not
+	// just damage from weapon attacks.
 	DamageEffect = new class'X2Effect_ApplyWeaponDamage';
 
-	// Deals 1-2 damage, 50% chance of 1 and 50% chance of 2
+	// Deals 1-2 damage: 1 base damage, with a 50% chance of 1 extra damage.
 	DamageEffect.EffectDamageValue.Damage = 1;
 	DamageEffect.EffectDamageValue.PlusOne = 50;
+
+	// Don't add in the damage from the weapon itself.
 	DamageEffect.bIgnoreBaseDamage = true;
 
 	Template = MeleeAttack('XMBExample_BullRush', "img:///UILibrary_PerkIcons.UIPerk_command", true, DamageEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_SingleConsumeAll);
+	
+	// Add a cooldown. The internal cooldown numbers include the turn the cooldown is applied, so
+	// this is actually a 4 turn cooldown.
 	AddCooldown(Template, 5);
 
+	// The default hit chance for melee attacks is low. Add +20 to the attack to match swords.
 	ToHitCalc = new class'X2AbilityToHitCalc_StandardMelee';
 	ToHitCalc.BuiltInHitMod = 20;
 	Template.AbilityToHitCalc = ToHitCalc;
