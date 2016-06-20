@@ -2209,6 +2209,9 @@
     <Content Include="Src\XModBase\Classes\XMBEffect_Extended.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBEffect_PermanentStatChange.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBEffect_RevealUnit.uc">
       <SubType>Content</SubType>
     </Content>

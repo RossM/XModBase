@@ -31,7 +31,9 @@ class XMBEffect_AbilityTriggered extends X2Effect_Persistent;
 // Effect properties //
 ///////////////////////
 
+var name EventID;									// An event to listen for.
 var name TriggeredEvent;							// An event to trigger when the unit uses an ability meeting the conditions.
+//var name TriggeredAbilityName;						// An ability to trigger directly when the unit uses an ability meeting the conditions.
 
 
 //////////////////////////
@@ -59,17 +61,17 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.SourceStateObjectRef.ObjectID));
 
 	ListenerObj = UnitState;
-	EventMgr.RegisterForEvent(ListenerObj, 'AbilityActivated', AbilityActivatedListener, ELD_OnStateSubmitted,, UnitState);	
+	EventMgr.RegisterForEvent(ListenerObj, EventID, AbilityActivatedListener, ELD_OnStateSubmitted,, UnitState);	
 }
 
-function static EventListenerReturn AbilityActivatedListener(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+function static EventListenerReturn AbilityActivatedListener(Object EventData, Object EventSource, XComGameState GameState, Name IncomingEventID)
 {
-	local XComGameState_Ability AbilityState;
+	local XComGameState_Ability AbilityState, ToUseAbilityState;
 	local XComGameStateContext_Ability AbilityContext;
 	local XComGameState_Unit SourceUnit, TargetUnit;
 	local XComGameState_Effect EffectState;
 	local X2EventManager EventMgr;
-	local StateObjectReference EffectRef;
+	local StateObjectReference EffectRef, AbilityRef;
 	local XComGameStateHistory History;
 	local XMBEffect_AbilityTriggered AbilityTriggeredEffect;
 
@@ -82,17 +84,27 @@ function static EventListenerReturn AbilityActivatedListener(Object EventData, O
 
 	// XComGameState_Unit already has an AbilityActivated listener, which we replace. Call the 
 	// handler so it can take care of important things like breaking concealment.
-	SourceUnit.OnAbilityActivated(EventData, EventSource, GameState, EventID);
-
-	AbilityState = XComGameState_Ability(EventData);
-	if (AbilityState == none)
-		return ELR_NoInterrupt;
+	SourceUnit.OnAbilityActivated(EventData, EventSource, GameState, IncomingEventID);
 
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 	if (AbilityContext == none)
 		return ELR_NoInterrupt;
 
-	TargetUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
+	AbilityState = XComGameState_Ability(EventData);
+	if (AbilityState == none)
+	{
+		AbilityState = XComGameState_Ability(GameState.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+		if (AbilityState == none)
+			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+	}
+	if (AbilityState == none)
+		return ELR_NoInterrupt;
+
+	TargetUnit = XComGameState_Unit(EventData);
+	if (TargetUnit == none)
+	{
+		TargetUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
+	}
 	if (TargetUnit == none || TargetUnit.ObjectID == SourceUnit.ObjectID)
 		return ELR_NoInterrupt;
 
@@ -108,7 +120,21 @@ function static EventListenerReturn AbilityActivatedListener(Object EventData, O
 		{
 			if (AbilityTriggeredEffect.ValidateAttack(EffectState, SourceUnit, TargetUnit, AbilityState) == 'AA_Success')
 			{
-				EventMgr.TriggerEvent(AbilityTriggeredEffect.TriggeredEvent, AbilityState, SourceUnit, GameState);
+				if (AbilityTriggeredEffect.TriggeredEvent != '')
+					EventMgr.TriggerEvent(AbilityTriggeredEffect.TriggeredEvent, AbilityState, SourceUnit, GameState);
+
+				//if (AbilityTriggeredEffect.TriggeredAbilityName != '')
+				//{
+					//foreach SourceUnit.Abilities(AbilityRef)
+					//{
+						//ToUseAbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityRef.ObjectID));
+						//if (ToUseAbilityState.GetMyTemplateName() == AbilityTriggeredEffect.TriggeredAbilityName)
+						//{
+							//class'XComGameState_Ability'.static.AbilityTriggerAgainstSingleTarget_Static(AbilityRef.ObjectID, SourceUnit.GetReference, TargetUnit.GetReference. false);
+							//break;
+						//}
+					//}
+				//}
 			}
 		}
 	}
@@ -163,4 +189,5 @@ DefaultProperties
 {
 	DuplicateResponse = eDupe_Ignore
 	TriggeredEvent = "XMBAbilityTrigger"
+	EventID = "AbilityActivated"
 }
