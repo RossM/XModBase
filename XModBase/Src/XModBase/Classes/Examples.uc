@@ -19,6 +19,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CloseCombatSpecialist());
 	Templates.AddItem(CloseCombatSpecialistShot());
 	Templates.AddItem(CloseAndPersonal());
+	Templates.AddItem(InspireAgility());
+	Templates.AddItem(InspireAgilityTrigger());
 
 	return Templates;
 }
@@ -138,6 +140,7 @@ static function X2AbilityTemplate HitAndRun()
 static function X2AbilityTemplate HitAndRunTrigger()
 {
 	local X2Effect_GrantActionPoints Effect;
+	local X2AbilityTemplate Template;
 
 	// Add a single movement-only action point to the unit
 	Effect = new class'X2Effect_GrantActionPoints';
@@ -145,7 +148,11 @@ static function X2AbilityTemplate HitAndRunTrigger()
 	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
 
 	// Create the template using a helper function. It will be triggered by the Hit and Run passive defined in HitAndRun();
-	return SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", Effect, 'HitAndRun', true);
+	Template = SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'HitAndRun');
+
+	Template.bShowActivation = true;
+
+	return Template;
 }
 
 // Perk name:		Assassin
@@ -192,7 +199,7 @@ static function X2AbilityTemplate AssassinTrigger()
 	StealthEffect.bRemoveWhenTargetConcealmentBroken = true;
 
 	// Create the template using a helper function
-	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", StealthEffect, 'Assassin');
+	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, StealthEffect, 'Assassin');
 
 	// Require that the unit be able to enter stealth
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_Stealth');
@@ -230,7 +237,8 @@ static function X2AbilityTemplate SlamFire()
 	SlamFireEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
 
 	// Create the template for an activated ability using a helper function.
-	Template = SelfTargetActivated('XMBExample_SlamFire', "img:///UILibrary_PerkIcons.UIPerk_command", true, SlamFireEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, false, eCost_Free, 4);
+	Template = SelfTargetActivated('XMBExample_SlamFire', "img:///UILibrary_PerkIcons.UIPerk_command", true, SlamFireEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free);
+	AddCooldown(Template, 4);
 
 	// Don't allow multiple ability-refunding abilities to be used in the same turn (e.g. Slam Fire and Serial)
 	class'X2Ability_RangerAbilitySet'.static.SuperKillRestrictions(Template, 'Serial_SuperKillCheck');
@@ -316,7 +324,8 @@ static function X2AbilityTemplate PowerShot()
 	local X2AbilityTemplate Template;
 
 	// Create the template using a helper function
-	Template = TypicalAttackAbility('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_WeaponConsumeAll, 3, 1);
+	Template = Attack('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_WeaponConsumeAll, 1);
+	AddCooldown(Template, 3);
 
 	// Add a secondary ability to provide bonuses on the shot
 	Template.AdditionalAbilities.AddItem('XMBExample_PowerShotBonuses');
@@ -379,13 +388,11 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 {
 	local X2AbilityTemplate Template;
 	local X2AbilityToHitCalc_StandardAim ToHit;
-	local X2AbilityTrigger_Event Trigger;
-	local X2Condition_UnitProperty UnitPropertyCondition;
 	local X2Effect_Persistent PersistentEffect;
 	local X2Condition_UnitEffectsWithAbilitySource EffectsCondition;
 
 	// Create the template using a helper function
-	Template = TypicalAttackAbility('XMBExample_CloseCombatSpecialistShot', "img:///UILibrary_PerkIcons.UIPerk_command", false, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
+	Template = Attack('XMBExample_CloseCombatSpecialistShot', "img:///UILibrary_PerkIcons.UIPerk_command", false, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
 	
 	// Reaction fire shouldn't show up as an activatable ability
 	HidePerkIcon(Template);
@@ -398,11 +405,8 @@ static function X2AbilityTemplate CloseCombatSpecialistShot()
 	// Remove the default trigger of being activated by the player
 	Template.AbilityTriggers.Length = 0;
 
-	// Add a trigger that activates the ability on enemy movement
-	Trigger = new class'X2AbilityTrigger_Event';
-	Trigger.EventObserverClass = class'X2TacticalGameRuleset_MovementObserver';
-	Trigger.MethodName = 'InterruptGameState';
-	Template.AbilityTriggers.AddItem(Trigger);
+	// Add a trigger that activates the ability on movement
+	AddMovementTrigger(Template);
 
 	// Restrict the shot to units within 4 tiles
 	Template.AbilityTargetConditions.AddItem(TargetWithinTiles(4));
@@ -450,7 +454,6 @@ static function X2AbilityTemplate CloseAndPersonal()
 {
 	local XMBEffect_AbilityCostRefund Effect;
 	local XMBCondition_AbilityName AbilityNameCondition;
-	local X2Condition_UnitProperty UnitPropertyCondition;
 	
 	// Create an effect that will refund the cost of attacks
 	Effect = new class'XMBEffect_AbilityCostRefund';
@@ -473,4 +476,42 @@ static function X2AbilityTemplate CloseAndPersonal()
 
 	// Create the template using a helper function
 	return Passive('XMBExample_CloseAndPersonal', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
+static function X2AbilityTemplate InspireAgility()
+{
+	local X2Effect_PersistentStatChange Effect;
+	local X2AbilityTemplate Template;
+
+	// Create a persistent stat change effect that grants +50 Dodge
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'InspireAgility';
+	Effect.AddPersistentStatChange(eStat_Dodge, 50);
+
+	// The effect lasts until the beginning of the player's next turn
+	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
+
+	Effect.VisualizationFn = EffectFlyOver_Visualization;
+
+	// Create the template using a helper function
+	Template = TargetedBuff('XMBExample_InspireAgility', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Free);
+
+	AddCharges(Template, 1);
+
+	PreventStackingEffects(Template);
+
+	Template.AdditionalAbilities.AddItem('XMBExample_InspireAgilityTrigger');
+
+	return Template;
+}
+
+static function X2AbilityTemplate InspireAgilityTrigger()
+{
+	local XMBEffect_AddAbilityCharges Effect;
+
+	Effect = new class'XMBEffect_AddAbilityCharges';
+	Effect.AbilityNames.AddItem('XMBExample_InspireAgility');
+	Effect.BonusCharges = 1;
+
+	return SelfTargetTrigger('XMBExample_InspireAgilityTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
 }
