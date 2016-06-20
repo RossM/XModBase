@@ -37,7 +37,7 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 	local X2AbilityTemplate Ability;
 	local X2AbilityCost AbilityCost;
 	local X2AbilityCost_ActionPoints ActionPointCost;
-	local int PointsSpent, Cost;
+	local int PointsSpent, TotalPoints, PrevTotalPoints, Cost;
 	local int i, MovementCost, PathIndex, FarthestTile;
 
 	History = `XCOMHISTORY;
@@ -51,9 +51,16 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 	SourceUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.SourceObject.ObjectID));
 	if (SourceUnit != none)
 	{
-		PrevSourceUnit = XComGameState_Unit(History.GetPreviousGameStateForObject(SourceUnit));
+		PrevSourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(SourceUnit.ObjectID,, AbilityContext.AssociatedState.HistoryIndex - 1));
 
-		PointsSpent = PrevSourceUnit.ActionPoints.Length - SourceUnit.ActionPoints.Length;
+		// Don't trigger if only reserve points were available
+		if (PrevSourceUnit.ActionPoints.Length == 0)
+			return 'AA_ValueCheckFailed';
+
+		PrevTotalPoints = PrevSourceUnit.ActionPoints.Length + PrevSourceUnit.ReserveActionPoints.Length;
+		TotalPoints = SourceUnit.ActionPoints.Length + SourceUnit.ReserveActionPoints.Length;
+
+		PointsSpent = PrevTotalPoints - TotalPoints;
 
 		Ability = kAbility.GetMyTemplate();
 

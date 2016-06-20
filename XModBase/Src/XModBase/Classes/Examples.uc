@@ -124,13 +124,9 @@ static function X2AbilityTemplate HitAndRun()
 	CostCondition.MinimumPointsSpent = 2;
 	AddTriggerTargetCondition(Template, CostCondition);
 
-	// Exclude overwatch abilities
+	// Exclude Hunker Down
 	NameCondition = new class'XMBCondition_AbilityName';
 	NameCondition.ExcludeAbilityNames.AddItem('HunkerDown');
-	NameCondition.ExcludeAbilityNames.AddItem('Overwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('PistolOverwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('SniperRifleOverwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('Suppression');
 	AddTriggerTargetCondition(Template, NameCondition);
 
 	Template.bShowActivation = true;

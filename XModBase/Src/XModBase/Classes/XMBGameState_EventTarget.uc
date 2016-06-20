@@ -11,6 +11,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	local XComGameStateHistory History;
 	local X2AbilityTrigger Trigger;
 	local XMBAbilityTrigger_EventListener EventListener;
+	local name AvailableCode;
 
 	History = `XCOMHISTORY;
 
@@ -37,8 +38,6 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	{
 		TargetUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
 	}
-	if (TargetUnit == none)
-		return ELR_NoInterrupt;
 
 	foreach TriggeredAbilities(AbilityRef)
 	{
@@ -49,13 +48,21 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 			EventListener = XMBAbilityTrigger_EventListener(Trigger);
 			if (EventListener != none && EventListener.ListenerData.EventID == EventID)
 			{
-				if (EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState) == 'AA_Success')
+				if (TargetUnit != none || EventListener.bSelfTarget)
 				{
-					if (EventListener.bSelfTarget)
-						SourceAbilityState.AbilityTriggerAgainstSingleTarget(SourceUnit.GetReference(), false);
-					else
-						SourceAbilityState.AbilityTriggerAgainstSingleTarget(TargetUnit.GetReference(), false);
+					AvailableCode = EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState);
+
+					`Log("OnEvent:" @ EventID @ SourceAbilityState.GetMyTemplateName @ AvailableCode);
+
+					if (AvailableCode == 'AA_Success')
+					{
+						if (EventListener.bSelfTarget)
+							SourceAbilityState.AbilityTriggerAgainstSingleTarget(SourceUnit.GetReference(), false);
+						else
+							SourceAbilityState.AbilityTriggerAgainstSingleTarget(TargetUnit.GetReference(), false);
+					}
 				}
+
 				break;
 			}			
 		}
