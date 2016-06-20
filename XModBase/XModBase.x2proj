@@ -2158,6 +2158,9 @@
     <Content Include="Src\XModBase\Classes\XMBAbility.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBAbilityTrigger_EventListener.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBAction_ForceVisibility.uc">
       <SubType>Content</SubType>
     </Content>
@@ -2216,6 +2219,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase\Classes\XMBEffect_ToHitModifierByRange.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\XModBase\Classes\XMBGameState_EventTarget.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase_Core_1_1_0\Classes\XMBAbilityMultiTarget_SoldierBonusRadius.uc">

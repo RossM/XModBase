@@ -105,34 +105,9 @@ static function X2AbilityTemplate Pyromaniac()
 static function X2AbilityTemplate HitAndRun()
 {
 	local X2AbilityTemplate Template;
-	local XMBEffect_AbilityTriggered Effect;
-	local XMBCondition_AbilityCost CostCondition;
-	local XMBCondition_AbilityName NameCondition;
-
-	// Create an effect that listens for ability activations and triggers an event
-	Effect = new class'XMBEffect_AbilityTriggered';
-	Effect.EffectName = 'HitAndRun';
-	Effect.TriggeredEvent = 'HitAndRun';
-
-	// Require that the activated ability costs 1 action point, but actually spent at least 2
-	CostCondition = new class'XMBCondition_AbilityCost';
-	CostCondition.bRequireMaximumCost = true;
-	CostCondition.MaximumCost = 1;
-	CostCondition.bRequireMinimumPointsSpent = true;
-	CostCondition.MinimumPointsSpent = 2;
-	Effect.AbilityTargetConditions.AddItem(CostCondition);
-
-	// Exclude overwatch abilities
-	NameCondition = new class'XMBCondition_AbilityName';
-	NameCondition.ExcludeAbilityNames.AddItem('HunkerDown');
-	NameCondition.ExcludeAbilityNames.AddItem('Overwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('PistolOverwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('SniperRifleOverwatch');
-	NameCondition.ExcludeAbilityNames.AddItem('Suppression');
-	Effect.AbilityTargetConditions.AddItem(NameCondition);
 
 	// Create the template using a helper function
-	Template = Passive('XMBExample_HitAndRun', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+	Template = Passive('XMBExample_HitAndRun', "img:///UILibrary_PerkIcons.UIPerk_command", true);
 
 	// We need an additional ability to actually listen for the trigger
 	Template.AdditionalAbilities.AddItem('XMBExample_HitAndRunTrigger');
@@ -145,6 +120,8 @@ static function X2AbilityTemplate HitAndRunTrigger()
 {
 	local X2Effect_GrantActionPoints Effect;
 	local X2AbilityTemplate Template;
+	local XMBCondition_AbilityCost CostCondition;
+	local XMBCondition_AbilityName NameCondition;
 
 	// Add a single movement-only action point to the unit
 	Effect = new class'X2Effect_GrantActionPoints';
@@ -152,7 +129,24 @@ static function X2AbilityTemplate HitAndRunTrigger()
 	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
 
 	// Create the template using a helper function. It will be triggered by the Hit and Run passive defined in HitAndRun();
-	Template = SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'HitAndRun');
+	Template = SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
+
+	// Require that the activated ability costs 1 action point, but actually spent at least 2
+	CostCondition = new class'XMBCondition_AbilityCost';
+	CostCondition.bRequireMaximumCost = true;
+	CostCondition.MaximumCost = 1;
+	CostCondition.bRequireMinimumPointsSpent = true;
+	CostCondition.MinimumPointsSpent = 2;
+	AddTriggerTargetCondition(Template, CostCondition);
+
+	// Exclude overwatch abilities
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.ExcludeAbilityNames.AddItem('HunkerDown');
+	NameCondition.ExcludeAbilityNames.AddItem('Overwatch');
+	NameCondition.ExcludeAbilityNames.AddItem('PistolOverwatch');
+	NameCondition.ExcludeAbilityNames.AddItem('SniperRifleOverwatch');
+	NameCondition.ExcludeAbilityNames.AddItem('Suppression');
+	AddTriggerTargetCondition(Template, NameCondition);
 
 	Template.bShowActivation = true;
 

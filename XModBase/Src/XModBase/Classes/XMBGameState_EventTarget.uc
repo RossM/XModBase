@@ -1,0 +1,1 @@
+class XMBGameState_EventTarget extends XComGameState_BaseObject;

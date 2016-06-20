@@ -116,7 +116,7 @@ static function X2AbilityTemplate Passive(name DataName, string IconImage, optio
 static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect Effect = none, optional name EventID = '')
 {
 	local X2AbilityTemplate						Template;
-	local X2AbilityTrigger_EventListener		EventListener;
+	local XMBAbilityTrigger_EventListener		EventListener;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
 
@@ -131,11 +131,11 @@ static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconIm
 	if (EventID == '')
 		EventID = DataName;
 
-	EventListener = new class'X2AbilityTrigger_EventListener';
+	EventListener = new class'XMBAbilityTrigger_EventListener';
 	EventListener.ListenerData.Deferral = ELD_OnStateSubmitted;
 	EventListener.ListenerData.EventID = EventID;
-	EventListener.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_Self;
 	EventListener.ListenerData.Filter = eFilter_Unit;
+	EventListener.bSelfTarget = true;
 	Template.AbilityTriggers.AddItem(EventListener);
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
@@ -567,7 +567,28 @@ static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iT
 	EffectsCondition = new class'X2Condition_UnitEffectsWithAbilitySource';
 	EffectsCondition.AddExcludeEffect(CooldownEffectName, 'AA_UnitIsImmune');
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
+}
 
+static function AddTriggerTargetCondition(X2AbilityTemplate Template, X2Condition Condition)
+{
+	local X2AbilityTrigger Trigger;
+
+	foreach Template.AbilityTriggers(Trigger)
+	{
+		if (XMBAbilityTrigger_EventListener(Trigger) != none)
+			XMBAbilityTrigger_EventListener(Trigger).AbilityTargetConditions.AddItem(Condition);
+	}
+}
+
+static function AddTriggerShooterCondition(X2AbilityTemplate Template, X2Condition Condition)
+{
+	local X2AbilityTrigger Trigger;
+
+	foreach Template.AbilityTriggers(Trigger)
+	{
+		if (XMBAbilityTrigger_EventListener(Trigger) != none)
+			XMBAbilityTrigger_EventListener(Trigger).AbilityShooterConditions.AddItem(Condition);
+	}
 }
 
 static function PreventStackingEffects(X2AbilityTemplate Template)
