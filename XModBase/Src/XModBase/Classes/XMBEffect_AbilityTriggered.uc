@@ -122,6 +122,8 @@ function static EventListenerReturn AbilityActivatedListener(Object EventData, O
 			{
 				if (AbilityTriggeredEffect.TriggeredEvent != '')
 					EventMgr.TriggerEvent(AbilityTriggeredEffect.TriggeredEvent, AbilityState, SourceUnit, GameState);
+				else
+					EventMgr.TriggerEvent(AbilityTriggeredEffect.EffectName, AbilityState, SourceUnit, GameState);
 
 				//if (AbilityTriggeredEffect.TriggeredAbilityName != '')
 				//{
@@ -188,6 +190,5 @@ function private name ValidateAttack(XComGameState_Effect EffectState, XComGameS
 DefaultProperties
 {
 	DuplicateResponse = eDupe_Ignore
-	TriggeredEvent = "XMBAbilityTrigger"
 	EventID = "AbilityActivated"
 }
