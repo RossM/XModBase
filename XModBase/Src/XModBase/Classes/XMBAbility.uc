@@ -116,9 +116,9 @@ static function X2AbilityTemplate Passive(name DataName, string IconImage, optio
 
 // Helper function for quickly defining an ability that triggers on an event and targets the unit 
 // itself. Note that this does not add a passive ability icon, so you should pair it with a
-// Passive or PurePassive that defines the icon. The IconImage argument is still used as the icon
-// for effects created by this ability.
-static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect Effect = none, optional name EventID = '')
+// Passive or PurePassive that defines the icon, or use AddIconPassive. The IconImage argument is
+// still used as the icon for effects created by this ability.
+static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect Effect = none, optional name EventID = '', optional AbilityEventFilter Filter = eFilter_Unit)
 {
 	local X2AbilityTemplate						Template;
 	local XMBAbilityTrigger_EventListener		EventListener;
@@ -139,7 +139,7 @@ static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconIm
 	EventListener = new class'XMBAbilityTrigger_EventListener';
 	EventListener.ListenerData.Deferral = ELD_OnStateSubmitted;
 	EventListener.ListenerData.EventID = EventID;
-	EventListener.ListenerData.Filter = eFilter_Unit;
+	EventListener.ListenerData.Filter = Filter;
 	EventListener.bSelfTarget = true;
 	Template.AbilityTriggers.AddItem(EventListener);
 
