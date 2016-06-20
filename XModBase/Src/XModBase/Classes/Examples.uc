@@ -15,7 +15,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PowerShot());
 	Templates.AddItem(PowerShotBonuses());
 	Templates.AddItem(CloseCombatSpecialist());
-	Templates.AddItem(CloseCombatSpecialistShot());
 	Templates.AddItem(CloseAndPersonal());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
@@ -337,27 +336,14 @@ static function X2AbilityTemplate PowerShotBonuses()
 static function X2AbilityTemplate CloseCombatSpecialist()
 {
 	local X2AbilityTemplate Template;
-
-	// Create a pure passive which displays the passive perk icon
-	Template = PurePassive('XMBExample_CloseCombatSpecialist', "img:///UILibrary_PerkIcons.UIPerk_command", true);
-
-	// Add the actual shot ability
-	Template.AdditionalAbilities.AddItem('XMBExample_CloseCombatSpecialistShot');
-
-	return Template;
-}
-
-// This is part of the Close Combat Specialist, above
-static function X2AbilityTemplate CloseCombatSpecialistShot()
-{
-	local X2AbilityTemplate Template;
 	local X2AbilityToHitCalc_StandardAim ToHit;
 
 	// Create the template using a helper function
-	Template = Attack('XMBExample_CloseCombatSpecialistShot', "img:///UILibrary_PerkIcons.UIPerk_command", false, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
+	Template = Attack('XMBExample_CloseCombatSpecialist', "img:///UILibrary_PerkIcons.UIPerk_command", false, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_None);
 	
-	// Reaction fire shouldn't show up as an activatable ability
+	// Reaction fire shouldn't show up as an activatable ability, it should be a passive instead
 	HidePerkIcon(Template);
+	AddIconPassive(Template);
 
 	// Set the shot to be considered reaction fire
 	ToHit = new class'X2AbilityToHitCalc_StandardAim';
