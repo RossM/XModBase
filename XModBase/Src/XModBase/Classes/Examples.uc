@@ -8,9 +8,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(AbsolutelyCritical());
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(HitAndRun());
-	Templates.AddItem(HitAndRunTrigger());
 	Templates.AddItem(Assassin());
-	Templates.AddItem(AssassinTrigger());
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(DamnGoodGround());
 	Templates.AddItem(MovingTarget());
@@ -22,7 +20,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
 	Templates.AddItem(ReverseEngineering());
-	Templates.AddItem(ReverseEngineeringTrigger());
 	Templates.AddItem(BullRush());
 	Templates.AddItem(BullRushTrigger());
 
@@ -104,20 +101,6 @@ static function X2AbilityTemplate Pyromaniac()
 // Config:			(AbilityName="XMBExample_HitAndRun")
 static function X2AbilityTemplate HitAndRun()
 {
-	local X2AbilityTemplate Template;
-
-	// Create the template using a helper function
-	Template = Passive('XMBExample_HitAndRun', "img:///UILibrary_PerkIcons.UIPerk_command", true);
-
-	// We need an additional ability to actually listen for the trigger
-	Template.AdditionalAbilities.AddItem('XMBExample_HitAndRunTrigger');
-
-	return Template;
-}
-
-// This is part of the Hit and Run effect, above
-static function X2AbilityTemplate HitAndRunTrigger()
-{
 	local X2Effect_GrantActionPoints Effect;
 	local X2AbilityTemplate Template;
 	local XMBCondition_AbilityCost CostCondition;
@@ -129,7 +112,10 @@ static function X2AbilityTemplate HitAndRunTrigger()
 	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
 
 	// Create the template using a helper function. It will be triggered by the Hit and Run passive defined in HitAndRun();
-	Template = SelfTargetTrigger('XMBExample_HitAndRunTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
+	Template = SelfTargetTrigger('XMBExample_HitAndRun', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
 
 	// Require that the activated ability costs 1 action point, but actually spent at least 2
 	CostCondition = new class'XMBCondition_AbilityCost';
@@ -159,20 +145,6 @@ static function X2AbilityTemplate HitAndRunTrigger()
 // Config:			(AbilityName="XMBExample_Assassin", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate Assassin()
 {
-	local X2AbilityTemplate						Template;
-
-	// Create the template using a helper function
-	Template = Passive('XMBExample_Assassin', "img:///UILibrary_PerkIcons.UIPerk_command", true);
-
-	// We need an additional ability to actually listen for the trigger
-	Template.AdditionalAbilities.AddItem('XMBExample_AssassinTrigger');
-
-	return Template;
-}
-
-// This is part of the Assassin effect, above
-static function X2AbilityTemplate AssassinTrigger()
-{
 	local X2AbilityTemplate Template;
 	local X2Effect_RangerStealth StealthEffect;
 
@@ -182,7 +154,10 @@ static function X2AbilityTemplate AssassinTrigger()
 	StealthEffect.bRemoveWhenTargetConcealmentBroken = true;
 
 	// Create the template using a helper function
-	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, StealthEffect, 'AbilityActivated');
+	Template = SelfTargetTrigger('XMBExample_Assassin', "img:///UILibrary_PerkIcons.UIPerk_command", false, StealthEffect, 'AbilityActivated');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
 
 	// Require that the activated ability use the weapon associated with this ability
 	AddTriggerTargetCondition(Template, default.MatchingWeaponCondition);
@@ -479,17 +454,6 @@ static function X2AbilityTemplate InspireAgilityTrigger()
 
 static function X2AbilityTemplate ReverseEngineering()
 {
-	local X2AbilityTemplate Template;
-
-	Template = Passive('XMBExample_ReverseEngineering', "img:///UILibrary_PerkIcons.UIPerk_command", false);
-
-	Template.AdditionalAbilities.AddItem('XMBExample_ReverseEngineeringTrigger');
-
-	return Template;
-}
-
-static function X2AbilityTemplate ReverseEngineeringTrigger()
-{
 	local XMBEffect_PermanentStatChange Effect;
 	local X2AbilityTemplate Template;
 	local X2Condition_UnitProperty Condition;
@@ -497,7 +461,10 @@ static function X2AbilityTemplate ReverseEngineeringTrigger()
 	Effect = new class'XMBEffect_PermanentStatChange';
 	Effect.AddStatChange(eStat_Hacking, 5);
 
-	Template = SelfTargetTrigger('XMBExample_ReverseEngineeringTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
+	Template = SelfTargetTrigger('XMBExample_ReverseEngineering', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
 
 	Condition = new class'X2Condition_UnitProperty';
 	Condition.ExcludeOrganic = true;

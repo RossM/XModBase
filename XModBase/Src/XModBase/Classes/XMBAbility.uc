@@ -612,6 +612,21 @@ static function PreventStackingEffects(X2AbilityTemplate Template)
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
 }
 
+static function AddIconPassive(X2AbilityTemplate Template)
+{
+	local X2AbilityTemplate IconTemplate;
+
+	IconTemplate = PurePassive(name(Template.DataName $ "_Icon"), Template.IconImage);
+	IconTemplate.LocFriendlyName = Template.LocFriendlyName;
+	IconTemplate.LocHelpText = Template.LocHelpText;
+	IconTemplate.LocLongDescription = Template.LocLongDescription;
+	IconTemplate.LocFlyOverText = Template.LocFlyOverText;
+
+	Template.AdditionalAbilities.AddItem(IconTemplate.DataName);
+
+	class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().AddAbilityTemplate(IconTemplate);
+}
+
 // Helper function for creating an X2Condition that requires a maximum distance between shooter and target.
 simulated static function X2Condition_UnitProperty TargetWithinTiles(int Tiles)
 {
