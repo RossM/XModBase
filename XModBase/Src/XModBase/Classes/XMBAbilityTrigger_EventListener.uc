@@ -1,3 +1,26 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBAbilityTrigger_EventListener.uc
+//  AUTHOR:  xylthixlm
+//
+//  This will trigger an ability when a certain event is fired. It supports filtering
+//  the events using X2Conditions.
+//
+//  USAGE
+//
+//  The following helper function in XMBAbility will create an ability template that uses
+//  an XMBAbilityTrigger_EventListener:
+//
+//  SelfTargetTrigger
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBAbilityTrigger_EventListener extends X2AbilityTrigger_EventListener;
 
 ////////////////////////
