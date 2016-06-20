@@ -479,21 +479,9 @@ static function X2AbilityTemplate InspireAgilityTrigger()
 
 static function X2AbilityTemplate ReverseEngineering()
 {
-	local XMBEffect_AbilityTriggered Effect;
 	local X2AbilityTemplate Template;
-	local X2Condition_UnitProperty Condition;
 
-	Effect = new class'XMBEffect_AbilityTriggered';
-	Effect.EffectName = 'ReverseEngineering';
-	Effect.EventID = 'KillMail';
-	Effect.TriggeredEvent = 'ReverseEngineering';
-
-	Condition = new class'X2Condition_UnitProperty';
-	Condition.ExcludeOrganic = true;
-	Condition.ExcludeDead = false;
-	Effect.AbilityTargetConditions.AddItem(Condition);
-
-	Template = Passive('XMBExample_ReverseEngineering', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+	Template = Passive('XMBExample_ReverseEngineering', "img:///UILibrary_PerkIcons.UIPerk_command", false);
 
 	Template.AdditionalAbilities.AddItem('XMBExample_ReverseEngineeringTrigger');
 
@@ -503,11 +491,20 @@ static function X2AbilityTemplate ReverseEngineering()
 static function X2AbilityTemplate ReverseEngineeringTrigger()
 {
 	local XMBEffect_PermanentStatChange Effect;
+	local X2AbilityTemplate Template;
+	local X2Condition_UnitProperty Condition;
 
 	Effect = new class'XMBEffect_PermanentStatChange';
 	Effect.AddStatChange(eStat_Hacking, 5);
 
-	return SelfTargetTrigger('XMBExample_ReverseEngineeringTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'ReverseEngineering');
+	Template = SelfTargetTrigger('XMBExample_ReverseEngineeringTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
+
+	Condition = new class'X2Condition_UnitProperty';
+	Condition.ExcludeOrganic = true;
+	Condition.ExcludeDead = false;
+	AddTriggerTargetCondition(Template, Condition);
+
+	return Template;
 }
 
 static function X2AbilityTemplate BullRush()
