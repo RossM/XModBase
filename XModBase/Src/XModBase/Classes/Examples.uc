@@ -43,8 +43,8 @@ static function X2AbilityTemplate Weaponmaster()
 	// The bonus adds 2 damage to attacks
 	Effect.AddDamageModifier(2);
 
-	// The bonus only applies to attacks with the weapon associated with this ability
-	Effect.bRequireAbilityWeapon = true;
+	// The bonus only applies to attacks with the weapon associated with this ability	Effect.bRequireAbilityWeapon = true;
+	Effect.OtherConditions.AddItem(default.MatchingWeaponCondition);
 
 	// Create the template using a helper function
 	return Passive('XMBExample_Weaponmaster', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
@@ -160,24 +160,9 @@ static function X2AbilityTemplate HitAndRunTrigger()
 static function X2AbilityTemplate Assassin()
 {
 	local X2AbilityTemplate						Template;
-	local XMBEffect_AbilityTriggered			Effect;
-
-	// Create an effect that listens for ability activations and triggers an event
-	Effect = new class'XMBEffect_AbilityTriggered';
-	Effect.EffectName = 'Assassin';
-	Effect.TriggeredEvent = 'Assassin';
-
-	// Require that the activated ability use the weapon associated with this ability
-	Effect.bRequireAbilityWeapon = true;
-
-	// Require that the target of the ability is now dead
-	Effect.AbilityTargetConditions.AddItem(default.DeadCondition);
-
-	// Require that the target of the ability was flanked or uncovered
-	Effect.AbilityTargetConditions.AddItem(default.NoCoverCondition);
 
 	// Create the template using a helper function
-	Template = Passive('XMBExample_Assassin', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+	Template = Passive('XMBExample_Assassin', "img:///UILibrary_PerkIcons.UIPerk_command", true);
 
 	// We need an additional ability to actually listen for the trigger
 	Template.AdditionalAbilities.AddItem('XMBExample_AssassinTrigger');
@@ -197,7 +182,16 @@ static function X2AbilityTemplate AssassinTrigger()
 	StealthEffect.bRemoveWhenTargetConcealmentBroken = true;
 
 	// Create the template using a helper function
-	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, StealthEffect, 'Assassin');
+	Template = SelfTargetTrigger('XMBExample_AssassinTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, StealthEffect, 'AbilityActivated');
+
+	// Require that the activated ability use the weapon associated with this ability
+	AddTriggerTargetCondition(Template, default.MatchingWeaponCondition);
+
+	// Require that the target of the ability is now dead
+	AddTriggerTargetCondition(Template, default.DeadCondition);
+
+	// Require that the target of the ability was flanked or uncovered
+	AddTriggerTargetCondition(Template, default.NoCoverCondition);
 
 	// Require that the unit be able to enter stealth
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_Stealth');
@@ -226,7 +220,7 @@ static function X2AbilityTemplate SlamFire()
 	SlamFireEffect.TriggeredEvent = 'SlamFire';
 
 	// Require that the activated ability use the weapon associated with this ability
-	SlamFireEffect.bRequireAbilityWeapon = true;
+	SlamFireEffect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
 
 	// Require that the activated ability get a critical hit
 	SlamFireEffect.AbilityTargetConditions.AddItem(default.CritCondition);

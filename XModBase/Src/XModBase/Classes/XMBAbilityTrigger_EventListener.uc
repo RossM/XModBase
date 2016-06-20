@@ -10,8 +10,6 @@ var bool bSelfTarget;
 // Condition properties //
 //////////////////////////
 
-var bool bRequireAbilityWeapon;						// Require that the weapon or ammo used in the ability match the item associated with this effect.
-
 var array<X2Condition> AbilityTargetConditions;		// Conditions on the target of the ability being checked.
 var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of the ability being checked.
 
@@ -118,19 +116,21 @@ function private name ValidateAttack(XComGameState_Ability SourceAbilityState, X
 	local StateObjectReference ItemRef;
 	local name AvailableCode;
 		
-	if (bRequireAbilityWeapon)
-	{
-		SourceWeapon = AbilityState.GetSourceWeapon();
-		if (SourceWeapon == none)
-			return 'AA_UnknownError';
-
-		ItemRef = SourceAbilityState.SourceWeapon;
-		if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
-			return 'AA_UnknownError';
-	}
-
 	foreach AbilityTargetConditions(kCondition)
 	{
+		if (kCondition.IsA('XMBCondition_MatchingWeapon'))
+		{
+			SourceWeapon = AbilityState.GetSourceWeapon();
+			if (SourceWeapon == none)
+				return 'AA_UnknownError';
+
+			ItemRef = SourceAbilityState.SourceWeapon;
+			if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
+				return 'AA_UnknownError';
+
+			continue;
+		}
+
 		AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);
 		if (AvailableCode != 'AA_Success')
 			return AvailableCode;

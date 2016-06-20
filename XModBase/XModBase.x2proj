@@ -2182,6 +2182,9 @@
     <Content Include="Src\XModBase\Classes\XMBCondition_HeightAdvantage.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBCondition_MatchingWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBCondition_ReactionFire.uc">
       <SubType>Content</SubType>
     </Content>

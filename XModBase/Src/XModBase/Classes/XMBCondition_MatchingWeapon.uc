@@ -1,0 +1,1 @@
+class XMBCondition_MatchingWeapon extends X2Condition;

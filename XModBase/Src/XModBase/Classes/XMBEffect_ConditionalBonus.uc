@@ -59,8 +59,6 @@ var bool bIgnoreSquadsightPenalty;					// Negates squadsight penalties. Requires
 // Condition properties //
 //////////////////////////
 
-var bool bRequireAbilityWeapon;						// Require that the weapon or ammo used in the ability match the item associated with this effect.
-
 var array<X2Condition> SelfConditions;				// Conditions applied to the unit with the effect (usually the shooter)
 var array<X2Condition> OtherConditions;				// Conditions applied to the other unit involved (usually the target)
 
@@ -147,23 +145,23 @@ function private name ValidateAttack(XComGameState_Effect EffectState, XComGameS
 	local StateObjectReference ItemRef;
 	local name AvailableCode;
 		
-	// Check that the attack is using the correct weapon if required
-	if (!bAsTarget && bRequireAbilityWeapon)
-	{
-		SourceWeapon = AbilityState.GetSourceWeapon();
-		if (SourceWeapon == none)
-			return 'AA_UnknownError';
-
-		ItemRef = EffectState.ApplyEffectParameters.ItemStateObjectRef;
-		if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
-			return 'AA_UnknownError';
-	}
-
 	if (!bAsTarget)
 	{
 		// Attack by the unit with the effect - check target conditions
 		foreach OtherConditions(kCondition)
 		{
+			// Check that the attack is using the correct weapon if required
+			if (kCondition.IsA('XMBCondition_MatchingWeapon'))
+			{
+				SourceWeapon = AbilityState.GetSourceWeapon();
+				if (SourceWeapon == none)
+					return 'AA_UnknownError';
+
+				ItemRef = EffectState.ApplyEffectParameters.ItemStateObjectRef;
+				if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
+					return 'AA_UnknownError';
+			}
+
 			AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);
 			if (AvailableCode != 'AA_Success')
 				return AvailableCode;

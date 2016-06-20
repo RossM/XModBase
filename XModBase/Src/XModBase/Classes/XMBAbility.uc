@@ -70,6 +70,11 @@ var const XMBCondition_AbilityHitResult MissCondition;				// The ability misses
 var const XMBCondition_AbilityHitResult CritCondition;				// The ability crits
 var const XMBCondition_AbilityHitResult GrazeCondition;				// The ability grazes
 
+// Matching weapon conditions. Only work as target conditions. Doesn't work if used on an
+// X2AbilityTemplate.
+var const XMBCondition_MatchingWeapon MatchingWeaponCondition;		// The ability matches the weapon of the 
+																	// ability defining the condition
+
 // Unit property conditions.
 var const X2Condition_UnitProperty LivingFriendlyTargetProperty;
 
@@ -709,6 +714,10 @@ defaultproperties
 		IncludeHitResults[0] = eHit_Graze
 	End Object
 	GrazeCondition = DefaultGrazeCondition
+
+	Begin Object Class=XMBCondition_MatchingWeapon Name=DefaultMatchingWeaponCondition
+	End Object
+	MatchingWeaponCondition = DefaultMatchingWeaponCondition
 
 	Begin Object Class=X2Condition_UnitProperty Name=DefaultLivingFriendlyTargetProperty
 		ExcludeAlive=false
