@@ -84,7 +84,8 @@ function static EventListenerReturn AbilityActivatedListener(Object EventData, O
 
 	// XComGameState_Unit already has an AbilityActivated listener, which we replace. Call the 
 	// handler so it can take care of important things like breaking concealment.
-	SourceUnit.OnAbilityActivated(EventData, EventSource, GameState, IncomingEventID);
+	if (IncomingEventID == 'AbilityActivated')
+		SourceUnit.OnAbilityActivated(EventData, EventSource, GameState, IncomingEventID);
 
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 	if (AbilityContext == none)
