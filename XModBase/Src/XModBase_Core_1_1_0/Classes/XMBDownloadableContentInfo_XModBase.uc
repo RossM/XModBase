@@ -251,7 +251,52 @@ static function UpdateAbilities()
 			{
 				Template.TargetingMethod = TargetingMethod;
 			}
+
+			if (Template.ShotHUDPriority == class'XMBAbility'.default.AUTO_PRIORITY)
+			{
+				Template.ShotHUDPriority = FindShotHUDPriority(Template.DataName);
+			}
 		}
+	}
+}
+
+static function int FindShotHUDPriority(name AbilityName)
+{
+	local X2SoldierClassTemplateManager SoldierClassManager;
+	local array<X2SoldierClassTemplate> AllTemplates;
+	local X2SoldierClassTemplate Template;
+	local array<SoldierClassAbilityType> AbilityTree;
+	local int HighestLevel;
+	local int rank;
+
+	SoldierClassManager = class'X2SoldierClassTemplateManager'.static.GetSoldierClassTemplateManager();
+
+	HighestLevel = -1;
+
+	AllTemplates = SoldierClassManager.GetAllSoldierClassTemplates();
+	foreach AllTemplates(Template)
+	{
+		for (rank = 0; rank < Template.GetMaxConfiguredRank(); rank++)
+		{
+			if (rank <= HighestLevel)
+				continue;
+
+			AbilityTree = Template.GetAbilityTree(rank);
+			if (AbilityTree.Find('AbilityName', AbilityName) != INDEX_NONE)
+				HighestLevel = rank;
+		}
+	}
+
+	switch (HighestLevel)
+	{
+	case 0:		return class'UIUtilities_Tactical'.const.CLASS_SQUADDIE_PRIORITY;
+	case 1:		return class'UIUtilities_Tactical'.const.CLASS_CORPORAL_PRIORITY;
+	case 2:		return class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY;
+	case 3:		return class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY;
+	case 4:		return class'UIUtilities_Tactical'.const.CLASS_CAPTAIN_PRIORITY;
+	case 5:		return class'UIUtilities_Tactical'.const.CLASS_MAJOR_PRIORITY;
+	case 6:		return class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY;
+	default:	return class'UIUtilities_Tactical'.const.UNSPECIFIED_PRIORITY;
 	}
 }
 
