@@ -32,7 +32,7 @@ static function array<X2DataTemplate> CreateTemplates()
 // Config:			(AbilityName="XMBExample_AbsolutelyCritical")
 static function X2AbilityTemplate AbsolutelyCritical()
 {
-	local XMBEffect_ConditionalBonus             Effect;
+	local XMBEffect_ConditionalBonus Effect;
 
 	// Create a conditional bonus
 	Effect = new class'XMBEffect_ConditionalBonus';
@@ -484,8 +484,8 @@ static function X2AbilityTemplate ReverseEngineering()
 // Config:			(AbilityName="XMBExample_SlamFire", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate SlamFire()
 {
-	local X2AbilityTemplate					Template;
-	local XMBEffect_AbilityCostRefund       SlamFireEffect;
+	local X2AbilityTemplate Template;
+	local XMBEffect_AbilityCostRefund SlamFireEffect;
 
 	// Create an effect that refunds the action point cost of abilities
 	SlamFireEffect = new class'XMBEffect_AbilityCostRefund';
@@ -517,7 +517,7 @@ static function X2AbilityTemplate SlamFire()
 // Config:			(AbilityName="XMBExample_Weaponmaster", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate Weaponmaster()
 {
-	local XMBEffect_ConditionalBonus              Effect;
+	local XMBEffect_ConditionalBonus Effect;
 
 	// Create a conditional bonus
 	Effect = new class'XMBEffect_ConditionalBonus';
