@@ -180,7 +180,7 @@ event ExpandHandler(string InString, out string OutString)
 }
 
 // Looks for a stat bonus in an X2EFfect_PersistentStatChange or subclass.
-function bool FindStatBonus(X2AbilityTemplate AbilityTemplate, ECharStatType StatType, out string OutString, optional float Multiplier = -1)
+function bool FindStatBonus(X2AbilityTemplate AbilityTemplate, ECharStatType StatType, out string OutString, optional float Multiplier = 1)
 {
 	local X2Effect EffectTemplate;
 	local X2Effect_PersistentStatChange StatChangeEffect;
