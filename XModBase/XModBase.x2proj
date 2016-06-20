@@ -2191,9 +2191,6 @@
     <Content Include="Src\XModBase\Classes\XMBEffect_AbilityCostRefund.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_AbilityTriggered.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\XModBase\Classes\XMBEffect_AddAbilityCharges.uc">
       <SubType>Content</SubType>
     </Content>
