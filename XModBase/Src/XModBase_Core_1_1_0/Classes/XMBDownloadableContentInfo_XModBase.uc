@@ -252,7 +252,7 @@ static function UpdateAbilities()
 				Template.TargetingMethod = TargetingMethod;
 			}
 
-			if (Template.ShotHUDPriority == class'XMBAbility'.default.AUTO_PRIORITY)
+			if (Template.ShotHUDPriority == -1)  // class'XMBAbility'.default.AUTO_PRIORITY
 			{
 				Template.ShotHUDPriority = FindShotHUDPriority(Template.DataName);
 			}
