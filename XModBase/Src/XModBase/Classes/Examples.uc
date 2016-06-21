@@ -375,6 +375,9 @@ static function X2AbilityTemplate InspireAgility()
 	Effect.EffectName = 'InspireAgility';
 	Effect.AddPersistentStatChange(eStat_Dodge, 50);
 
+	// Prevent the effect from applying to a unit more than once
+	Effect.DuplicateResponse = eDupe_Ignore;
+
 	// The effect lasts until the beginning of the player's next turn
 	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
 

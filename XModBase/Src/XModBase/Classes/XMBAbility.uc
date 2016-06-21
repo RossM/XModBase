@@ -17,6 +17,7 @@
 //
 //  DEPENDENCIES
 //
+//  Core
 //  XMBCondition_CoverType.uc
 //  XMBCondition_HeightAdvantage.uc
 //  XMBCondition_ReactionFire.uc
@@ -76,7 +77,7 @@ var const XMBCondition_MatchingWeapon MatchingWeaponCondition;		// The ability m
 																	// ability defining the condition
 
 // Unit property conditions.
-var const X2Condition_UnitProperty LivingFriendlyTargetProperty;
+var const X2Condition_UnitProperty LivingFriendlyTargetProperty;	// The target is alive and an ally.
 
 // Use this for ShotHUDPriority to have the priority calculated automatically
 var const int AUTO_PRIORITY;
@@ -136,6 +137,7 @@ static function X2AbilityTemplate SelfTargetTrigger(name DataName, string IconIm
 	if (EventID == '')
 		EventID = DataName;
 
+	// XMBAbilityTrigger_EventListener doesn't use ListenerData.EventFn
 	EventListener = new class'XMBAbilityTrigger_EventListener';
 	EventListener.ListenerData.Deferral = ELD_OnStateSubmitted;
 	EventListener.ListenerData.EventID = EventID;
@@ -397,6 +399,8 @@ static function X2AbilityTemplate TargetedDebuff(name DataName, string IconImage
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	// Use an animation of pointing at the target, rather than the weapon animation.
 	Template.CustomFireAnim = 'HL_SignalPoint';
 	
 	Template.bCrossClassEligible = bCrossClassEligible;
@@ -448,6 +452,8 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	// Use an animation of pointing at the target, rather than the weapon animation.
 	Template.CustomFireAnim = 'HL_SignalPoint';
 	
 	Template.bCrossClassEligible = bCrossClassEligible;
@@ -492,7 +498,9 @@ static function X2AbilityCost_ActionPoints ActionPointCost(EActionPointCost Cost
 	return AbilityCost;
 }
 
-// Helper function for creating an X2AbilityCooldown.
+// Helper function for adding a cooldown to an ability. This takes an internal cooldown duration,
+// which is one turn longer than the cooldown displayed in ability help text because it includes
+// the turn the ability was applied.
 static function AddCooldown(X2AbilityTemplate Template, int iNumTurns)
 {
 	local X2AbilityCooldown AbilityCooldown;
@@ -501,7 +509,7 @@ static function AddCooldown(X2AbilityTemplate Template, int iNumTurns)
 	Template.AbilityCooldown = AbilityCooldown;
 }
 
-// Helper function for creating an X2AbilityCost_Ammo.
+// Helper function for adding an ammo cost to an ability.
 static function AddAmmoCost(X2AbilityTemplate Template, int iAmmo)
 {
 	local X2AbilityCost_Ammo AmmoCost;
@@ -510,6 +518,7 @@ static function AddAmmoCost(X2AbilityTemplate Template, int iAmmo)
 	Template.AbilityCosts.AddItem(AmmoCost);
 }
 
+// Helper function for giving an ability a limited number of charges.
 static function AddCharges(X2AbilityTemplate Template, int InitialCharges)
 {
 	local X2AbilityCharges Charges;
@@ -524,6 +533,8 @@ static function AddCharges(X2AbilityTemplate Template, int InitialCharges)
 	Template.AbilityCosts.AddItem(ChargeCost);
 }
 
+// Helper function for making an ability trigger whenever another unit moves in the unit's vision. 
+// This is usually used for overwatch-type abilities.
 static function AddMovementTrigger(X2AbilityTemplate Template)
 {
 	local X2AbilityTrigger_Event Trigger;
@@ -533,6 +544,8 @@ static function AddMovementTrigger(X2AbilityTemplate Template)
 	Template.AbilityTriggers.AddItem(Trigger);
 }
 
+// Helper function for making an ability trigger whenever another unit acts in the unit's vision. 
+// This is usually used for overwatch-type abilities.
 static function AddAttackTrigger(X2AbilityTemplate Template)
 {
 	local X2AbilityTrigger_Event Trigger;
@@ -542,6 +555,11 @@ static function AddAttackTrigger(X2AbilityTemplate Template)
 	Template.AbilityTriggers.AddItem(Trigger);
 }
 
+// Helper function for preventing an ability from applying to the same target too often. This works
+// by creating a dummy persistent effect that does nothing and expires after some number of turns,
+// and adding a condition that prevents the ability from affecting units with the dummy persistent
+// effect. One common use is to prevent overwatch-type abilities from triggering more than once
+// against the same target in a turn.
 static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iTurns = 1, optional name CooldownEffectName = '', optional GameRuleStateChange GameRule = eGameRule_PlayerTurnEnd)
 {
 	local X2Effect_Persistent PersistentEffect;
@@ -574,6 +592,11 @@ static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iT
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
 }
 
+// For abilities with an XMBAbilityTrigger_EventListener, such as abilities created by
+// SelfTargetTrigger, this adds an AbilityTargetCondition to the listener. Use this when you want
+// to add a restriction based on the ability that caused the trigger to fire, for example with an
+// AbilityActivated trigger. If you want to add a restriction on the unit the triggered ability
+// will apply to, use X2AbilityTemplate.AbilityTargetConditions instead.
 static function AddTriggerTargetCondition(X2AbilityTemplate Template, X2Condition Condition)
 {
 	local X2AbilityTrigger Trigger;
@@ -585,6 +608,9 @@ static function AddTriggerTargetCondition(X2AbilityTemplate Template, X2Conditio
 	}
 }
 
+// For abilities with an XMBAbilityTrigger_EventListener, such as abilities created by
+// SelfTargetTrigger, this adds an AbilityShooterCondition to the listener. In most cases you
+// should use X2AbilityTemplate.AbilityShooterConditions instead of this.
 static function AddTriggerShooterCondition(X2AbilityTemplate Template, X2Condition Condition)
 {
 	local X2AbilityTrigger Trigger;
@@ -596,6 +622,8 @@ static function AddTriggerShooterCondition(X2AbilityTemplate Template, X2Conditi
 	}
 }
 
+// Prevent an ability from targetting a unit that already has any of the effects the ability would
+// add. You should also set DuplicateResponse to eDupe_Ignore if you use this.
 static function PreventStackingEffects(X2AbilityTemplate Template)
 {
 	local X2Condition_UnitEffectsWithAbilitySource EffectsCondition;
@@ -612,6 +640,9 @@ static function PreventStackingEffects(X2AbilityTemplate Template)
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
 }
 
+// Adds a secondary ability that provides a passive icon for the ability. For use with triggered
+// abilities and other abilities that should have a passive icon but don't have a passive effect
+// to use with Passive.
 static function AddIconPassive(X2AbilityTemplate Template)
 {
 	local X2AbilityTemplate IconTemplate;
