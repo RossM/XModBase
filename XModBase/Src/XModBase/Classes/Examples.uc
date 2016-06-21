@@ -12,6 +12,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CloseCombatSpecialist());
 	Templates.AddItem(DamnGoodGround());
 	Templates.AddItem(DangerZone());
+	Templates.AddItem(DeepCover());
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
@@ -260,6 +261,47 @@ static function X2AbilityTemplate DangerZone()
 	Effect.fBonusRadius = 2;
 
 	return Passive('XMBExample_DangerZone', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
+static function X2AbilityTemplate DeepCover()
+{
+	local X2Effect_GrantActionPoints ActionPointEffect;
+	local X2Effect_ImmediateAbilityActivation HunkerDownEffect;
+	local X2AbilityTemplate Template;
+	local X2Condition_UnitEffects EffectsCondition;
+	local X2Condition_UnitValue ValueCondition;
+
+	// Create a triggered ability that runs at the end of the player's turn
+	Template = SelfTargetTrigger('XMBExample_DeepCover', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'PlayerTurnEnded', eFilter_Player);
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+	// Require not already hunkered down
+	EffectsCondition = new class'X2Condition_UnitEffects';
+	EffectsCondition.AddExcludeEffect('HunkerDown', 'AA_UnitIsImmune');
+	Template.AbilityTargetConditions.AddItem(EffectsCondition);
+
+	// Require no attacks made this turn
+	ValueCondition = new class'X2Condition_UnitValue';
+	ValueCondition.AddCheckValue('AttacksThisTurn', 1, eCheck_LessThan);
+	Template.AbilityTargetConditions.AddItem(ValueCondition);
+
+	// Hunkering requires an action point, so grant one if the unit is out of action points
+	ActionPointEffect = new class'X2Effect_GrantActionPoints';
+	ActionPointEffect.PointType = class'X2CharacterTemplateManager'.default.DeepCoverActionPoint;
+	ActionPointEffect.NumActionPoints = 1;
+	ActionPointEffect.bApplyOnlyWhenOut = true;
+	Template.AddShooterEffect(ActionPointEffect);
+
+	// Activate the Hunker Down ability
+	HunkerDownEffect = new class'X2Effect_ImmediateAbilityActivation';
+	HunkerDownEffect.EffectName = 'ImmediateHunkerDown';
+	HunkerDownEffect.AbilityName = 'HunkerDown';
+	HunkerDownEffect.BuildPersistentEffect(1, false, true, , eGameRule_PlayerTurnBegin);
+	Template.AddTargetEffect(HunkerDownEffect);
+
+	return Template;
 }
 
 // Perk name:		Hit and Run

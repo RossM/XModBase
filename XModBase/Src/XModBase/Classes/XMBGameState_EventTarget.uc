@@ -15,26 +15,18 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 
 	History = `XCOMHISTORY;
 
-	SourceUnit = XComGameState_Unit(EventSource);
-	if (SourceUnit == none)
-		return ELR_NoInterrupt;
-
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
-	if (AbilityContext == none)
-		return ELR_NoInterrupt;
 
 	AbilityState = XComGameState_Ability(EventData);
-	if (AbilityState == none)
+	if (AbilityState == none && AbilityContext != none)
 	{
 		AbilityState = XComGameState_Ability(GameState.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
 		if (AbilityState == none)
 			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
 	}
-	if (AbilityState == none)
-		return ELR_NoInterrupt;
 
 	TargetUnit = XComGameState_Unit(EventData);
-	if (TargetUnit == none)
+	if (TargetUnit == none && AbilityContext != none)
 	{
 		TargetUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
 	}
@@ -42,6 +34,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	foreach TriggeredAbilities(AbilityRef)
 	{
 		SourceAbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityRef.ObjectID));
+		SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(SourceAbilityState.OwnerStateObject.ObjectID));
 
 		foreach SourceAbilityState.GetMyTemplate().AbilityTriggers(Trigger)
 		{
