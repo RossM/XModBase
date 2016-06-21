@@ -596,6 +596,25 @@ static function X2AbilityTemplate SlamFire()
 	return Template;
 }
 
+// Perk name:		Sprint
+// Perk effect:		Gain a bonus move action.
+// Localized text:	"Gain a bonus move action."
+// Config:			(AbilityName="XMBExample_Sprint")
+static function X2AbilityTemplate Sprint()
+{
+	local X2Effect_GrantActionPoints Effect;
+	local X2AbilityTemplate Template;
+
+	Effect = new class'X2Effect_GrantActionPoints';
+	Effect.NumActionPoints = 1;
+	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
+
+	Template = SelfTargetActivated('XMBExample_Sprint', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_Free);
+	AddCooldown(Template, 3);
+
+	return Template;
+}
+
 // Perk name:		Weaponmaster
 // Perk effect:		Your primary weapon attacks deal +2 damage.
 // Localized text:	"Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
