@@ -1,3 +1,11 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBAbility.uc
+//  AUTHOR:  xylthixlm
+//
+//  This has examples of abilities you can create in XModBase. Some of them are from
+//  my other mods, some of them are recreations of vanilla abilities, and some are are
+//  new abilities that showcase what XModBase can do.
+//---------------------------------------------------------------------------------------
 class Examples extends XMBAbility;
 
 static function array<X2DataTemplate> CreateTemplates()
@@ -131,6 +139,7 @@ static function X2AbilityTemplate BullRush()
 	// alternate animation, FF_Melee, which is a generic melee attack that works with any weapon.
 	Template.CustomFireAnim = 'FF_Melee';
 
+	// Add a secondary ability that will reset the cooldown when the unit takes damage
 	Template.AdditionalAbilities.AddItem('XMBExample_BullRushTrigger');
 
 	return Template;
@@ -141,10 +150,12 @@ static function X2AbilityTemplate BullRushTrigger()
 {
 	local X2Effect_ReduceCooldowns Effect;
 
+	// Create an effect that completely resets the Bull Rush cooldown
 	Effect = new class'X2Effect_ReduceCooldowns';
 	Effect.AbilitiesToTick.AddItem('XMBExample_BullRush');
 	Effect.ReduceAll = true;
 
+	// Create a triggered ability that activates when the unit takes damage
 	return SelfTargetTrigger('XMBExample_BullRushTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'UnitTakeEffectDamage');
 }
 
@@ -263,6 +274,10 @@ static function X2AbilityTemplate DangerZone()
 	return Passive('XMBExample_DangerZone', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+// Perk name:		Deep Cover
+// Perk effect:		If you did not attack this turn, hunker down automatically.
+// Localized text:	"If you did not attack this turn, hunker down automatically."
+// Config:			(AbilityName="XMBExample_DeepCover")
 static function X2AbilityTemplate DeepCover()
 {
 	local X2Effect_GrantActionPoints ActionPointEffect;
@@ -320,7 +335,7 @@ static function X2AbilityTemplate HitAndRun()
 	Effect.NumActionPoints = 1;
 	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
 
-	// Create the template using a helper function. It will be triggered by the Hit and Run passive defined in HitAndRun();
+	// Create a triggered ability that will activate whenever the unit uses an ability that meets the condition
 	Template = SelfTargetTrigger('XMBExample_HitAndRun', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
@@ -339,6 +354,7 @@ static function X2AbilityTemplate HitAndRun()
 	NameCondition.ExcludeAbilityNames.AddItem('HunkerDown');
 	AddTriggerTargetCondition(Template, NameCondition);
 
+	// Show a flyover when Hit and Run is activated
 	Template.bShowActivation = true;
 
 	return Template;
@@ -364,7 +380,7 @@ static function X2AbilityTemplate InspireAgility()
 	// Add a visualization that plays a flyover over the target unit
 	Effect.VisualizationFn = EffectFlyOver_Visualization;
 
-	// Create the template using a helper function
+	// Create a targeted buff that affects allies
 	Template = TargetedBuff('XMBExample_InspireAgility', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Free);
 
 	// The ability starts out with a single charge
@@ -374,6 +390,7 @@ static function X2AbilityTemplate InspireAgility()
 	// ability adds. This helper function prevents targetting units that already have the effect.
 	PreventStackingEffects(Template);
 
+	// Add a secondary ability that will grant the bonus charges on kills
 	Template.AdditionalAbilities.AddItem('XMBExample_InspireAgilityTrigger');
 
 	return Template;
@@ -384,10 +401,12 @@ static function X2AbilityTemplate InspireAgilityTrigger()
 {
 	local XMBEffect_AddAbilityCharges Effect;
 
+	// Create an effect that will add a bonus charge to the Inspire Agility ability
 	Effect = new class'XMBEffect_AddAbilityCharges';
 	Effect.AbilityNames.AddItem('XMBExample_InspireAgility');
 	Effect.BonusCharges = 1;
 
+	// Create a triggered ability that activates when the unit gets a kill
 	return SelfTargetTrigger('XMBExample_InspireAgilityTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
 }
 
@@ -501,9 +520,11 @@ static function X2AbilityTemplate ReverseEngineering()
 	local X2AbilityTemplate Template;
 	local X2Condition_UnitProperty Condition;
 
+	// Create a permanent stat change effect that adds 5 to Hacking
 	Effect = new class'XMBEffect_PermanentStatChange';
 	Effect.AddStatChange(eStat_Hacking, 5);
 
+	// Create a triggered ability that activates whenever the unit gets a kill
 	Template = SelfTargetTrigger('XMBExample_ReverseEngineering', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
