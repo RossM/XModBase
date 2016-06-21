@@ -24,6 +24,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
+	Templates.AddItem(LightningHands());
 	Templates.AddItem(MovingTarget());
 	Templates.AddItem(PowerShot());
 	Templates.AddItem(PowerShotBonuses());
@@ -408,6 +409,24 @@ static function X2AbilityTemplate InspireAgilityTrigger()
 
 	// Create a triggered ability that activates when the unit gets a kill
 	return SelfTargetTrigger('XMBExample_InspireAgilityTrigger', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'KillMail');
+}
+
+// Perk name:		Lightning Hands
+// Perk effect:		Fire your pistol at a target. This attack does not cost an action.
+// Localized text:	"Fire your pistol at a target. This attack does not cost an action."
+// Config:			(AbilityName="XMBExample_LightningHands", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+static function X2AbilityTemplate LightningHands()
+{
+	local X2AbilityTemplate Template;
+
+	// Create a standard attack that doesn't cost an action.
+	Template = Attack('XMBExample_LightningHands', "img:///UILibrary_PerkIcons.UIPerk_command", false, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_Free, 1);
+
+	// Add a cooldown. The internal cooldown numbers include the turn the cooldown is applied, so
+	// this is actually a 3 turn cooldown.
+	AddCooldown(Template, 4);
+
+	return Template;
 }
 
 // Perk name:		Moving Target
