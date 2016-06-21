@@ -25,12 +25,14 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
 	Templates.AddItem(LightningHands());
+	Templates.AddItem(Magnum());
 	Templates.AddItem(MovingTarget());
 	Templates.AddItem(PowerShot());
 	Templates.AddItem(PowerShotBonuses());
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(ReverseEngineering());
 	Templates.AddItem(SlamFire());
+	Templates.AddItem(Sprint());
 	Templates.AddItem(Weaponmaster());
 
 	return Templates;
@@ -430,6 +432,25 @@ static function X2AbilityTemplate LightningHands()
 	AddCooldown(Template, 4);
 
 	return Template;
+}
+
+// Perk name:		Magnum
+// Perk effect:		Your pistol attacks get +10 Aim and deal +1 damage.
+// Localized text:	"Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
+// Config:			(AbilityName="XMBExample_Magnum", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
+static function X2AbilityTemplate Magnum()
+{
+	local XMBEffect_ConditionalBonus Effect;
+
+	// Create an effect that adds +10 to hit and +1 damage
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.AddDamageModifier(1);
+	Effect.AddToHitModifier(10);
+
+	// Restrict to the weapon matching this ability
+	Effect.OtherConditions.AddItem(default.MatchingWeaponCondition);
+
+	return Passive('XMBExample_Magnum', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 }
 
 // Perk name:		Moving Target
