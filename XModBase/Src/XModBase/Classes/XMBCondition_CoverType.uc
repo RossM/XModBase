@@ -19,7 +19,7 @@
 //  The following examples in Examples.uc use this class:
 //
 //  AbsolutelyCritical
-//	Assassin
+//  Assassin
 //
 //  INSTALLATION
 //

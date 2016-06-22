@@ -5,7 +5,7 @@
 //  A condition that requires that the target of an ability is dead. This is useful for
 //  checks that happen after the ability has resolved, for example for checking whether
 //  the ability killed the target in XMBEffect_AbilityCostRefund or 
-//  XMBEffect_AbilityTriggered.
+//  XMBAbilityTrigger_EventListener.
 //
 //  USAGE
 //

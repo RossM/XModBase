@@ -1,3 +1,24 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBEffect_PermanentStatChange.uc
+//  AUTHOR:  xylthixlm
+//
+//  An effect which permanently changes a unit's base stats.
+//
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  ReverseEngineering
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBEffect_PermanentStatChange extends X2Effect;
 
 var array<StatChange> StatChanges;

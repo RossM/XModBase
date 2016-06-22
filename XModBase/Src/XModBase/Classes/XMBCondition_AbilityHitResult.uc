@@ -2,6 +2,10 @@
 //  FILE:    XMBCondition_AbilityHitResult.uc
 //  AUTHOR:  xylthixlm
 //
+//  A condition that checks the hit result of the ability. This can be used with 
+//  persistent effects such as XMBEffect_AbilityCostRefund or 
+//  XMBAbilityTrigger_EventListener.
+//
 //  USAGE
 //
 //  XMBAbility provides default instances of this class for common cases:

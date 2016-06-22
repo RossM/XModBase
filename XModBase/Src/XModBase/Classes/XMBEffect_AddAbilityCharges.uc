@@ -1,3 +1,24 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBEffect_AddAbilityCharges.uc
+//  AUTHOR:  xylthixlm
+//
+//  An effect which adds additional charges to a limited-use ability.
+//
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  InspireAgility
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBEffect_AddAbilityCharges extends X2Effect;
 
 var Array<name> AbilityNames;				// List of ability template names that will have charges added

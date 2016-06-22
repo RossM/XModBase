@@ -6,6 +6,10 @@
 //
 //  USAGE
 //
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

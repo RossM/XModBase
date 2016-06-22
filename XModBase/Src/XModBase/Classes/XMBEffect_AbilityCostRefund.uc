@@ -10,8 +10,8 @@
 //
 //  The following examples in Examples.uc use this class:
 //
-//  SlamFire
 //  CloseAndPersonal
+//  SlamFire
 //
 //  INSTALLATION
 //

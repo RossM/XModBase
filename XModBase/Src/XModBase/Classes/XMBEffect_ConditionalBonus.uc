@@ -14,11 +14,12 @@
 //
 //  The following examples in Examples.uc use this class:
 //
-//  Weaponmaster
 //  AbsolutelyCritical
 //  DamnGoodGround
+//  Magnum
 //  MovingTarget
 //  PowerShot
+//  Weaponmaster
 //
 //  INSTALLATION
 //
