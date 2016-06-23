@@ -2155,6 +2155,9 @@
     <Content Include="Src\XModBase\Classes\Examples.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBEffect_DoNotConsumeAllPoints.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBAbility.uc">
       <SubType>Content</SubType>
     </Content>

@@ -14,6 +14,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(AbsolutelyCritical());
 	Templates.AddItem(Assassin());
+	Templates.AddItem(BulletSwarm());
 	Templates.AddItem(BullRush());
 	Templates.AddItem(BullRushTrigger());
 	Templates.AddItem(CloseAndPersonal());
@@ -98,6 +99,20 @@ static function X2AbilityTemplate Assassin()
 	Template.ActivationSpeech = 'ActivateConcealment';
 
 	return Template;
+}
+
+// Perk name:		Bullet Swarm
+// Perk effect:		Firing your primary weapon as your first action no longer ends your turn.
+// Localized text:	Firing your <Ability:WeaponName/> as your first action no longer ends your turn.
+// Config:			(AbilityName="XMBExample_BulletSwarm", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
+static function X2AbilityTemplate BulletSwarm()
+{
+	local XMBEffect_DoNotConsumeAllPoints Effect;
+
+	Effect = new class'XMBEffect_DoNotConsumeAllPoints';
+	Effect.AbilityNames.AddItem('StandardShot');
+
+	return Passive('XMBExample_BulletSwarm', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 }
 
 // Perk name:		Bull Rush

@@ -256,6 +256,8 @@ static function UpdateAbilities()
 			{
 				Template.ShotHUDPriority = FindShotHUDPriority(Template.DataName);
 			}
+
+			HandleAbilityEffects(Template);
 		}
 	}
 }
@@ -297,6 +299,79 @@ static function int FindShotHUDPriority(name AbilityName)
 	case 5:		return class'UIUtilities_Tactical'.const.CLASS_MAJOR_PRIORITY;
 	case 6:		return class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY;
 	default:	return class'UIUtilities_Tactical'.const.UNSPECIFIED_PRIORITY;
+	}
+}
+
+static function HandleAbilityEffects(X2AbilityTemplate Template)
+{
+	local X2Effect Effect;
+
+	foreach Template.AbilityTargetEffects(Effect)
+	{
+		HandleEffect(Effect);
+	}
+
+	foreach Template.AbilityMultiTargetEffects(Effect)
+	{
+		HandleEffect(Effect);
+	}
+
+	foreach Template.AbilityShooterEffects(Effect)
+	{
+		HandleEffect(Effect);
+	}
+}
+
+static function HandleEffect(X2Effect Effect)
+{
+	local XMBEffectInterface DoNotConsumeAllEffect;
+	local LWTuple Tuple;
+	local LWTValue Value;
+	local name AbilityName, EffectName;
+	local X2AbilityTemplate AbilityTemplate;
+	local X2AbilityTemplateManager AbilityMgr;
+	local X2AbilityCost_ActionPoints ActionPointCost;
+	local int i;
+
+	DoNotConsumeAllEffect = XMBEffectInterface(Effect);
+	if (DoNotConsumeAllEffect == none)
+		return;
+
+	Tuple = new class'LWTuple';
+	Tuple.Id = 'DoNotConsumeAllPoints';
+
+	if (DoNotConsumeAllEffect.GetExtValue(Tuple))
+	{
+		if (X2Effect_Persistent(Effect) == none)
+			return;
+
+		AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+		EffectName = X2Effect_Persistent(Effect).EffectName;
+
+		foreach Tuple.Data(Value)
+		{
+			AbilityName = Value.n;
+			AbilityTemplate = AbilityMgr.FindAbilityTemplate(AbilityName);
+			if (AbilityTemplate == none)
+			{
+				`Log(EffectName $ ": Could not find ability template '" $ AbilityName $ "'");
+				continue;
+			}
+
+			for (i = 0; i < AbilityTemplate.AbilityCosts.Length; i++)
+			{
+				ActionPointCost = X2AbilityCost_ActionPoints(AbilityTemplate.AbilityCosts[i]);
+				if (ActionPointCost != none && ActionPointCost.DoNotConsumeAllEffects.Find(EffectName) == INDEX_NONE)
+				{
+					// Action point costs may be shared between effects. We don't want to accidentally modify a shared
+					// object, so make a copy.
+					ActionPointCost = new ActionPointCost.class(ActionPointCost);
+					AbilityTemplate.AbilityCosts[i] = ActionPointCost;
+					
+					ActionPointCost.DoNotConsumeAllEffects.AddItem(EffectName);
+				}
+			}
+		}
 	}
 }
 
