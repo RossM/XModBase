@@ -23,6 +23,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(DamnGoodGround());
 	Templates.AddItem(DangerZone());
 	Templates.AddItem(DeepCover());
+	Templates.AddItem(EspritDeCorps());
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
@@ -368,6 +369,30 @@ static function X2AbilityTemplate DeepCover()
 	HunkerDownEffect.AbilityName = 'HunkerDown';
 	HunkerDownEffect.BuildPersistentEffect(1, false, true, , eGameRule_PlayerTurnBegin);
 	Template.AddTargetEffect(HunkerDownEffect);
+
+	return Template;
+}
+
+static function X2AbilityTemplate EspritDeCorps()
+{
+	local X2Effect_PersistentStatChange Effect;
+	local X2AbilityTemplate Template;
+
+	Template = Passive('XMBExample_EspritDeCorps', "img:///UILibrary_PerkIcons.UIPerk_command", true);
+
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'EspritDeCorps';
+
+	Effect.AddPersistentStatChange(eStat_Will, 5);
+	Effect.AddPersistentStatChange(eStat_Defense, 5);
+
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true, , Template.AbilitySourceName);
+
+	// Set the template to affect all allied units
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+
+	// Add the effect
+	Template.AddMultiTargetEffect(Effect);
 
 	return Template;
 }

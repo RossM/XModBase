@@ -63,6 +63,12 @@ LocFlyOverText="Deep Cover"
 LocHelpText="If you did not attack this turn, hunker down automatically."
 LocLongDescription="If you did not attack this turn, hunker down automatically."
 
+[XMBExample_EspritDeCorps X2AbilityTemplate]
+LocFriendlyName="Esprit de Corps"
+LocFlyOverText="Esprit de Corps"
+LocHelpText="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
+LocLongDescription="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
+
 [XMBExample_HitAndRun X2AbilityTemplate]
 LocFriendlyName="Hit and Run"
 LocFlyOverText="Hit and Run"
