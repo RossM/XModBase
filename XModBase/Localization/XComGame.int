@@ -96,8 +96,14 @@ LocLongDescription="You get an additional +<Ability:Defense/> Defense and +<Abil
 [XMBExample_PowerShot X2AbilityTemplate]
 LocFriendlyName="Power Shot"
 LocFlyOverText="Power Shot"
-LocHelpText="Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
-LocLongDescription="Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
+LocHelpText="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocLongDescription="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+
+[XMBExample_PowerShotBonuses X2AbilityTemplate]
+LocFriendlyName="Power Shot"
+LocFlyOverText="Power Shot"
+LocHelpText="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocLongDescription="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
 
 [XMBExample_Pyromaniac X2AbilityTemplate]
 LocFriendlyName="Pyromaniac"

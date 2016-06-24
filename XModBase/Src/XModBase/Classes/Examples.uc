@@ -527,7 +527,7 @@ static function X2AbilityTemplate MovingTarget()
 
 // Perk name:		Power Shot
 // Perk effect:		Make an attack that has +20 crit chance and deals +3/4/5 damage on crit.
-// Localized text:	"Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
+// Localized text:	"Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
 // Config:			(AbilityName="XMBExample_PowerShot", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate PowerShot()
 {

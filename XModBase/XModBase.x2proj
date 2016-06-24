@@ -26,6 +26,9 @@
     <Folder Include="Src\XModBase_Interfaces\Classes" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\XComGameData.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Localization\XComGame.int">
       <SubType>Content</SubType>
     </Content>
