@@ -13,6 +13,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	Templates.AddItem(AbsolutelyCritical());
+	Templates.AddItem(AdrenalineSurge());
 	Templates.AddItem(Assassin());
 	Templates.AddItem(BulletSwarm());
 	Templates.AddItem(BullRush());
@@ -58,6 +59,40 @@ static function X2AbilityTemplate AbsolutelyCritical()
 
 	// Create the template using a helper function
 	return Passive('XMBExample_AbsolutelyCritical', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
+static function X2AbilityTemplate AdrenalineSurge()
+{
+	local X2Effect_PersistentStatChange Effect;
+	local X2AbilityTemplate Template;
+	local X2AbilityMultiTarget_Radius RadiusMultiTarget;
+
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'AdrenalineSurge';
+	Effect.DuplicateResponse = eDupe_Refresh;
+
+	Effect.AddPersistentStatChange(eStat_Mobility, 3);
+	Effect.AddPersistentStatChange(eStat_CritChance, 10);
+
+	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
+
+	Effect.TargetConditions.AddItem(default.LivingFriendlyTargetProperty);
+
+	Effect.VisualizationFn = EffectFlyOver_Visualization;
+
+	Template = SelfTargetTrigger('XMBExample_AdrenalineSurge', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, 'KillMail');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
+	RadiusMultiTarget.fTargetRadius = 12;
+	RadiusMultiTarget.bIgnoreBlockingCover = true;
+	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
+
+	Template.AddMultiTargetEffect(Effect);
+
+	return Template;
 }
 
 // Perk name:		Assassin

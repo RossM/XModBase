@@ -577,6 +577,7 @@ static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iT
 	PersistentEffect.bApplyOnHit = true;
 	PersistentEffect.bApplyOnMiss = true;
 	Template.AddTargetEffect(PersistentEffect);
+	Template.AddMultiTargetEffect(PersistentEffect);
 
 	// Create a condition that checks for the presence of a certain effect. There are three
 	// similar classes that do this: X2Condition_UnitEffects,
@@ -590,6 +591,7 @@ static function AddPerTargetCooldown(X2AbilityTemplate Template, optional int iT
 	EffectsCondition = new class'X2Condition_UnitEffectsWithAbilitySource';
 	EffectsCondition.AddExcludeEffect(CooldownEffectName, 'AA_UnitIsImmune');
 	Template.AbilityTargetConditions.AddItem(EffectsCondition);
+	Template.AbilityMultiTargetConditions.AddItem(EffectsCondition);
 }
 
 // For abilities with an XMBAbilityTrigger_EventListener, such as abilities created by

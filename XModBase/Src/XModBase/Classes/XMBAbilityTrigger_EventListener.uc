@@ -16,6 +16,7 @@
 //
 //  The following examples in Examples.uc use this class:
 //
+//  AdrenalineSurge
 //  Assassin
 //  BullRush
 //  DeepCover
