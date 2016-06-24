@@ -655,6 +655,9 @@ static function AddIconPassive(X2AbilityTemplate Template)
 	IconTemplate.LocLongDescription = Template.LocLongDescription;
 	IconTemplate.LocFlyOverText = Template.LocFlyOverText;
 
+	X2Effect_Persistent(IconTemplate.AbilityTargetEffects[0]).FriendlyName = Template.LocFriendlyName;
+	X2Effect_Persistent(IconTemplate.AbilityTargetEffects[0]).FriendlyDescription = Template.LocLongDescription;
+
 	Template.AdditionalAbilities.AddItem(IconTemplate.DataName);
 
 	class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().AddAbilityTemplate(IconTemplate);

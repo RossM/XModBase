@@ -75,6 +75,12 @@ event ExpandHandler(string InString, out string OutString)
 	{
 		AbilityTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(name(Split[1]));
 	}
+	else if (AbilityTemplate != none && Right(AbilityTemplate.DataName, 5) ~= "_Icon")
+	{
+		// If the template name ends with "_Icon", it was added by AddIconPassive(). Use the
+		// primary ability template instead.
+		AbilityTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate(name(Left(AbilityTemplate.DataName, Len(AbilityTemplate.DataName) - 5)));
+	}
 
 	// Check for handling by XMBEffectInterface::GetTagValue.
 	if (AbilityTemplate != none)

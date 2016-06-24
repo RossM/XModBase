@@ -1,0 +1,130 @@
+;---------------------------------------------------------------------------------------
+;  FILE:    XComGame.int
+;  AUTHOR:  xylthixlm
+;---------------------------------------------------------------------------------------
+
+[XMBExample_AbsolutelyCritical X2AbilityTemplate]
+LocFriendlyName="Absolutely Critical"
+LocFlyOverText="Absolutely Critical"
+LocHelpText="You get an additional +<Ability:Crit> Crit chance against flanked targets."
+LocLongDescription="You get an additional +<Ability:Crit> Crit chance against flanked targets."
+
+[XMBExample_AdrenalineSurge X2AbilityTemplate]
+LocFriendlyName="Adrenaline Surge"
+LocFlyOverText="Adrenaline Surge"
+LocHelpText="When you get a kill, you and nearby friendly units get +<Ability:Crit/> Crit chance and +<Ability:Mobility/> Mobility until the end of your turn."
+LocLongDescription="When you get a kill, you and nearby friendly units get +<Ability:Crit/> Crit chance and +<Ability:Mobility/> Mobility until the end of your turn."
+
+[XMBExample_Assassin X2AbilityTemplate]
+LocFriendlyName="Assassin"
+LocFlyOverText="Assassin"
+LocHelpText="When you kill a flanked or uncovered enemy with your <Ability:WeaponName/>, you gain concealment."
+LocLongDescription="When you kill a flanked or uncovered enemy with your <Ability:WeaponName/>, you gain concealment."
+
+[XMBExample_BulletSwarm X2AbilityTemplate]
+LocFriendlyName="Bullet Swarm"
+LocFlyOverText="Bullet Swarm"
+LocHelpText="Firing your <Ability:WeaponName/> as your first action no longer ends your turn."
+LocLongDescription="Firing your <Ability:WeaponName/> as your first action no longer ends your turn."
+
+[XMBExample_BullRush X2AbilityTemplate]
+LocFriendlyName="Bull Rush"
+LocFlyOverText="Bull Rush"
+LocHelpText="Make an unarmed melee attack that stuns the target. Whenever you take damage, this ability's cooldown resets."
+LocLongDescription="Make an unarmed melee attack that stuns the target. Whenever you take damage, this ability's cooldown resets."
+
+[XMBExample_CloseAndPersonal X2AbilityTemplate]
+LocFriendlyName="Close and Personal"
+LocFlyOverText="Close and Personal"
+LocHelpText="The first standard shot made within 4 tiles of the target does not cost an action."
+LocLongDescription="The first standard shot made within 4 tiles of the target does not cost an action."
+
+[XMBExample_CloseCombatSpecialist X2AbilityTemplate]
+LocFriendlyName="Close Combat Specialist"
+LocFlyOverText="Close Combat Specialist"
+LocHelpText="Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch."
+LocLongDescription="Confers a reaction shot against any enemy who closes to within 4 tiles. Does not require Overwatch."
+
+[XMBExample_DamnGoodGround X2AbilityTemplate]
+LocFriendlyName="Damn Good Ground"
+LocFlyOverText="Damn Good Ground"
+LocHelpText="You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
+LocLongDescription="You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
+
+[XMBExample_DangerZone X2AbilityTemplate]
+LocFriendlyName="Danger Zone"
+LocFlyOverText="Danger Zone"
+LocHelpText="The radius of all your grenades is increased by 2."
+LocLongDescription="The radius of all your grenades is increased by 2."
+
+[XMBExample_DeepCover X2AbilityTemplate]
+LocFriendlyName="Deep Cover"
+LocFlyOverText="Deep Cover"
+LocHelpText="If you did not attack this turn, hunker down automatically."
+LocLongDescription="If you did not attack this turn, hunker down automatically."
+
+[XMBExample_HitAndRun X2AbilityTemplate]
+LocFriendlyName="Hit and Run"
+LocFlyOverText="Hit and Run"
+LocHelpText="Move after taking a single action that would normally end your turn."
+LocLongDescription="Move after taking a single action that would normally end your turn."
+
+[XMBExample_InspireAgility X2AbilityTemplate]
+LocFriendlyName="Inspire Agility"
+LocFlyOverText="Inspire Agility"
+LocHelpText="Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+LocLongDescription="Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+
+[XMBExample_LightningHands X2AbilityTemplate]
+LocFriendlyName="Lightning Hands"
+LocFlyOverText="Lightning Hands"
+LocHelpText="Fire your pistol at a target. This attack does not cost an action."
+LocLongDescription="Fire your pistol at a target. This attack does not cost an action."
+
+[XMBExample_Magnum X2AbilityTemplate]
+LocFriendlyName="Magnum"
+LocFlyOverText="Magnum"
+LocHelpText="Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
+LocLongDescription="Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
+
+[XMBExample_MovingTarget X2AbilityTemplate]
+LocFriendlyName="Moving Target"
+LocFlyOverText="Moving Target"
+LocHelpText="You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
+LocLongDescription="You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
+
+[XMBExample_PowerShot X2AbilityTemplate]
+LocFriendlyName="Power Shot"
+LocFlyOverText="Power Shot"
+LocHelpText="Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
+LocLongDescription="Make an attack that has +<Ability:Crit:PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:PowerShotBonuses/> damage on crit."
+
+[XMBExample_Pyromaniac X2AbilityTemplate]
+LocFriendlyName="Pyromaniac"
+LocFlyOverText="Pyromaniac"
+LocHelpText="Your fire attacks deal +1 damage, and your burn effects deal +1 damage per turn. You get a free incendiary grenade on each mission."
+LocLongDescription="Your fire attacks deal +1 damage, and your burn effects deal +1 damage per turn. You get a free incendiary grenade on each mission."
+
+[XMBExample_ReverseEngineering X2AbilityTemplate]
+LocFriendlyName="Reverse Engineering"
+LocFlyOverText="Reverse Engineering"
+LocHelpText="When you kill an enemy robotic unit you gain a permanent Hacking increase of <Ability:Hacking/>."
+LocLongDescription="When you kill an enemy robotic unit you gain a permanent Hacking increase of <Ability:Hacking/>."
+
+[XMBExample_SlamFire X2AbilityTemplate]
+LocFriendlyName="Slam Fire"
+LocFlyOverText="Slam Fire"
+LocHelpText="For the rest of the turn, whenever you get a critical hit with your <Ability:WeaponName/>, your actions are refunded."
+LocLongDescription="For the rest of the turn, whenever you get a critical hit with your <Ability:WeaponName/>, your actions are refunded."
+
+[XMBExample_Sprint X2AbilityTemplate]
+LocFriendlyName="Sprint"
+LocFlyOverText="Sprint"
+LocHelpText="Gain a bonus move action."
+LocLongDescription="Gain a bonus move action."
+
+[XMBExample_Weaponmaster X2AbilityTemplate]
+LocFriendlyName="Weaponmaster"
+LocFlyOverText="Weaponmaster"
+LocHelpText="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
+LocLongDescription="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
