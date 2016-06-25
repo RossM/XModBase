@@ -302,3 +302,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.XCOM_suo
+
+XComGame*/
