@@ -19,7 +19,7 @@
 //
 //  None.
 //---------------------------------------------------------------------------------------
-class XMBEffect_PermanentStatChange extends X2Effect;
+class XMBEffect_PermanentStatChange extends X2Effect implements(XMBEffectInterface);
 
 var array<StatChange> StatChanges;
 
