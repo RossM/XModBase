@@ -123,6 +123,12 @@ LocFlyOverText="Reverse Engineering"
 LocHelpText="When you kill an enemy robotic unit you gain a permanent Hacking increase of <Ability:Hacking/>."
 LocLongDescription="When you kill an enemy robotic unit you gain a permanent Hacking increase of <Ability:Hacking/>."
 
+[XMBExample_Rocketeer X2AbilityTemplate]
+LocFriendlyName="Rocketeer"
+LocFlyOverText="Rocketeer"
+LocHelpText="Your equipped heavy weapon gets an additional use."
+LocLongDescription="Your equipped heavy weapon gets an additional use."
+
 [XMBExample_SlamFire X2AbilityTemplate]
 LocFriendlyName="Slam Fire"
 LocFlyOverText="Slam Fire"

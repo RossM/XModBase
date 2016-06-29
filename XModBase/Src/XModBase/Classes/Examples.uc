@@ -34,6 +34,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PowerShotBonuses());
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(ReverseEngineering());
+	Templates.AddItem(Rocketeer());
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(Sprint());
 	Templates.AddItem(Weaponmaster());
@@ -655,6 +656,26 @@ static function X2AbilityTemplate ReverseEngineering()
 	Condition.ExcludeFriendlyToSource = true;
 	Condition.ExcludeHostileToSource = false;
 	AddTriggerTargetCondition(Template, Condition);
+
+	return Template;
+}
+
+static function X2AbilityTemplate Rocketeer()
+{
+	local XMBEffect_AddItemChargesBySlot Effect;
+	local X2AbilityTemplate Template;
+
+	// Create an effect that adds a charge to the equipped heavy weapon
+	Effect = new class'XMBEffect_AddItemChargesBySlot';
+	Effect.ApplyToSlots.AddItem(eInvSlot_HeavyWeapon);
+	Effect.PerItemBonus = 1;
+
+	// The effect isn't an X2Effect_Persistent, so we can't use it as the effect for Passive(). Let
+	// Passive() create its own effect.
+	Template = Passive('XMBExample_Rocketeer', "img:///UILibrary_PerkIcons.UIPerk_command", true);
+
+	// Add the XMBEffect_AddItemChargesBySlot as an extra effect.
+	Template.AddTargetEffect(Effect);
 
 	return Template;
 }
