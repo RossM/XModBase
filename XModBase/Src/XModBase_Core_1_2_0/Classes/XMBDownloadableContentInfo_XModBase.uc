@@ -152,14 +152,14 @@ static function bool UpdateAbilityToHitCalc(out X2AbilityToHitCalc ToHitCalc)
 static function bool UpdateAbilityMultiTarget(out X2AbilityMultiTargetStyle MultiTarget)
 {
 	local XMBOverrideInterface Override;
-	local XMBAbilityMultiTarget_SoldierBonusRadius NewMultiTarget;
+	local XMBAbilityMultiTarget_Radius NewMultiTarget;
 
 	Override = XMBOverrideInterface(MultiTarget);
 
 	if (Override != none)
 	{
 		// If the current hit calc isn't overriding the correct class, don't change it
-		if (Override.GetOverrideBaseClass() != class'X2AbilityMultiTarget_SoldierBonusRadius')
+		if (Override.GetOverrideBaseClass() != class'X2AbilityMultiTarget_Radius')
 			return false;
 
 		// If the current hit calc is a newer version, don't change it
@@ -168,11 +168,11 @@ static function bool UpdateAbilityMultiTarget(out X2AbilityMultiTargetStyle Mult
 	}
 	else
 	{
-		if (MultiTarget.Class != class'X2AbilityMultiTarget_SoldierBonusRadius')
+		if (MultiTarget.Class != class'X2AbilityMultiTarget_Radius')
 			return false;
 	}
 
-	NewMultiTarget = new class'XMBAbilityMultiTarget_SoldierBonusRadius'(MultiTarget);
+	NewMultiTarget = new class'XMBAbilityMultiTarget_Radius'(MultiTarget);
 	NewMultiTarget.MajorVersion = default.MajorVersion;
 	NewMultiTarget.MinorVersion = default.MinorVersion;
 	NewMultiTarget.PatchVersion = default.PatchVersion;

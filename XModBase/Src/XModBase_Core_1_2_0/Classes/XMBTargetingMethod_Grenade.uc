@@ -20,7 +20,7 @@ class XMBTargetingMethod_Grenade extends X2TargetingMethod_Grenade implements(XM
 var const int MajorVersion, MinorVersion, PatchVersion;
 
 // This is necessary to get grenade-radius-modifying abilities to work, by giving the terrible
-// hack in XMBAbilityMultiTarget_SoldierBonusRadius a chance to do its thing before the
+// hack in XMBAbilityMultiTarget_Radius a chance to do its thing before the
 // target tiles are calculated. Most of the important bits of code are native so this is the
 // best I can do.
 function Update(float DeltaTime)

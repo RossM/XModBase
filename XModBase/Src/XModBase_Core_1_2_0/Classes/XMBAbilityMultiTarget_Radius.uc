@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    XMBAbilityMultiTarget_SoldierBonusRadius.uc
+//  FILE:    XMBAbilityMultiTarget_Radius.uc
 //  AUTHOR:  xylthixlm
 //
 //  This file contains internal implementation of XModBase. You don't need to, and
@@ -14,7 +14,7 @@
 //  you change this file, your mod will become incompatible with any other mod using
 //  XModBase.
 //---------------------------------------------------------------------------------------
-class XMBAbilityMultiTarget_SoldierBonusRadius extends X2AbilityMultiTarget_SoldierBonusRadius
+class XMBAbilityMultiTarget_Radius extends X2AbilityMultiTarget_Radius
 	implements(XMBOverrideInterface);
 
 // XModBase version
@@ -85,7 +85,7 @@ simulated function float GetTargetRadius(const XComGameState_Ability Ability)
 
 function class GetOverrideBaseClass() 
 { 
-	return class'X2AbilityMultiTarget_SoldierBonusRadius';
+	return class'X2AbilityMultiTarget_Radius';
 }
 
 function GetOverrideVersion(out int Major, out int Minor, out int Patch)
