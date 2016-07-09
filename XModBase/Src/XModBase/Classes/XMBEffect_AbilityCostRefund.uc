@@ -20,7 +20,7 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 class XMBEffect_AbilityCostRefund extends X2Effect_Persistent config(GameData_SoldierSkills);
 

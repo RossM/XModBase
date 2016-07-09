@@ -21,7 +21,7 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 class XMBEffect_ToHitModifierByRange extends X2Effect_Persistent;
 

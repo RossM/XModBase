@@ -30,6 +30,7 @@
 //
 //  Core
 //  XMBEffect_Extended.uc
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 
 class XMBEffect_ConditionalBonus extends XMBEffect_Extended;
