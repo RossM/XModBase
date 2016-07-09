@@ -69,6 +69,12 @@ LocFlyOverText="Esprit de Corps"
 LocHelpText="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
 LocLongDescription="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
 
+[XMBExample_Focus X2AbilityTemplate]
+LocFriendlyName="Focus"
+LocFlyOverText="Focus"
+LocHelpText="Your first reaction shot each turn always hits."
+LocLongDescription="Your first reaction shot each turn always hits."
+
 [XMBExample_HitAndRun X2AbilityTemplate]
 LocFriendlyName="Hit and Run"
 LocFlyOverText="Hit and Run"

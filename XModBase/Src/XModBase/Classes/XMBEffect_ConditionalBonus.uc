@@ -141,74 +141,31 @@ function AddArmorPiercingModifier(int Value, optional EAbilityHitResult ModType 
 // Checks that an attack meets all the conditions of this effect.
 function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
 {
-	local X2Condition kCondition;
-	local XComGameState_Item SourceWeapon;
-	local StateObjectReference ItemRef;
 	local name AvailableCode;
 		
 	if (!bAsTarget)
 	{
 		// Attack by the unit with the effect - check target conditions
-		foreach OtherConditions(kCondition)
-		{
-			// Check that the attack is using the correct weapon if required
-			if (kCondition.IsA('XMBCondition_MatchingWeapon'))
-			{
-				SourceWeapon = AbilityState.GetSourceWeapon();
-				if (SourceWeapon == none)
-					return 'AA_UnknownError';
-
-				ItemRef = EffectState.ApplyEffectParameters.ItemStateObjectRef;
-				if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
-					return 'AA_UnknownError';
-			}
-
-			AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-
-			AvailableCode = kCondition.MeetsCondition(Target);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
+		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(OtherConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
 		
-			AvailableCode = kCondition.MeetsConditionWithSource(Target, Attacker);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-		}
-
 		// Attack by the unit with the effect - check shooter conditions
-		foreach SelfConditions(kCondition)
-		{
-			AvailableCode = kCondition.MeetsCondition(Attacker);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-		}
+		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(SelfConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
 	}
 	else
 	{
 		// Attack against the unit with the effect - check target conditions
-		foreach SelfConditions(kCondition)
-		{
-			AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-
-			AvailableCode = kCondition.MeetsCondition(Target);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-		
-			AvailableCode = kCondition.MeetsConditionWithSource(Target, Attacker);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-		}
+		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(SelfConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
 
 		// Attack against the unit with the effect - check shooter conditions
-		foreach TargetConditions(kCondition)
-		{
-			AvailableCode = kCondition.MeetsCondition(Attacker);
-			if (AvailableCode != 'AA_Success')
-				return AvailableCode;
-		}
+		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(OtherConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
 	}
 
 	return 'AA_Success';

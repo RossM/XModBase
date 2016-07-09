@@ -47,19 +47,20 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 	if (AbilityContext == none)
-		return 'AA_ValueCheckFailed';
+		return 'AA_MissingRequiredContext';  // NOTE: Nonstandard AA code
 
 	HitResult = AbilityContext.ResultContext.HitResult;
 
 	if (IncludeHitResults.Length > 0 && IncludeHitResults.Find(HitResult) == INDEX_NONE)
-		return 'AA_ValueCheckFailed';
+		return 'AA_HitResultFailure';
 	if (ExcludeHitResults.Length > 0 && ExcludeHitResults.Find(HitResult) != INDEX_NONE)
-		return 'AA_ValueCheckFailed';
+		return 'AA_HitResultFailure';
 
 	if (bRequireHit && !class'XComGameStateContext_Ability'.static.IsHitResultHit(HitResult))
-		return 'AA_ValueCheckFailed';
+		return 'AA_HitResultFailure';
 	if (bRequireMiss && !class'XComGameStateContext_Ability'.static.IsHitResultMiss(HitResult))
-		return 'AA_ValueCheckFailed';
+		return 'AA_HitResultFailure';
+
 
 	return 'AA_Success';
 }

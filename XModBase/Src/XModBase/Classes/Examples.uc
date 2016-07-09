@@ -24,6 +24,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(DangerZone());
 	Templates.AddItem(DeepCover());
 	Templates.AddItem(EspritDeCorps());
+	Templates.AddItem(Focus());
+	Templates.AddItem(FocusCount());
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(InspireAgilityTrigger());
@@ -394,6 +396,46 @@ static function X2AbilityTemplate EspritDeCorps()
 
 	// Add the effect
 	Template.AddMultiTargetEffect(Effect);
+
+	return Template;
+}
+
+static function X2AbilityTemplate Focus()
+{
+	local XMBEffect_ChangeHitResultForAttacker Effect;
+	local X2Condition_UnitValue UnitValueCondition;
+	local X2AbilityTemplate Template;
+
+	UnitValueCondition = new class'X2Condition_UnitValue';
+	UnitValueCondition.AddCheckValue('ReactionFireAttacks', 1, eCheck_LessThan);
+
+	Effect = new class'XMBEffect_ChangeHitResultForAttacker';
+	Effect.EffectName = 'Focus';
+	Effect.AbilityTargetConditions.AddItem(default.ReactionFireCondition);
+	Effect.AbilityShooterConditions.AddItem(UnitValueCondition);
+	Effect.bRequireMiss = true;
+	Effect.NewResult = eHit_Success;
+
+	Template = Passive('XMBExample_Focus', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+
+	Template.AdditionalAbilities.AddItem('XMBExample_FocusCount');
+
+	return Template;
+}
+
+static function X2AbilityTemplate FocusCount()
+{
+	local X2Effect_IncrementUnitValue Effect;
+	local X2AbilityTemplate Template;
+
+	Effect = new class'X2Effect_IncrementUnitValue';
+	Effect.UnitName = 'ReactionFireAttacks';
+	Effect.NewValueToSet = 1;
+	Effect.CleanupType = eCleanup_BeginTurn;
+
+	Template = SelfTargetTrigger('XMBExample_FocusCount', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated', eFilter_Unit);
+
+	AddTriggerTargetCondition(Template, default.ReactionFireCondition);
 
 	return Template;
 }

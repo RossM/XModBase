@@ -47,6 +47,9 @@
     <Content Include="Src\XModBase\Classes\XMBEffectUtilities.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBEffect_ChangeHitResultForAttacker.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBEffect_DoNotConsumeAllPoints.uc">
       <SubType>Content</SubType>
     </Content>
