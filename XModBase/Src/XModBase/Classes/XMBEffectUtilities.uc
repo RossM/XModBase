@@ -34,11 +34,11 @@ function static name CheckTargetConditions(out array<X2Condition> AbilityTargetC
 		{
 			SourceWeapon = AbilityState.GetSourceWeapon();
 			if (SourceWeapon == none || EffectState == none)
-				return 'AA_UnknownError';
+				return 'AA_WeaponIncompatible';
 
 			ItemRef = EffectState.ApplyEffectParameters.ItemStateObjectRef;
 			if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
-				return 'AA_UnknownError';
+				return 'AA_WeaponIncompatible';
 		}
 
 		AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);

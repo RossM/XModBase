@@ -44,10 +44,10 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 		return 'AA_NotAUnit';
 
 	if (bRequireHeightDisadvantage && !SourceState.HasHeightAdvantageOver(TargetState, true))
-		return 'AA_ValueCheckFailed';
+		return 'AA_InvalidTargetHeight';  // NOTE: Nonstandard AA code
 
 	if (bRequireHeightAdvantage && !TargetState.HasHeightAdvantageOver(SourceState, false))
-		return 'AA_ValueCheckFailed';
+		return 'AA_InvalidTargetHeight';  // NOTE: Nonstandard AA code
 
 	return 'AA_Success';
 }

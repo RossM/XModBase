@@ -35,9 +35,9 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 	DataName = kAbility.GetMyTemplate().DataName;
 
 	if (IncludeAbilityNames.Length > 0 && IncludeAbilityNames.Find(DataName) == INDEX_NONE)
-		return 'AA_ValueCheckFailed';
+		return 'AA_InvalidAbilityName';  // NOTE: Nonstandard AA code
 	if (ExcludeAbilityNames.Length > 0 && ExcludeAbilityNames.Find(DataName) != INDEX_NONE)
-		return 'AA_ValueCheckFailed';
+		return 'AA_InvalidAbilityName';  // NOTE: Nonstandard AA code
 
 	return 'AA_Success';
 }
