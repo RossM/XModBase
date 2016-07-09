@@ -73,44 +73,16 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 
 function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
 {
-	local X2Condition kCondition;
-	local XComGameState_Item SourceWeapon;
-	local StateObjectReference ItemRef;
 	local name AvailableCode;
+
+	AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
 		
-	foreach AbilityTargetConditions(kCondition)
-	{
-		if (kCondition.IsA('XMBCondition_MatchingWeapon'))
-		{
-			SourceWeapon = AbilityState.GetSourceWeapon();
-			if (SourceWeapon == none)
-				return 'AA_UnknownError';
-
-			ItemRef = EffectState.ApplyEffectParameters.ItemStateObjectRef;
-			if (SourceWeapon.ObjectID != ItemRef.ObjectID && SourceWeapon.LoadedAmmo.ObjectID != ItemRef.ObjectID)
-				return 'AA_UnknownError';
-		}
-
-		AvailableCode = kCondition.AbilityMeetsCondition(AbilityState, Target);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-
-		AvailableCode = kCondition.MeetsCondition(Target);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
+	AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
 		
-		AvailableCode = kCondition.MeetsConditionWithSource(Target, Attacker);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-	}
-
-	foreach AbilityShooterConditions(kCondition)
-	{
-		AvailableCode = kCondition.MeetsCondition(Attacker);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-	}
-
 	return 'AA_Success';
 }
 
