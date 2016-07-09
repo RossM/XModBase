@@ -17,7 +17,7 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 class XMBEffect_AddAbilityCharges extends X2Effect;
 
@@ -30,12 +30,14 @@ var bool bAllowUseAmmoAsCharges;			// Some abilities display the amount of ammo 
 											// true, this effect will give those abilities extra ammo
 											// instead of extra charges.
 
+
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
 	local XComGameState_Unit NewUnit;
 	local XComGameState_Ability AbilityState;
 	local XComGameStateHistory History;
 	local StateObjectReference ObjRef;
+	local XComGameState_BattleData BattleData;
 	local int Charges;
 	
 	NewUnit = XComGameState_Unit(kNewTargetState);
@@ -43,6 +45,13 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		return;
 
 	History = `XCOMHISTORY;
+
+	// Don't add the extra item if this is a direct mission transfer. It will have been already 
+	// added in the first non-transfer mission.
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (BattleData.DirectTransferInfo.IsDirectMissionTransfer && class'XMBEffectUtilities'.static.IsPostBeginPlayTrigger(ApplyEffectParameters))
+		return;
+
 	foreach NewUnit.Abilities(ObjRef)
 	{
 		AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(ObjRef.ObjectID));

@@ -19,7 +19,7 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 class XMBEffect_AddUtilityItem extends X2Effect_Persistent;
 
@@ -52,6 +52,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local name AbilityName;
 	local array<SoldierClassAbilityType> EarnedSoldierAbilities;
 	local XGUnit UnitVisualizer;
+	local XComGameState_BattleData BattleData;
 	local int idx;
 
 	NewUnit = XComGameState_Unit(kNewTargetState);
@@ -59,6 +60,12 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		return;
 
 	History = `XCOMHISTORY;
+
+	// Don't add the extra item if this is a direct mission transfer. It will have been already 
+	// added in the first non-transfer mission.
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (BattleData.DirectTransferInfo.IsDirectMissionTransfer && class'XMBEffectUtilities'.static.IsPostBeginPlayTrigger(ApplyEffectParameters))
+		return;
 
 	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	AbilityTemplateMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
@@ -94,6 +101,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 			}
 		}
 	}
+
+	if (BaseCharges <= 0)
+		return;
 
 	// No items to merge with, so create the item
 	ItemState = EquipmentTemplate.CreateInstanceFromTemplate(NewGameState);

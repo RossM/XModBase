@@ -17,7 +17,7 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
 class XMBEffect_AddItemChargesBySlot extends X2Effect;
 
@@ -26,14 +26,14 @@ class XMBEffect_AddItemChargesBySlot extends X2Effect;
 // Bonus properties //
 //////////////////////
 
-var int PerItemBonus;									// The number of charges to add for each item in the right slot.
+var int PerItemBonus;						// The number of charges to add for each item in the right slot.
 
 
 //////////////////////////
 // Condition properties //
 //////////////////////////
 
-var array<EInventorySlot> ApplyToSlots;					// The slot, or slots, to add charges to items in.
+var array<EInventorySlot> ApplyToSlots;		// The slot, or slots, to add charges to items in.
 
 
 ////////////////////////////
@@ -64,6 +64,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Unit NewUnit;
 	local XComGameState_Item ItemState, InnerItemState;
 	local XComGameStateHistory History;
+	local XComGameState_BattleData BattleData;
 	local int i, j, modifier;
 
 	NewUnit = XComGameState_Unit(kNewTargetState);
@@ -71,6 +72,12 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		return;
 
 	History = `XCOMHISTORY;
+
+	// Don't add the extra item if this is a direct mission transfer. It will have been already 
+	// added in the first non-transfer mission.
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (BattleData.DirectTransferInfo.IsDirectMissionTransfer && class'XMBEffectUtilities'.static.IsPostBeginPlayTrigger(ApplyEffectParameters))
+		return;
 
 	for (i = 0; i < NewUnit.InventoryItems.Length; ++i)
 	{
