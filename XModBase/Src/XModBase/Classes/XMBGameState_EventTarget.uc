@@ -17,6 +17,9 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 
+	if (EventId == 'AbilityActivated' && (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt))
+		return ELR_NoInterrupt;
+
 	AbilityState = XComGameState_Ability(EventData);
 	if (AbilityState == none && AbilityContext != none)
 	{
@@ -34,6 +37,9 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	foreach TriggeredAbilities(AbilityRef)
 	{
 		SourceAbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityRef.ObjectID));
+		if (SourceAbilityState == none)
+			continue;
+
 		SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(SourceAbilityState.OwnerStateObject.ObjectID));
 
 		foreach SourceAbilityState.GetMyTemplate().AbilityTriggers(Trigger)
@@ -45,7 +51,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 				{
 					AvailableCode = EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState);
 
-					`Log("OnEvent:" @ EventID @ SourceAbilityState.GetMyTemplate().DataName @ AvailableCode);
+					`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID $ ":" @ AbilityState.GetMyTemplate().DataName @ "=" @ AvailableCode);
 
 					if (AvailableCode == 'AA_Success')
 					{
