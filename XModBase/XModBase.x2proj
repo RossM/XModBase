@@ -44,6 +44,9 @@
     <Content Include="Src\XModBase\Classes\Examples.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\XModBase\Classes\XMBCondition_AbilityProperty.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\XModBase\Classes\XMBEffectUtilities.uc">
       <SubType>Content</SubType>
     </Content>

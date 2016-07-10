@@ -40,6 +40,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(Sprint());
 	Templates.AddItem(Weaponmaster());
+	Templates.AddItem(ZeroIn());
+	Templates.AddItem(ZeroInMiss());
 
 	return Templates;
 }
@@ -795,3 +797,59 @@ static function X2AbilityTemplate Weaponmaster()
 	return Passive('XMBExample_Weaponmaster', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+static function X2AbilityTemplate ZeroIn()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalBonus BonusEffect;
+	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+
+	Template = SelfTargetTrigger('XMBExample_ZeroIn', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
+	AbilityPropertyCondition.bRequireActivated = true;
+	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
+	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
+	AddTriggerTargetCondition(Template, default.MissCondition);
+
+	BonusEffect = new class'XMBEffect_ConditionalBonus';
+	BonusEffect.EffectName = 'ZeroIn';
+	BonusEffect.DuplicateResponse = eDupe_Refresh;
+	BonusEffect.OtherConditions.AddItem(AbilityPropertyCondition);
+	BonusEffect.AddToHitModifier(20, eHit_Success);
+	BonusEffect.BuildPersistentEffect(1, true, true, false);
+	BonusEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true, , Template.AbilitySourceName);
+
+	Template.AddTargetEffect(BonusEffect);
+
+	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInMiss');
+
+	return Template;
+}
+
+static function X2AbilityTemplate ZeroInMiss()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_RemoveEffects RemoveBonusEffect;
+	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+
+	RemoveBonusEffect = new class'X2Effect_RemoveEffects';
+	RemoveBonusEffect.EffectNamesToRemove.AddItem('ZeroIn');
+	
+	Template = SelfTargetTrigger('XMBExample_ZeroInMiss', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
+
+	// Trigger abilities don't appear as passives. Add a passive ability icon.
+	AddIconPassive(Template);
+
+	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
+	AbilityPropertyCondition.bRequireActivated = true;
+	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
+	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
+	AddTriggerTargetCondition(Template, default.HitCondition);
+
+	Template.AddTargetEffect(RemoveBonusEffect);
+
+	return Template;
+}

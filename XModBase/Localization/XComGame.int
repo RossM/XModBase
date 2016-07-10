@@ -152,3 +152,10 @@ LocFriendlyName="Weaponmaster"
 LocFlyOverText="Weaponmaster"
 LocHelpText="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
 LocLongDescription="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
+
+[XMBExample_ZeroIn X2AbilityTemplate]
+LocFriendlyName="Zero In"
+LocFlyOverText="Zero In"
+LocHelpText="When you miss a shot, you get +<Ability:ToHit/> Aim on your next attack."
+LocLongDescription="When you miss a shot, you get +<Ability:ToHit/> Aim on your next attack."
+
