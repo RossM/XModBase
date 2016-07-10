@@ -42,7 +42,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TacticalSense());
 	Templates.AddItem(Weaponmaster());
 	Templates.AddItem(ZeroIn());
-	Templates.AddItem(ZeroInMiss());
+	Templates.AddItem(ZeroInHit());
 
 	return Templates;
 }
@@ -840,12 +840,12 @@ static function X2AbilityTemplate ZeroIn()
 
 	Template.AddTargetEffect(BonusEffect);
 
-	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInMiss');
+	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInHit');
 
 	return Template;
 }
 
-static function X2AbilityTemplate ZeroInMiss()
+static function X2AbilityTemplate ZeroInHit()
 {
 	local X2AbilityTemplate Template;
 	local X2Effect_RemoveEffects RemoveBonusEffect;
@@ -854,7 +854,7 @@ static function X2AbilityTemplate ZeroInMiss()
 	RemoveBonusEffect = new class'X2Effect_RemoveEffects';
 	RemoveBonusEffect.EffectNamesToRemove.AddItem('ZeroIn');
 	
-	Template = SelfTargetTrigger('XMBExample_ZeroInMiss', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
+	Template = SelfTargetTrigger('XMBExample_ZeroInHit', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
