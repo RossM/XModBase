@@ -5,14 +5,11 @@ var array<X2Condition> RequiredConditions;
 
 simulated function int CountVisibleUnitsForUnit(XComGameState_Unit SourceState, int HistoryIndex = -1)
 {
-	local int Index;
-	local XComGameStateHistory History;
 	local X2GameRulesetVisibilityManager VisibilityMgr;	
 	local array<StateObjectReference> VisibleUnits;
 	local StateObjectReference UnitRef;
 	local int Count;
 
-	History = `XCOMHISTORY;
 	VisibilityMgr = `TACTICALRULES.VisibilityMgr;
 
 	//Set default conditions (visible units need to be alive and game play visible) if no conditions were specified
