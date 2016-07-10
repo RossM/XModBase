@@ -4,21 +4,13 @@ static function bool IsPostBeginPlayTrigger(const out EffectAppliedData ApplyEff
 {
 	local XComGameState_Ability AbilityState;
 	local XComGameStateHistory History;
-	local X2AbilityTemplate AbilityTemplate;
-	local X2AbilityTrigger AbilityTrigger;
+	local int Priority;
 
 	History = `XCOMHISTORY;
 
 	AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(ApplyEffectParameters.AbilityStateObjectRef.ObjectID));
-	AbilityTemplate = AbilityState.GetMyTemplate();
 
-	foreach AbilityTemplate.AbilityTriggers(AbilityTrigger)
-	{
-		if (AbilityTrigger.IsA('X2AbilityTrigger_UnitPostBeginPlay'))
-			return true;
-	}
-	
-	return false;
+	return AbilityState.IsAbilityTriggeredOnUnitPostBeginTacticalPlay(Priority);
 }
 
 function static name CheckTargetConditions(out array<X2Condition> AbilityTargetConditions, XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
