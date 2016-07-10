@@ -45,7 +45,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 				{
 					AvailableCode = EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState);
 
-					`Log("OnEvent:" @ EventID @ SourceAbilityState.GetMyTemplateName @ AvailableCode);
+					`Log("OnEvent:" @ EventID @ SourceAbilityState.GetMyTemplate().DataName @ AvailableCode);
 
 					if (AvailableCode == 'AA_Success')
 					{
