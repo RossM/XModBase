@@ -56,6 +56,10 @@ var array<ExtShotModifierInfo> Modifiers;			// Modifiers to attacks made by (or 
 
 var bool bIgnoreSquadsightPenalty;					// Negates squadsight penalties. Requires XMBEffect_Extended.
 
+var XMBValue ScaleValue;
+var float ScaleBase;
+var float ScaleMax;
+
 
 //////////////////////////
 // Condition properties //
@@ -134,10 +138,31 @@ function AddArmorPiercingModifier(int Value, optional EAbilityHitResult ModType 
 	Modifiers.AddItem(ExtModInfo);
 }	
 
+function SetScale(XMBValue Value, optional float Base = 0.0, optional float Max = 1000)
+{
+	ScaleValue = Value;
+	ScaleBase = Base;
+	ScaleMax = Max;
+}
+
 
 ////////////////////
 // Implementation //
 ////////////////////
+
+function private float GetScaleMultiplier(XComGameState_Effect EffectState, XComGameState_Unit UnitState, XComGameState_Ability AbilityState)
+{
+	local float Scale;
+
+	if (ScaleValue == none)
+		return 1.0;
+
+	Scale = ScaleValue.GetValue(EffectState, UnitState, AbilityState);
+	Scale += ScaleBase;
+	Scale = FClamp(Scale, 0, ScaleMax);
+
+	return Scale;
+}
 
 // Checks that an attack meets all the conditions of this effect.
 function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
@@ -214,7 +239,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		}
 	}
 
-	return BonusDamage;
+	return int(BonusDamage * GetScaleMultiplier(EffectState, Attacker, AbilityState));
 }
 
 // From X2Effect_Persistent. Returns an armor shred modifier for an attack by the unit with the effect.
@@ -241,7 +266,7 @@ function int GetExtraShredValue(XComGameState_Effect EffectState, XComGameState_
 		}
 	}
 
-	return BonusShred;
+	return int(BonusShred * GetScaleMultiplier(EffectState, Attacker, AbilityState));
 }
 
 // From X2Effect_Persistent. Returns an armor piercing modifier for an attack by the unit with the effect.
@@ -268,7 +293,7 @@ function int GetExtraArmorPiercing(XComGameState_Effect EffectState, XComGameSta
 		}
 	}
 
-	return BonusArmorPiercing;
+	return int(BonusArmorPiercing * GetScaleMultiplier(EffectState, Attacker, AbilityState));
 }
 
 // From X2Effect_Persistent. Returns to hit modifiers for an attack by the unit with the effect.
@@ -287,6 +312,7 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 				continue;
 
 			ExtModInfo.ModInfo.Reason = FriendlyName;
+			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleMultiplier(EffectState, Target, AbilityState));
 			ShotModifiers.AddItem(ExtModInfo.ModInfo);
 		}
 	}
@@ -310,6 +336,7 @@ function GetToHitAsTargetModifiers(XComGameState_Effect EffectState, XComGameSta
 				continue;
 
 			ExtModInfo.ModInfo.Reason = FriendlyName;
+			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleMultiplier(EffectState, Target, AbilityState));
 			ShotModifiers.AddItem(ExtModInfo.ModInfo);
 		}	
 	}
@@ -354,25 +381,45 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 	// These are all the combinations of modifier type and hit result that make sense.
 	switch (Tag)
 	{
-	case 'ToHit':				Tag = 'ToHit';			HitResult = eHit_Success;							break;
-	case 'ToHitAsTarget':		Tag = 'ToHitAsTarget';	HitResult = eHit_Success;							break;
-	case 'Defense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = -1;	break;
-	case 'Damage':				Tag = 'Damage';			HitResult = eHit_Success;							break;
-	case 'Shred':				Tag = 'Shred';			HitResult = eHit_Success;							break;
-	case 'ArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Success;							break;
-	case 'Crit':				Tag = 'ToHit';			HitResult = eHit_Crit;								break;
-	case 'CritDefense':			Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier = -1;	break;
-	case 'CritDamage':			Tag = 'Damage';			HitResult = eHit_Crit;								break;
-	case 'CritShred':			Tag = 'Shred';			HitResult = eHit_Crit;								break;
-	case 'CritArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Crit;								break;
-	case 'Graze':				Tag = 'ToHit';			HitResult = eHit_Graze;								break;
-	case 'Dodge':				Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;								break;
-	case 'GrazeDamage':			Tag = 'Damage';			HitResult = eHit_Graze;								break;
-	case 'GrazeShred':			Tag = 'Shred';			HitResult = eHit_Graze;								break;
-	case 'GrezeArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Graze;								break;
-	case 'MissDamage':			Tag = 'Damage';			HitResult = eHit_Miss;								break;
-	case 'MissShred':			Tag = 'Shred';			HitResult = eHit_Miss;								break;
-	case 'MissArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Miss;								break;
+	case 'ToHit':					Tag = 'ToHit';			HitResult = eHit_Success;									break;
+	case 'ToHitAsTarget':			Tag = 'ToHitAsTarget';	HitResult = eHit_Success;									break;
+	case 'Defense':					Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = -1;			break;
+	case 'Damage':					Tag = 'Damage';			HitResult = eHit_Success;									break;
+	case 'Shred':					Tag = 'Shred';			HitResult = eHit_Success;									break;
+	case 'ArmorPiercing':			Tag = 'ArmorPiercing';	HitResult = eHit_Success;									break;
+	case 'Crit':					Tag = 'ToHit';			HitResult = eHit_Crit;										break;
+	case 'CritDefense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier = -1;			break;
+	case 'CritDamage':				Tag = 'Damage';			HitResult = eHit_Crit;										break;
+	case 'CritShred':				Tag = 'Shred';			HitResult = eHit_Crit;										break;
+	case 'CritArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Crit;										break;
+	case 'Graze':					Tag = 'ToHit';			HitResult = eHit_Graze;										break;
+	case 'Dodge':					Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;										break;
+	case 'GrazeDamage':				Tag = 'Damage';			HitResult = eHit_Graze;										break;
+	case 'GrazeShred':				Tag = 'Shred';			HitResult = eHit_Graze;										break;
+	case 'GrezeArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Graze;										break;
+	case 'MissDamage':				Tag = 'Damage';			HitResult = eHit_Miss;										break;
+	case 'MissShred':				Tag = 'Shred';			HitResult = eHit_Miss;										break;
+	case 'MissArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Miss;										break;
+
+	case 'MaxToHit':				Tag = 'ToHit';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
+	case 'MaxToHitAsTarget':		Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
+	case 'MaxDefense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = -ScaleMax;	break;
+	case 'MaxDamage':				Tag = 'Damage';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
+	case 'MaxShred':				Tag = 'Shred';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
+	case 'MaxArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
+	case 'MaxCrit':					Tag = 'ToHit';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxCritDefense':			Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier = -ScaleMax;	break;
+	case 'MaxCritDamage':			Tag = 'Damage';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxCritShred':			Tag = 'Shred';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxCritArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxGraze':				Tag = 'ToHit';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxDodge':				Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxGrazeDamage':			Tag = 'Damage';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxGrazeShred':			Tag = 'Shred';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxGrezeArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxMissDamage':			Tag = 'Damage';			HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxMissShred':			Tag = 'Shred';			HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
+	case 'MaxMissArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
 
 	default:
 		return false;

@@ -39,6 +39,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Rocketeer());
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(Sprint());
+	Templates.AddItem(TacticalSense());
 	Templates.AddItem(Weaponmaster());
 	Templates.AddItem(ZeroIn());
 	Templates.AddItem(ZeroInMiss());
@@ -774,6 +775,21 @@ static function X2AbilityTemplate Sprint()
 	AddCooldown(Template, 3);
 
 	return Template;
+}
+
+static function X2AbilityTemplate TacticalSense()
+{
+	local XMBEffect_ConditionalBonus Effect;
+	local XMBValue_Visibility Value;
+	 
+	Value = new class'XMBValue_Visibility';
+	Value.bCountEnemies = true;
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.SetScale(Value, 0, 5);
+	Effect.AddToHitAsTargetModifier(10, eHit_Graze);
+
+	return Passive('XMBExample_TacticalSense', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
 // Perk name:		Weaponmaster

@@ -153,6 +153,12 @@ LocFlyOverText="Weaponmaster"
 LocHelpText="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
 LocLongDescription="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
 
+[XMBExample_TacticalSense X2AbilityTemplate]
+LocFriendlyName="Tactical Sense"
+LocFlyOverText="Tactical Sense"
+LocHelpText="You get +<Ability:Dodge/> Dodge per visible enemy, to a max of +<Ability:MaxDodge/>."
+LocLongDescription="You get +<Ability:Dodge/> Dodge per visible enemy, to a max of +<Ability:MaxDodge/>."
+
 [XMBExample_ZeroIn X2AbilityTemplate]
 LocFriendlyName="Zero In"
 LocFlyOverText="Zero In"
