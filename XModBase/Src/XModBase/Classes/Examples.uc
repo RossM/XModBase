@@ -63,7 +63,7 @@ static function X2AbilityTemplate AbsolutelyCritical()
 	Effect.AddToHitModifier(50, eHit_Crit);
 
 	// The bonus only applies while flanking
-	Effect.OtherConditions.AddItem(default.FlankedCondition);
+	Effect.AbilityTargetConditions.AddItem(default.FlankedCondition);
 
 	// Create the template using a helper function
 	return Passive('XMBExample_AbsolutelyCritical', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
@@ -297,24 +297,39 @@ static function X2AbilityTemplate CloseCombatSpecialist()
 // Config:			(AbilityName="XMBExample_DamnGoodGround")
 static function X2AbilityTemplate DamnGoodGround()
 {
-	local XMBEffect_ConditionalBonus Effect;
+	local XMBEffect_ConditionalBonus Effect, AsTargetEffect;
+	local X2AbilityTemplate Template;
 
-	// Create a conditional bonus
+	// Create a conditional bonus for the Aim bonus
 	Effect = new class'XMBEffect_ConditionalBonus';
 	Effect.EffectName = 'DamnGoodGround';
 
-	// The bonus adds +10 Aim and +10 Defense
+	// The bonus adds +10 Aim
 	Effect.AddToHitModifier(10);
-	Effect.AddToHitAsTargetModifier(-10);
-
-	// When being attacked, require that the unit have height advantage
-	Effect.SelfConditions.AddItem(default.HeightAdvantageCondition);
 
 	// When attacking, require that the target have height disadvantage
-	Effect.OtherConditions.AddItem(default.HeightDisadvantageCondition);
+	Effect.AbilityTargetConditions.AddItem(default.HeightDisadvantageCondition);
 
 	// Create the template using a helper function
-	return Passive('XMBExample_DamnGoodGround', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+	Template = Passive('XMBExample_DamnGoodGround', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+
+	// Create a second conditional bonus for the Defense bonus
+	AsTargetEffect = new class'XMBEffect_ConditionalBonus';
+	AsTargetEffect.EffectName = 'DamnGoodGroundAsTarget';
+
+	// The bonus adds +10 Defense
+	AsTargetEffect.AddToHitAsTargetModifier(-10);
+
+	// When being attacked, require that the unit have height advantage
+	AsTargetEffect.AbilityTargetConditions.AddItem(default.HeightAdvantageCondition);
+
+	// Set the display info so that bonus name appears correctly in the shot breakdown
+	AsTargetEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, false, , Template.AbilitySourceName);
+
+	// Add this as a second effect of the passive
+	Template.AddTargetEffect(AsTargetEffect);
+
+	return Template;
 }
 
 // Perk name:		Danger Zone
@@ -570,7 +585,7 @@ static function X2AbilityTemplate Magnum()
 	Effect.AddToHitModifier(10);
 
 	// Restrict to the weapon matching this ability
-	Effect.OtherConditions.AddItem(default.MatchingWeaponCondition);
+	Effect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
 
 	return Passive('XMBExample_Magnum', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 }
@@ -591,7 +606,7 @@ static function X2AbilityTemplate MovingTarget()
 	Effect.AddToHitAsTargetModifier(50, eHit_Graze);
 
 	// Require that the incoming attack is reaction fire
-	Effect.SelfConditions.AddItem(default.ReactionFireCondition);
+	Effect.AbilityTargetConditions.AddItem(default.ReactionFireCondition);
 
 	// Create the template using a helper function
 	return Passive('XMBExample_MovingTarget', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
@@ -637,7 +652,7 @@ static function X2AbilityTemplate PowerShotBonuses()
 	// The bonus only applies to the Power Shot ability
 	Condition = new class'XMBCondition_AbilityName';
 	Condition.IncludeAbilityNames.AddItem('XMBExample_PowerShot');
-	Effect.OtherConditions.AddItem(Condition);
+	Effect.AbilityTargetConditions.AddItem(Condition);
 
 	// Create the template using a helper function
 	Template = Passive('XMBExample_PowerShotBonuses', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
@@ -809,7 +824,7 @@ static function X2AbilityTemplate Weaponmaster()
 	Effect.AddDamageModifier(2);
 
 	// The bonus only applies to attacks with the weapon associated with this ability
-	Effect.OtherConditions.AddItem(default.MatchingWeaponCondition);
+	Effect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
 
 	// Create the template using a helper function
 	return Passive('XMBExample_Weaponmaster', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
@@ -834,7 +849,7 @@ static function X2AbilityTemplate ZeroIn()
 	Effect.ScaleValue = Value;
 	Effect.ScaleMax = 1;
 	Effect.AddToHitModifier(20, eHit_Success);
-	Effect.OtherConditions.AddItem(AbilityPropertyCondition);
+	Effect.AbilityTargetConditions.AddItem(AbilityPropertyCondition);
 
 	Template = Passive('XMBExample_ZeroIn', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 

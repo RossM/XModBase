@@ -68,8 +68,8 @@ var float ScaleMax;
 // Condition properties //
 //////////////////////////
 
-var array<X2Condition> SelfConditions;				// Conditions applied to the unit with the effect (usually the shooter)
-var array<X2Condition> OtherConditions;				// Conditions applied to the other unit involved (usually the target)
+var array<X2Condition> AbilityTargetConditions;		// Conditions on the target of the ability being modified.
+var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of the ability being modified.
 
 
 /////////////
@@ -159,36 +159,18 @@ function private float GetScaleByValue(XComGameState_Effect EffectState, XComGam
 	return Scale;
 }
 
-// Checks that an attack meets all the conditions of this effect.
-function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
+function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
 {
 	local name AvailableCode;
-		
-	if (!bAsTarget)
-	{
-		// Attack by the unit with the effect - check target conditions
-		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(OtherConditions, EffectState, Attacker, Target, AbilityState);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-		
-		// Attack by the unit with the effect - check shooter conditions
-		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(SelfConditions, EffectState, Attacker, Target, AbilityState);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-	}
-	else
-	{
-		// Attack against the unit with the effect - check target conditions
-		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(SelfConditions, EffectState, Attacker, Target, AbilityState);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
 
-		// Attack against the unit with the effect - check shooter conditions
-		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(OtherConditions, EffectState, Attacker, Target, AbilityState);
-		if (AvailableCode != 'AA_Success')
-			return AvailableCode;
-	}
-
+	AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
+		
+	AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
+		
 	return 'AA_Success';
 }
 
@@ -320,7 +302,7 @@ function GetToHitAsTargetModifiers(XComGameState_Effect EffectState, XComGameSta
 {
 	local ExtShotModifierInfo ExtModInfo;
 
-	if (ValidateAttack(EffectState, Attacker, Target, AbilityState, true) == 'AA_Success')
+	if (ValidateAttack(EffectState, Attacker, Target, AbilityState) == 'AA_Success')
 	{
 		foreach Modifiers(ExtModInfo)
 		{
