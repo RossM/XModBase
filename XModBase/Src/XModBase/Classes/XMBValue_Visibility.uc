@@ -2,6 +2,7 @@
 //  FILE:    XMBValue_Visibility.uc
 //  AUTHOR:  xylthixlm
 //
+//  An XMBValue that counts the number of other units a unit can see.
 //
 //  USAGE
 //
@@ -18,12 +19,17 @@
 //
 //  DEPENDENCIES
 //
-//  None.
+//  XMBValue.uc
 //---------------------------------------------------------------------------------------
 class XMBValue_Visibility extends XMBValue;
 
 var bool bCountEnemies, bCountAllies, bCountNeutrals;
-var array<X2Condition> RequiredConditions;
+
+var array<X2Condition> RequiredConditions;		// A filter for which units will be counted. By
+												// default, counts living visible units. Other
+												// possible filters are defined in 
+												// X2TacticalVisibilityHelpers.uc.
+			
 
 simulated function int CountVisibleUnitsForUnit(XComGameState_Unit SourceState, int HistoryIndex = -1)
 {
@@ -61,7 +67,7 @@ simulated function int CountVisibleUnitsForUnit(XComGameState_Unit SourceState, 
 	return Count;
 }
 
-function float GetValue(XComGameState_Effect EffectState, XComGameState_Unit UnitState, XComGameState_Ability AbilityState)
+function float GetValue(XComGameState_Effect EffectState, XComGameState_Unit UnitState, XComGameState_Unit TargetState, XComGameState_Ability AbilityState)
 {
 	return CountVisibleUnitsForUnit(UnitState);
 }

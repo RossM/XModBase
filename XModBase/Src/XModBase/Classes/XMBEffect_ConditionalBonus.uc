@@ -146,14 +146,14 @@ function AddArmorPiercingModifier(int Value, optional EAbilityHitResult ModType 
 // Implementation //
 ////////////////////
 
-function private float GetScaleByValue(XComGameState_Effect EffectState, XComGameState_Unit UnitState, XComGameState_Ability AbilityState)
+function private float GetScaleByValue(XComGameState_Effect EffectState, XComGameState_Unit UnitState, XComGameState_Unit TargetState, XComGameState_Ability AbilityState)
 {
 	local float Scale, Value;
 
 	if (ScaleValue == none)
 		return 1.0;
 
-	Value = ScaleValue.GetValue(EffectState, UnitState, AbilityState);
+	Value = ScaleValue.GetValue(EffectState, UnitState, TargetState, AbilityState);
 	Scale = FClamp(ScaleBase + ScaleMultiplier * Value, 0, ScaleMax);
 
 	return Scale;
@@ -234,7 +234,7 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		}
 	}
 
-	return int(BonusDamage * GetScaleByValue(EffectState, Attacker, AbilityState));
+	return int(BonusDamage * GetScaleByValue(EffectState, Attacker, XComGameState_Unit(TargetDamageable), AbilityState));
 }
 
 // From X2Effect_Persistent. Returns an armor shred modifier for an attack by the unit with the effect.
@@ -261,7 +261,7 @@ function int GetExtraShredValue(XComGameState_Effect EffectState, XComGameState_
 		}
 	}
 
-	return int(BonusShred * GetScaleByValue(EffectState, Attacker, AbilityState));
+	return int(BonusShred * GetScaleByValue(EffectState, Attacker, XComGameState_Unit(TargetDamageable), AbilityState));
 }
 
 // From X2Effect_Persistent. Returns an armor piercing modifier for an attack by the unit with the effect.
@@ -288,7 +288,7 @@ function int GetExtraArmorPiercing(XComGameState_Effect EffectState, XComGameSta
 		}
 	}
 
-	return int(BonusArmorPiercing * GetScaleByValue(EffectState, Attacker, AbilityState));
+	return int(BonusArmorPiercing * GetScaleByValue(EffectState, Attacker, XComGameState_Unit(TargetDamageable), AbilityState));
 }
 
 // From X2Effect_Persistent. Returns to hit modifiers for an attack by the unit with the effect.
@@ -307,7 +307,7 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 				continue;
 
 			ExtModInfo.ModInfo.Reason = FriendlyName;
-			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleByValue(EffectState, Attacker, AbilityState));
+			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleByValue(EffectState, Attacker, Target, AbilityState));
 			ShotModifiers.AddItem(ExtModInfo.ModInfo);
 		}
 	}
@@ -331,7 +331,7 @@ function GetToHitAsTargetModifiers(XComGameState_Effect EffectState, XComGameSta
 				continue;
 
 			ExtModInfo.ModInfo.Reason = FriendlyName;
-			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleByValue(EffectState, Target, AbilityState));
+			ExtModInfo.ModInfo.Value = int(ExtModInfo.ModInfo.Value * GetScaleByValue(EffectState, Target, none, AbilityState));
 			ShotModifiers.AddItem(ExtModInfo.ModInfo);
 		}	
 	}
