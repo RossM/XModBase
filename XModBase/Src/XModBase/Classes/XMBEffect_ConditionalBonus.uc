@@ -60,6 +60,7 @@ var bool bIgnoreSquadsightPenalty;					// Negates squadsight penalties. Requires
 
 var XMBValue ScaleValue;
 var float ScaleBase;
+var float ScaleMultiplier;
 var float ScaleMax;
 
 
@@ -140,13 +141,6 @@ function AddArmorPiercingModifier(int Value, optional EAbilityHitResult ModType 
 	Modifiers.AddItem(ExtModInfo);
 }	
 
-function SetScale(XMBValue Value, optional float Base = 0.0, optional float Max = 1000)
-{
-	ScaleValue = Value;
-	ScaleBase = Base;
-	ScaleMax = Max;
-}
-
 
 ////////////////////
 // Implementation //
@@ -160,6 +154,7 @@ function private float GetScaleMultiplier(XComGameState_Effect EffectState, XCom
 		return 1.0;
 
 	Scale = ScaleValue.GetValue(EffectState, UnitState, AbilityState);
+	Scale *= ScaleMultiplier;
 	Scale += ScaleBase;
 	Scale = FClamp(Scale, 0, ScaleMax);
 
@@ -483,4 +478,10 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 	// as a negative modifier to eHit_Success.
 	TagValue = string(int(Result * ResultMultiplier));
 	return true;
+}
+
+defaultproperties
+{
+	ScaleMultiplier = 1.0
+	ScaleMax = 1000
 }

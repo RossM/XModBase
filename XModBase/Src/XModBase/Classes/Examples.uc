@@ -786,7 +786,8 @@ static function X2AbilityTemplate TacticalSense()
 	Value.bCountEnemies = true;
 
 	Effect = new class'XMBEffect_ConditionalBonus';
-	Effect.SetScale(Value, 0, 5);
+	Effect.ScaleValue = Value;
+	Effect.ScaleMax = 5;
 	Effect.AddToHitAsTargetModifier(10, eHit_Graze);
 
 	return Passive('XMBExample_TacticalSense', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
