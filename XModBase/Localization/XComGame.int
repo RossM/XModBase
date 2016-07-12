@@ -6,14 +6,14 @@
 [XMBExample_AbsolutelyCritical X2AbilityTemplate]
 LocFriendlyName="Absolutely Critical"
 LocFlyOverText="Absolutely Critical"
-LocHelpText="You get an additional +<Ability:Crit> Crit chance against flanked targets."
-LocLongDescription="You get an additional +<Ability:Crit> Crit chance against flanked targets."
+LocHelpText="You get an additional <Ability:+Crit> Crit chance against flanked targets."
+LocLongDescription="You get an additional <Ability:+Crit> Crit chance against flanked targets."
 
 [XMBExample_AdrenalineSurge X2AbilityTemplate]
 LocFriendlyName="Adrenaline Surge"
 LocFlyOverText="Adrenaline Surge"
-LocHelpText="When you get a kill, you and nearby friendly units get +<Ability:Crit/> Crit chance and +<Ability:Mobility/> Mobility until the end of your turn."
-LocLongDescription="When you get a kill, you and nearby friendly units get +<Ability:Crit/> Crit chance and +<Ability:Mobility/> Mobility until the end of your turn."
+LocHelpText="When you get a kill, you and nearby friendly units get <Ability:+Crit/> Crit chance and <Ability:+Mobility/> Mobility until the end of your turn."
+LocLongDescription="When you get a kill, you and nearby friendly units get <Ability:+Crit/> Crit chance and <Ability:+Mobility/> Mobility until the end of your turn."
 
 [XMBExample_Assassin X2AbilityTemplate]
 LocFriendlyName="Assassin"
@@ -48,8 +48,8 @@ LocLongDescription="Confers a reaction shot against any enemy who closes to with
 [XMBExample_DamnGoodGround X2AbilityTemplate]
 LocFriendlyName="Damn Good Ground"
 LocFlyOverText="Damn Good Ground"
-LocHelpText="You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
-LocLongDescription="You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
+LocHelpText="You get an additional <Ability:+ToHit/> Aim and <Ability:+Defense/> Defense against targets at lower elevation."
+LocLongDescription="You get an additional <Ability:+ToHit/> Aim and <Ability:+Defense/> Defense against targets at lower elevation."
 
 [XMBExample_DangerZone X2AbilityTemplate]
 LocFriendlyName="Danger Zone"
@@ -66,8 +66,8 @@ LocLongDescription="If you did not attack this turn, hunker down automatically."
 [XMBExample_EspritDeCorps X2AbilityTemplate]
 LocFriendlyName="Esprit de Corps"
 LocFlyOverText="Esprit de Corps"
-LocHelpText="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
-LocLongDescription="Squad receives +<Ability:Will/> Will and +<Ability:Defense/> Defense in battle."
+LocHelpText="Squad receives <Ability:+Will/> Will and <Ability:+Defense/> Defense in battle."
+LocLongDescription="Squad receives <Ability:+Will/> Will and <Ability:+Defense/> Defense in battle."
 
 [XMBExample_Focus X2AbilityTemplate]
 LocFriendlyName="Focus"
@@ -84,8 +84,8 @@ LocLongDescription="Move after taking a single action that would normally end yo
 [XMBExample_InspireAgility X2AbilityTemplate]
 LocFriendlyName="Inspire Agility"
 LocFlyOverText="Inspire Agility"
-LocHelpText="Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
-LocLongDescription="Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+LocHelpText="Give a friendly unit <Ability:+Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+LocLongDescription="Give a friendly unit <Ability:+Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
 
 [XMBExample_LightningHands X2AbilityTemplate]
 LocFriendlyName="Lightning Hands"
@@ -96,26 +96,26 @@ LocLongDescription="Fire your pistol at a target. This attack does not cost an a
 [XMBExample_Magnum X2AbilityTemplate]
 LocFriendlyName="Magnum"
 LocFlyOverText="Magnum"
-LocHelpText="Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
-LocLongDescription="Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
+LocHelpText="Your pistol attacks get <Ability:+ToHit/> Aim and deal <Ability:+Damage/> damage."
+LocLongDescription="Your pistol attacks get <Ability:+ToHit/> Aim and deal <Ability:+Damage/> damage."
 
 [XMBExample_MovingTarget X2AbilityTemplate]
 LocFriendlyName="Moving Target"
 LocFlyOverText="Moving Target"
-LocHelpText="You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
-LocLongDescription="You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
+LocHelpText="You get an additional <Ability:+Defense/> Defense and <Ability:+Dodge/> Dodge against reaction fire."
+LocLongDescription="You get an additional <Ability:+Defense/> Defense and <Ability:+Dodge/> Dodge against reaction fire."
 
 [XMBExample_PowerShot X2AbilityTemplate]
 LocFriendlyName="Power Shot"
 LocFlyOverText="Power Shot"
-LocHelpText="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
-LocLongDescription="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocHelpText="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocLongDescription="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
 
 [XMBExample_PowerShotBonuses X2AbilityTemplate]
 LocFriendlyName="Power Shot"
 LocFlyOverText="Power Shot"
-LocHelpText="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
-LocLongDescription="Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocHelpText="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+LocLongDescription="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
 
 [XMBExample_Pyromaniac X2AbilityTemplate]
 LocFriendlyName="Pyromaniac"
@@ -150,18 +150,18 @@ LocLongDescription="Gain a bonus move action."
 [XMBExample_Weaponmaster X2AbilityTemplate]
 LocFriendlyName="Weaponmaster"
 LocFlyOverText="Weaponmaster"
-LocHelpText="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
-LocLongDescription="Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
+LocHelpText="Your <Ability:WeaponName/> attacks deal <Ability:+Damage/> damage."
+LocLongDescription="Your <Ability:WeaponName/> attacks deal <Ability:+Damage/> damage."
 
 [XMBExample_TacticalSense X2AbilityTemplate]
 LocFriendlyName="Tactical Sense"
 LocFlyOverText="Tactical Sense"
-LocHelpText="You get +<Ability:Dodge/> Dodge per visible enemy, to a max of +<Ability:MaxDodge/>."
-LocLongDescription="You get +<Ability:Dodge/> Dodge per visible enemy, to a max of +<Ability:MaxDodge/>."
+LocHelpText="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
+LocLongDescription="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
 
 [XMBExample_ZeroIn X2AbilityTemplate]
 LocFriendlyName="Zero In"
 LocFlyOverText="Zero In"
-LocHelpText="When you miss a shot, you get +<Ability:ToHit/> Aim on your next attack."
-LocLongDescription="When you miss a shot, you get +<Ability:ToHit/> Aim on your next attack."
+LocHelpText="When you miss a shot, you get <Ability:+ToHit/> Aim on your next attack."
+LocLongDescription="When you miss a shot, you get <Ability:+ToHit/> Aim on your next attack."
 

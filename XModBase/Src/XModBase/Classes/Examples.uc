@@ -49,7 +49,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 // Perk name:		Absolutely Critical
 // Perk effect:		You get an additional +50 Crit chance against flanked targets.
-// Localized text:	"You get an additional +<Ability:Crit> Crit chance against flanked targets."
+// Localized text:	"You get an additional <Ability:+Crit> Crit chance against flanked targets."
 // Config:			(AbilityName="XMBExample_AbsolutelyCritical")
 static function X2AbilityTemplate AbsolutelyCritical()
 {
@@ -292,7 +292,7 @@ static function X2AbilityTemplate CloseCombatSpecialist()
 
 // Perk name:		Damn Good Ground
 // Perk effect:		You get an additional +10 Aim and +10 Defense against targets at lower elevation.
-// Localized text:	"You get an additional +<Ability:ToHit/> Aim and +<Ability:Defense/> Defense against targets at lower elevation."
+// Localized text:	"You get an additional <Ability:+ToHit/> Aim and <Ability:+Defense/> Defense against targets at lower elevation."
 // Config:			(AbilityName="XMBExample_DamnGoodGround")
 static function X2AbilityTemplate DamnGoodGround()
 {
@@ -486,7 +486,7 @@ static function X2AbilityTemplate HitAndRun()
 
 // Perk name:		Inspire Agility
 // Perk effect:		Give a friendly unit +50 Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge.
-// Localized text:	"Give a friendly unit +<Ability:Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
+// Localized text:	"Give a friendly unit <Ability:+Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
 // Config:			(AbilityName="XMBExample_InspireAgility")
 static function X2AbilityTemplate InspireAgility()
 {
@@ -557,7 +557,7 @@ static function X2AbilityTemplate LightningHands()
 
 // Perk name:		Magnum
 // Perk effect:		Your pistol attacks get +10 Aim and deal +1 damage.
-// Localized text:	"Your pistol attacks get +<Ability:ToHit/> Aim and deal +<Ability:Damage/> damage."
+// Localized text:	"Your pistol attacks get <Ability:+ToHit/> Aim and deal <Ability:+Damage/> damage."
 // Config:			(AbilityName="XMBExample_Magnum", ApplyToWeaponSlot=eInvSlot_SecondaryWeapon)
 static function X2AbilityTemplate Magnum()
 {
@@ -576,7 +576,7 @@ static function X2AbilityTemplate Magnum()
 
 // Perk name:		Moving Target
 // Perk effect:		You get an additional +30 Defense and +50 Dodge against reaction fire.
-// Localized text:	"You get an additional +<Ability:Defense/> Defense and +<Ability:Dodge/> Dodge against reaction fire."
+// Localized text:	"You get an additional <Ability:+Defense/> Defense and <Ability:+Dodge/> Dodge against reaction fire."
 // Config:			(AbilityName="XMBExample_MovingTarget")
 static function X2AbilityTemplate MovingTarget()
 {
@@ -598,7 +598,7 @@ static function X2AbilityTemplate MovingTarget()
 
 // Perk name:		Power Shot
 // Perk effect:		Make an attack that has +20 crit chance and deals +3/4/5 damage on crit.
-// Localized text:	"Make an attack that has +<Ability:Crit:XMBExample_PowerShotBonuses/> crit chance and deals +<Ability:CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
+// Localized text:	"Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
 // Config:			(AbilityName="XMBExample_PowerShot", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate PowerShot()
 {
@@ -795,7 +795,7 @@ static function X2AbilityTemplate TacticalSense()
 
 // Perk name:		Weaponmaster
 // Perk effect:		Your primary weapon attacks deal +2 damage.
-// Localized text:	"Your <Ability:WeaponName/> attacks deal +<Ability:Damage/> damage."
+// Localized text:	"Your <Ability:WeaponName/> attacks deal <Ability:+Damage/> damage."
 // Config:			(AbilityName="XMBExample_Weaponmaster", ApplyToWeaponSlot=eInvSlot_PrimaryWeapon)
 static function X2AbilityTemplate Weaponmaster()
 {
