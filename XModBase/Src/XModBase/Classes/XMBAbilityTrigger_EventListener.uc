@@ -20,10 +20,12 @@
 //  Assassin
 //  BullRush
 //  DeepCover
+//  Focus
 //  HitAndRun
 //  InspireAgility
 //  ReverseEngineering
 //  SlamFire
+//  ZeroIn
 //
 //  INSTALLATION
 //

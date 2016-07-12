@@ -19,7 +19,9 @@
 //  Magnum
 //  MovingTarget
 //  PowerShot
+//  TacticalSense
 //  Weaponmaster
+//  ZeroIn
 //
 //  INSTALLATION
 //

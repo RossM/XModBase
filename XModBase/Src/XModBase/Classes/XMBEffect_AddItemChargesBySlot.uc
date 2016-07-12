@@ -10,6 +10,8 @@
 //
 //  The following examples in Examples.uc use this class:
 //
+//  Rocketeer
+//
 //  INSTALLATION
 //
 //  Install the XModBase core as described in readme.txt. Copy this file, and any files 

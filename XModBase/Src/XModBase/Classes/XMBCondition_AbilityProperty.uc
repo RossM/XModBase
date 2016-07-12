@@ -1,3 +1,25 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBCondition_AbilityProperty.uc
+//  AUTHOR:  xylthixlm
+//
+//
+//  USAGE
+//
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//	ZeroIn
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBCondition_AbilityProperty extends X2Condition;
 
 var bool bRequireActivated;

@@ -1,3 +1,24 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBEffect_ChangeHitResultForAttacker.uc
+//  AUTHOR:  xylthixlm
+//
+//
+//
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  Focus
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBEffect_ChangeHitResultForAttacker extends X2Effect_Persistent;
 
 var array<X2Condition> AbilityTargetConditions;
