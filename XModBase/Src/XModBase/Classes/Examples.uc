@@ -43,6 +43,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Weaponmaster());
 	Templates.AddItem(ZeroIn());
 	Templates.AddItem(ZeroInHit());
+	Templates.AddItem(ZeroInMiss());
 
 	return Templates;
 }
@@ -817,13 +818,44 @@ static function X2AbilityTemplate Weaponmaster()
 static function X2AbilityTemplate ZeroIn()
 {
 	local X2AbilityTemplate Template;
-	local XMBEffect_ConditionalBonus BonusEffect;
+	local XMBEffect_ConditionalBonus Effect;
+	local XMBValue_UnitValue Value;
 	local XMBCondition_AbilityProperty AbilityPropertyCondition;
 
-	Template = SelfTargetTrigger('XMBExample_ZeroIn', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
+	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
+	AbilityPropertyCondition.bRequireActivated = true;
+	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
 
-	// Trigger abilities don't appear as passives. Add a passive ability icon.
-	AddIconPassive(Template);
+	Value = new class'XMBValue_UnitValue';
+	Value.UnitValueName = 'ConsecutiveMisses';
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.EffectName = 'ZeroIn';
+	Effect.ScaleValue = Value;
+	Effect.ScaleMax = 1;
+	Effect.AddToHitModifier(20, eHit_Success);
+	Effect.OtherConditions.AddItem(AbilityPropertyCondition);
+
+	Template = Passive('XMBExample_ZeroIn', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+
+	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInMiss');
+	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInHit');
+
+	return Template;
+}
+
+static function X2AbilityTemplate ZeroInMiss()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_IncrementUnitValue Effect;
+	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+
+	Effect = new class'X2Effect_IncrementUnitValue';
+	Effect.UnitName = 'ConsecutiveMisses';
+	Effect.NewValueToSet = 1;
+	Effect.CleanupType = eCleanup_BeginTactical;
+
+	Template = SelfTargetTrigger('XMBExample_ZeroInMiss', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
 
 	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
 	AbilityPropertyCondition.bRequireActivated = true;
@@ -831,42 +863,27 @@ static function X2AbilityTemplate ZeroIn()
 	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
 	AddTriggerTargetCondition(Template, default.MissCondition);
 
-	BonusEffect = new class'XMBEffect_ConditionalBonus';
-	BonusEffect.EffectName = 'ZeroIn';
-	BonusEffect.DuplicateResponse = eDupe_Refresh;
-	BonusEffect.OtherConditions.AddItem(AbilityPropertyCondition);
-	BonusEffect.AddToHitModifier(20, eHit_Success);
-	BonusEffect.BuildPersistentEffect(1, true, true, false);
-	BonusEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true, , Template.AbilitySourceName);
-
-	Template.AddTargetEffect(BonusEffect);
-
-	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInHit');
-
 	return Template;
 }
 
 static function X2AbilityTemplate ZeroInHit()
 {
 	local X2AbilityTemplate Template;
-	local X2Effect_RemoveEffects RemoveBonusEffect;
+	local X2Effect_SetUnitValue Effect;
 	local XMBCondition_AbilityProperty AbilityPropertyCondition;
 
-	RemoveBonusEffect = new class'X2Effect_RemoveEffects';
-	RemoveBonusEffect.EffectNamesToRemove.AddItem('ZeroIn');
-	
-	Template = SelfTargetTrigger('XMBExample_ZeroInHit', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, 'AbilityActivated');
+	Effect = new class'X2Effect_SetUnitValue';
+	Effect.UnitName = 'ConsecutiveMisses';
+	Effect.NewValueToSet = 0;
+	Effect.CleanupType = eCleanup_BeginTactical;
 
-	// Trigger abilities don't appear as passives. Add a passive ability icon.
-	AddIconPassive(Template);
+	Template = SelfTargetTrigger('XMBExample_ZeroInHit', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
 
 	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
 	AbilityPropertyCondition.bRequireActivated = true;
 	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
 	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
 	AddTriggerTargetCondition(Template, default.HitCondition);
-
-	Template.AddTargetEffect(RemoveBonusEffect);
 
 	return Template;
 }
