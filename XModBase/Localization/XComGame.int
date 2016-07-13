@@ -147,21 +147,21 @@ LocFlyOverText="Sprint"
 LocHelpText="Gain a bonus move action."
 LocLongDescription="Gain a bonus move action."
 
+[XMBExample_TacticalSense X2AbilityTemplate]
+LocFriendlyName="Tactical Sense"
+LocFlyOverText="Tactical Sense"
+LocHelpText="You get <Ability:+CurDodge/> Dodge due to visible enemies."
+LocLongDescription="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
+
 [XMBExample_Weaponmaster X2AbilityTemplate]
 LocFriendlyName="Weaponmaster"
 LocFlyOverText="Weaponmaster"
 LocHelpText="Your <Ability:WeaponName/> attacks deal <Ability:+Damage/> damage."
 LocLongDescription="Your <Ability:WeaponName/> attacks deal <Ability:+Damage/> damage."
 
-[XMBExample_TacticalSense X2AbilityTemplate]
-LocFriendlyName="Tactical Sense"
-LocFlyOverText="Tactical Sense"
-LocHelpText="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
-LocLongDescription="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
-
 [XMBExample_ZeroIn X2AbilityTemplate]
 LocFriendlyName="Zero In"
 LocFlyOverText="Zero In"
-LocHelpText="When you miss a shot, you get <Ability:+ToHit/> Aim on your next attack."
+LocHelpText="You get <Ability:+CurToHit/> Aim on your next attack."
 LocLongDescription="When you miss a shot, you get <Ability:+ToHit/> Aim on your next attack."
 

@@ -68,8 +68,13 @@ var float ScaleMax;
 // Condition properties //
 //////////////////////////
 
-var array<X2Condition> AbilityTargetConditions;		// Conditions on the target of the ability being modified.
-var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of the ability being modified.
+var array<X2Condition> AbilityTargetConditions;				// Conditions on the target of the ability being modified.
+var array<X2Condition> AbilityShooterConditions;			// Conditions on the shooter of the ability being modified.
+var array<X2Condition> AbilityTargetConditionsAsTarget;		// Conditions on the target of the ability being modified, for ToHitAsTarget.
+var array<X2Condition> AbilityShooterConditionsAsTarget;	// Conditions on the shooter of the ability being modified, for ToHitAsTarget.
+
+var bool bHideWhenNotRelevant;								// If true, the ability doesn't appear in the UI when its
+															// conditions are not met.
 
 
 /////////////
@@ -159,17 +164,31 @@ function private float GetScaleByValue(XComGameState_Effect EffectState, XComGam
 	return Scale;
 }
 
-function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
+function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
 {
 	local name AvailableCode;
 
-	AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditions, EffectState, Attacker, Target, AbilityState);
-	if (AvailableCode != 'AA_Success')
-		return AvailableCode;
+	if (!bAsTarget)
+	{
+		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
 		
-	AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectState, Attacker, Target, AbilityState);
-	if (AvailableCode != 'AA_Success')
-		return AvailableCode;
+		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
+	}
+	else
+	{
+		AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditionsAsTarget, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
+		
+		AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditionsAsTarget, EffectState, Attacker, Target, AbilityState);
+		if (AvailableCode != 'AA_Success')
+			return AvailableCode;
+	}
+
 		
 	return 'AA_Success';
 }
@@ -302,7 +321,7 @@ function GetToHitAsTargetModifiers(XComGameState_Effect EffectState, XComGameSta
 {
 	local ExtShotModifierInfo ExtModInfo;
 
-	if (ValidateAttack(EffectState, Attacker, Target, AbilityState) == 'AA_Success')
+	if (ValidateAttack(EffectState, Attacker, Target, AbilityState, true) == 'AA_Success')
 	{
 		foreach Modifiers(ExtModInfo)
 		{
@@ -333,6 +352,71 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 	return true;
 }
 
+// From X2Effect_Persistent.
+function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit)
+{
+	local name AvailableCode;
+	local float Scale;
+	local ExtShotModifierInfo ExtModInfo;
+	local bool bHasAsShooterEffects, bHasAsTargetEffects;
+	local array<StateObjectReference> VisibleUnits;
+	local StateObjectReference UnitRef;
+	local XComGameState_Unit OtherUnit;
+	local XComGameStateHistory History;
+
+	if (!bHideWhenNotRelevant)
+		return true;
+
+	History = `XCOMHISTORY;
+
+	Scale = GetScaleByValue(EffectGameState, TargetUnit, none, none);
+	if (Scale == 0.0)
+		return false;
+
+	foreach Modifiers(ExtModInfo)
+	{
+		if (ExtModInfo.Type == 'ToHitAsTarget')
+			bHasAsTargetEffects = true;
+		else
+			bHasAsShooterEffects = true;
+	}
+
+	class'X2TacticalVisibilityHelpers'.static.GetAllVisibleEnemyUnitsForUnit(TargetUnit.ObjectID, VisibleUnits);
+	foreach VisibleUnits(UnitRef)
+	{
+		OtherUnit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (OtherUnit != none)
+		{
+			if (bHasAsShooterEffects)
+			{
+				AvailableCode = ValidateAttack(EffectGameState, TargetUnit, OtherUnit, none);
+				if (AvailableCode == 'AA_Success')
+					return true;
+			}
+
+			if (bHasAsTargetEffects)
+			{
+				AvailableCode = ValidateAttack(EffectGameState, OtherUnit, TargetUnit, none, true);
+				if (AvailableCode == 'AA_Success')
+					return true;
+			}
+		}
+	}
+
+	if (VisibleUnits.Length == 0)
+	{
+		if (bHasAsShooterEffects && AbilityTargetConditions.Length == 0)
+		{
+			AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectGameState, TargetUnit, none, none);
+			if (AvailableCode == 'AA_Success')
+				return true;
+		}
+	}
+
+	return false;
+}
+
+
 // From XMBEffectInterface. Checks whether this effect handles a particular ability tag, such as
 // "<Ability:ToHit/>", and gets the value of the tag if it's handled. This function knows which
 // modifiers are actually applied by this effect, and will only handle those. A complete list of 
@@ -350,53 +434,52 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 	local int ValidModifiers, ValidTechModifiers;
 	local EAbilityHitResult HitResult;
 	local float ResultMultiplier;
+	local XComGameState_Unit UnitState;
 	local int idx;
 
 	ResultMultiplier = 1;
 	TechResults.Length = class'X2ItemTemplateManager'.default.WeaponTechCategories.Length;
 
+	if (left(Tag, 3) ~= "Max")
+	{
+		Tag = name(mid(Tag, 3));
+		ResultMultiplier *= ScaleMax;
+	}
+	else if (left(Tag, 3) ~= "Cur")
+	{
+		Tag = name(mid(Tag, 3));
+		if (AbilityState != none)
+		{
+			UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(AbilityState.OwnerStateObject.ObjectID));
+			if (UnitState != none)
+			{
+				ResultMultiplier *= GetScaleByValue(none, UnitState, none, none);
+			}
+		}
+	}
+
 	// These are all the combinations of modifier type and hit result that make sense.
 	switch (Tag)
 	{
-	case 'ToHit':					Tag = 'ToHit';			HitResult = eHit_Success;									break;
-	case 'ToHitAsTarget':			Tag = 'ToHitAsTarget';	HitResult = eHit_Success;									break;
-	case 'Defense':					Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = -1;			break;
-	case 'Damage':					Tag = 'Damage';			HitResult = eHit_Success;									break;
-	case 'Shred':					Tag = 'Shred';			HitResult = eHit_Success;									break;
-	case 'ArmorPiercing':			Tag = 'ArmorPiercing';	HitResult = eHit_Success;									break;
-	case 'Crit':					Tag = 'ToHit';			HitResult = eHit_Crit;										break;
-	case 'CritDefense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier = -1;			break;
-	case 'CritDamage':				Tag = 'Damage';			HitResult = eHit_Crit;										break;
-	case 'CritShred':				Tag = 'Shred';			HitResult = eHit_Crit;										break;
-	case 'CritArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Crit;										break;
-	case 'Graze':					Tag = 'ToHit';			HitResult = eHit_Graze;										break;
-	case 'Dodge':					Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;										break;
-	case 'GrazeDamage':				Tag = 'Damage';			HitResult = eHit_Graze;										break;
-	case 'GrazeShred':				Tag = 'Shred';			HitResult = eHit_Graze;										break;
-	case 'GrezeArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Graze;										break;
-	case 'MissDamage':				Tag = 'Damage';			HitResult = eHit_Miss;										break;
-	case 'MissShred':				Tag = 'Shred';			HitResult = eHit_Miss;										break;
-	case 'MissArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Miss;										break;
-
-	case 'MaxToHit':				Tag = 'ToHit';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
-	case 'MaxToHitAsTarget':		Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
-	case 'MaxDefense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier = -ScaleMax;	break;
-	case 'MaxDamage':				Tag = 'Damage';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
-	case 'MaxShred':				Tag = 'Shred';			HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
-	case 'MaxArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Success;	ResultMultiplier = ScaleMax;	break;
-	case 'MaxCrit':					Tag = 'ToHit';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxCritDefense':			Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier = -ScaleMax;	break;
-	case 'MaxCritDamage':			Tag = 'Damage';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxCritShred':			Tag = 'Shred';			HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxCritArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Crit;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxGraze':				Tag = 'ToHit';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxDodge':				Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxGrazeDamage':			Tag = 'Damage';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxGrazeShred':			Tag = 'Shred';			HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxGrezeArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Graze;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxMissDamage':			Tag = 'Damage';			HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxMissShred':			Tag = 'Shred';			HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
-	case 'MaxMissArmorPiercing':	Tag = 'ArmorPiercing';	HitResult = eHit_Miss;		ResultMultiplier = ScaleMax;	break;
+	case 'ToHit':					Tag = 'ToHit';			HitResult = eHit_Success;							break;
+	case 'ToHitAsTarget':			Tag = 'ToHitAsTarget';	HitResult = eHit_Success;							break;
+	case 'Defense':					Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier *= -1;	break;
+	case 'Damage':					Tag = 'Damage';			HitResult = eHit_Success;							break;
+	case 'Shred':					Tag = 'Shred';			HitResult = eHit_Success;							break;
+	case 'ArmorPiercing':			Tag = 'ArmorPiercing';	HitResult = eHit_Success;							break;
+	case 'Crit':					Tag = 'ToHit';			HitResult = eHit_Crit;								break;
+	case 'CritDefense':				Tag = 'ToHitAsTarget';	HitResult = eHit_Crit;		ResultMultiplier *= -1;	break;
+	case 'CritDamage':				Tag = 'Damage';			HitResult = eHit_Crit;								break;
+	case 'CritShred':				Tag = 'Shred';			HitResult = eHit_Crit;								break;
+	case 'CritArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Crit;								break;
+	case 'Graze':					Tag = 'ToHit';			HitResult = eHit_Graze;								break;
+	case 'Dodge':					Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;								break;
+	case 'GrazeDamage':				Tag = 'Damage';			HitResult = eHit_Graze;								break;
+	case 'GrazeShred':				Tag = 'Shred';			HitResult = eHit_Graze;								break;
+	case 'GrazeArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Graze;								break;
+	case 'MissDamage':				Tag = 'Damage';			HitResult = eHit_Miss;								break;
+	case 'MissShred':				Tag = 'Shred';			HitResult = eHit_Miss;								break;
+	case 'MissArmorPiercing':		Tag = 'ArmorPiercing';	HitResult = eHit_Miss;								break;
 
 	default:
 		return false;

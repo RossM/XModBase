@@ -125,20 +125,24 @@ event ExpandHandler(string InString, out string OutString)
 			}
 		}
 
-		if (OutString != "")
+		if (OutString == "")
 		{
-			if (plusFlag && left(OutString, 1) != "-")
-				OutString = "+" $ OutString;
-			return;
+			// If this tag is a stat name, look for an X2Effect_PersistentStatChange that modifies that
+			// stat.
+			idx = class'XMBConfig'.default.m_aCharStatTags.Find(Type);
+			if (idx != INDEX_NONE)
+			{
+				if (!FindStatBonus(AbilityTemplate, ECharStatType(idx), OutString))
+					OutString = "";
+			}
 		}
+	}
 
-		// If this tag is a stat name, look for an X2Effect_PersistentStatChange that modifies that
-		// stat.
-		idx = class'XMBConfig'.default.m_aCharStatTags.Find(Type);
-		if (idx != INDEX_NONE && FindStatBonus(AbilityTemplate, ECharStatType(idx), OutString))
-		{
-			return;
-		}
+	if (OutString != "")
+	{
+		if (plusFlag && left(OutString, 1) != "-")
+			OutString = "+" $ OutString;
+		return;
 	}
 
 	switch (Type)
@@ -207,7 +211,9 @@ event ExpandHandler(string InString, out string OutString)
 	}
 
 	// no tag found
+	`RedScreenOnce("XMBAbilityTag v" $ MajorVersion $ "." $ MinorVersion $ "." $ PatchVersion);
 	`RedScreenOnce(`location $ ": Unhandled localization tag: '"$Tag$":"$InString$"'");
+	`RedScreenOnce("AbilityState =" @ AbilityState $ ", AbilityTemplate =" @ AbilityTemplate.DataName $ ", Type =" @ Type);
 	OutString = "<Ability:"$InString$"/>";
 }
 

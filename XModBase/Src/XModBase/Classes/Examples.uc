@@ -136,7 +136,7 @@ static function X2AbilityTemplate Assassin()
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_Stealth');
 
 	// Add an additional effect that causes the AI to forget where the unit was
-	Template.AddTargetEffect(class'X2Effect_Spotted'.static.CreateUnspottedEffect());
+	AddSecondaryEffect(Template, class'X2Effect_Spotted'.static.CreateUnspottedEffect());
 
 	// Have the unit say it's entering concealment
 	Template.ActivationSpeech = 'ActivateConcealment';
@@ -193,7 +193,7 @@ static function X2AbilityTemplate BullRush()
 
 	// Create a stun effect that removes 2 actions and has a 100% chance of success if the attack hits.
 	StunnedEffect = class'X2StatusEffects'.static.CreateStunnedStatusEffect(2, 100, false);
-	Template.AddTargetEffect(StunnedEffect);
+	AddSecondaryEffect(Template, StunnedEffect);
 
 	// The default fire animation depends on the ability's associated weapon - shooting for a gun or 
 	// slashing for a sword. If the ability has no associated weapon, no animation plays. Use an
@@ -297,37 +297,23 @@ static function X2AbilityTemplate CloseCombatSpecialist()
 // Config:			(AbilityName="XMBExample_DamnGoodGround")
 static function X2AbilityTemplate DamnGoodGround()
 {
-	local XMBEffect_ConditionalBonus Effect, AsTargetEffect;
+	local XMBEffect_ConditionalBonus Effect;
 	local X2AbilityTemplate Template;
 
 	// Create a conditional bonus for the Aim bonus
 	Effect = new class'XMBEffect_ConditionalBonus';
 	Effect.EffectName = 'DamnGoodGround';
 
-	// The bonus adds +10 Aim
+	// The bonus adds +10 Aim and +10 Defense
 	Effect.AddToHitModifier(10);
+	Effect.AddToHitAsTargetModifier(-10);
 
 	// When attacking, require that the target have height disadvantage
 	Effect.AbilityTargetConditions.AddItem(default.HeightDisadvantageCondition);
+	Effect.AbilityTargetConditionsAsTarget.AddItem(default.HeightAdvantageCondition);
 
 	// Create the template using a helper function
 	Template = Passive('XMBExample_DamnGoodGround', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
-
-	// Create a second conditional bonus for the Defense bonus
-	AsTargetEffect = new class'XMBEffect_ConditionalBonus';
-	AsTargetEffect.EffectName = 'DamnGoodGroundAsTarget';
-
-	// The bonus adds +10 Defense
-	AsTargetEffect.AddToHitAsTargetModifier(-10);
-
-	// When being attacked, require that the unit have height advantage
-	AsTargetEffect.AbilityTargetConditions.AddItem(default.HeightAdvantageCondition);
-
-	// Set the display info so that bonus name appears correctly in the shot breakdown
-	AsTargetEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, false, , Template.AbilitySourceName);
-
-	// Add this as a second effect of the passive
-	Template.AddTargetEffect(AsTargetEffect);
 
 	return Template;
 }
@@ -383,14 +369,14 @@ static function X2AbilityTemplate DeepCover()
 	ActionPointEffect.PointType = class'X2CharacterTemplateManager'.default.DeepCoverActionPoint;
 	ActionPointEffect.NumActionPoints = 1;
 	ActionPointEffect.bApplyOnlyWhenOut = true;
-	Template.AddShooterEffect(ActionPointEffect);
+	AddSecondaryEffect(Template, ActionPointEffect);
 
 	// Activate the Hunker Down ability
 	HunkerDownEffect = new class'X2Effect_ImmediateAbilityActivation';
 	HunkerDownEffect.EffectName = 'ImmediateHunkerDown';
 	HunkerDownEffect.AbilityName = 'HunkerDown';
 	HunkerDownEffect.BuildPersistentEffect(1, false, true, , eGameRule_PlayerTurnBegin);
-	Template.AddTargetEffect(HunkerDownEffect);
+	AddSecondaryEffect(Template, HunkerDownEffect);
 
 	return Template;
 }
@@ -685,7 +671,7 @@ static function X2AbilityTemplate Pyromaniac()
 	// Add another effect that grants a free incendiary grenade during each mission
 	ItemEffect = new class 'XMBEffect_AddUtilityItem';
 	ItemEffect.DataName = 'Firebomb';
-	Template.AddTargetEffect(ItemEffect);
+	AddSecondaryEffect(Template, ItemEffect);
 
 	return Template;
 }
@@ -736,7 +722,7 @@ static function X2AbilityTemplate Rocketeer()
 	Template = Passive('XMBExample_Rocketeer', "img:///UILibrary_PerkIcons.UIPerk_command", true);
 
 	// Add the XMBEffect_AddItemChargesBySlot as an extra effect.
-	Template.AddTargetEffect(Effect);
+	AddSecondaryEffect(Template, Effect);
 
 	return Template;
 }
@@ -846,6 +832,7 @@ static function X2AbilityTemplate ZeroIn()
 
 	Effect = new class'XMBEffect_ConditionalBonus';
 	Effect.EffectName = 'ZeroIn';
+
 	Effect.ScaleValue = Value;
 	Effect.ScaleMax = 1;
 	Effect.AddToHitModifier(20, eHit_Success);

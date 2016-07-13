@@ -87,7 +87,8 @@ var const int AUTO_PRIORITY;
 // takes an X2Effect_Persistent.
 static function X2AbilityTemplate Passive(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect_Persistent Effect = none)
 {
-	local X2AbilityTemplate						Template;
+	local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalBonus ConditionalEffect;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
 	Template.IconImage = IconImage;
@@ -102,6 +103,21 @@ static function X2AbilityTemplate Passive(name DataName, string IconImage, optio
 
 	if (Effect == none)
 		Effect = new class'X2Effect_Persistent';
+
+	ConditionalEffect = XMBEffect_ConditionalBonus(Effect);
+
+	if (ConditionalEffect != none && (ConditionalEffect.AbilityTargetConditions.Length > 0 ||
+									  ConditionalEffect.AbilityShooterConditions.Length > 0 ||
+									  ConditionalEffect.ScaleValue != none))
+	{
+		ConditionalEffect.BuildPersistentEffect(1, true, false, false);
+		ConditionalEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true,,Template.AbilitySourceName);
+		ConditionalEffect.bHideWhenNotRelevant = true;
+		Template.AddTargetEffect(ConditionalEffect);
+
+		Effect = new class'X2Effect_Persistent';
+		Effect.EffectName = name(DataName $ "_Passive");
+	}
 
 	Effect.BuildPersistentEffect(1, true, false, false);
 	Effect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,,Template.AbilitySourceName);
@@ -459,6 +475,16 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 	Template.bCrossClassEligible = bCrossClassEligible;
 
 	return Template;
+}
+
+static function AddSecondaryEffect(X2AbilityTemplate Template, X2Effect Effect)
+{
+	if (X2Effect_Persistent(Effect) != none)
+		X2Effect_Persistent(Effect).SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true, , Template.AbilitySourceName);
+	if (XMBEffect_ConditionalBonus(Effect) != none)
+		XMBEffect_ConditionalBonus(Effect).bHideWhenNotRelevant = true;
+
+	Template.AddTargetEffect(Effect);
 }
 
 // Hides the icon of an ability. For use with secondary abilities added in AdditionaAbilities that
