@@ -352,6 +352,22 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 	return true;
 }
 
+function private bool AllConditionsAreUnitConditions(array<X2Condition> Conditions)
+{
+	local X2Condition Condition;
+
+	foreach Conditions(Condition)
+	{
+		if (class'XMBConfig'.default.UnitConditions.Find(Condition.class.name) == INDEX_NONE && 
+			class'XMBConfig'.default.ExtraUnitConditions.Find(Condition.class.name) == INDEX_NONE)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 function private bool IsEffectRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit, bool bCheckVisibleUnits = true)
 {
 	local name AvailableCode;
@@ -411,8 +427,12 @@ function private bool IsEffectRelevant(XComGameState_Effect EffectGameState, XCo
 				return true;
 		}
 
-		if (bHasAsTargetEffects && AbilityTargetConditionsAsTarget.Length == 0 && AbilityShooterConditionsAsTarget.Length == 0)
-			return true;
+		if (bHasAsTargetEffects && AbilityShooterConditionsAsTarget.Length == 0 && AllConditionsAreUnitConditions(AbilityTargetConditionsAsTarget))
+		{
+			AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditionsAsTarget, EffectGameState, none, TargetUnit, none);
+			if (AvailableCode == 'AA_Success')
+				return true;
+		}
 	}
 
 	return false;

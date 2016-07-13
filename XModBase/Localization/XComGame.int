@@ -147,6 +147,12 @@ LocFlyOverText="Sprint"
 LocHelpText="Gain a bonus move action."
 LocLongDescription="Gain a bonus move action."
 
+[XMBExample_SurvivalInstinct X2AbilityTemplate]
+LocFriendlyName="Survival Instinct"
+LocFlyOverText="Survival Instinct"
+LocHelpText="<Ability:+Defense/> Defense and <Ability:+Crit/> Crit chance due to injury."
+LocLongDescription="Gain <Ability:+Defense/> Defense and <Ability:+Crit/> Crit chance while injured."
+
 [XMBExample_TacticalSense X2AbilityTemplate]
 LocFriendlyName="Tactical Sense"
 LocFlyOverText="Tactical Sense"

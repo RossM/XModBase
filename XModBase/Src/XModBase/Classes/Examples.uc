@@ -39,6 +39,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Rocketeer());
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(Sprint());
+	Templates.AddItem(SurvivalInstinct());
 	Templates.AddItem(TacticalSense());
 	Templates.AddItem(Weaponmaster());
 	Templates.AddItem(ZeroIn());
@@ -777,6 +778,23 @@ static function X2AbilityTemplate Sprint()
 	AddCooldown(Template, 3);
 
 	return Template;
+}
+
+static function X2AbilityTemplate SurvivalInstinct()
+{
+	local XMBEffect_ConditionalBonus Effect;
+	local X2Condition_UnitStatCheck Condition;
+
+	Condition = new class'X2Condition_UnitStatCheck';
+	Condition.AddCheckStat(eStat_HP, 100, eCheck_LessThan,,, true);
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.AddToHitModifier(10, eHit_Crit);
+	Effect.AddToHitAsTargetModifier(-20, eHit_Success);
+	EFfect.AbilityShooterConditions.AddItem(Condition);
+	Effect.AbilityTargetConditionsAsTarget.AddItem(Condition);
+
+	return Passive('XMBExample_SurvivalInstinct', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
 static function X2AbilityTemplate TacticalSense()
