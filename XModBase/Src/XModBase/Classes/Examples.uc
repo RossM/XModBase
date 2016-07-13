@@ -14,6 +14,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(AbsolutelyCritical());
 	Templates.AddItem(AdrenalineSurge());
+	Templates.AddItem(ArcticWarrior());
 	Templates.AddItem(Assassin());
 	Templates.AddItem(BulletSwarm());
 	Templates.AddItem(BullRush());
@@ -100,6 +101,31 @@ static function X2AbilityTemplate AdrenalineSurge()
 	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
 
 	Template.AddMultiTargetEffect(Effect);
+
+	return Template;
+}
+
+static function X2AbilityTemplate ArcticWarrior()
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_PersistentStatChange Effect;
+	local X2Condition_MapProperty Condition;
+	
+	Template = Passive('XMBExample_ArcticWarrior', "img:///UILibrary_PerkIcons.UIPerk_command", true, none);
+
+	Effect = new class'X2Effect_PersistentStatChange';
+	Effect.EffectName = 'ArcticWarrior';
+	Effect.BuildPersistentEffect(1, true, false, false);
+
+	Effect.AddPersistentStatChange(eStat_Defense, 10);
+	Effect.AddPersistentStatChange(eStat_Mobility, 3);
+
+	Condition = new class'X2Condition_MapProperty';
+	Condition.AllowedBiomes.AddItem("Tundra");
+
+	Effect.TargetConditions.AddItem(Condition);
+
+	AddSecondaryEffect(Template, Effect);
 
 	return Template;
 }

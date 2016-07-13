@@ -15,6 +15,12 @@ LocFlyOverText="Adrenaline Surge"
 LocHelpText="When you get a kill, you and nearby friendly units get <Ability:+Crit/> Crit chance and <Ability:+Mobility/> Mobility until the end of your turn."
 LocLongDescription="When you get a kill, you and nearby friendly units get <Ability:+Crit/> Crit chance and <Ability:+Mobility/> Mobility until the end of your turn."
 
+[XMBExample_ArcticWarrior X2AbilityTemplate]
+LocFriendlyName="Arctic Warrior"
+LocFlyOverText="Arctic Warrior"
+LocHelpText="<Ability:+Defense/> Defense and <Ability:+Mobility/> Mobility due to climate."
+LocLongDescription="You gain <Ability:+Defense/> Defense and <Ability:+Mobility/> Mobility in cold climates."
+
 [XMBExample_Assassin X2AbilityTemplate]
 LocFriendlyName="Assassin"
 LocFlyOverText="Assassin"
@@ -156,7 +162,7 @@ LocLongDescription="Gain <Ability:+Defense/> Defense and <Ability:+Crit/> Crit c
 [XMBExample_TacticalSense X2AbilityTemplate]
 LocFriendlyName="Tactical Sense"
 LocFlyOverText="Tactical Sense"
-LocHelpText="You get <Ability:+CurDodge/> Dodge due to visible enemies."
+LocHelpText="<Ability:+CurDodge/> Dodge due to visible enemies."
 LocLongDescription="You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
 
 [XMBExample_Weaponmaster X2AbilityTemplate]
