@@ -19,6 +19,7 @@
 //  Magnum
 //  MovingTarget
 //  PowerShot
+//  SurvivalInstinct
 //  TacticalSense
 //  Weaponmaster
 //  ZeroIn
