@@ -352,8 +352,7 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 	return true;
 }
 
-// From X2Effect_Persistent.
-function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit)
+function private bool IsEffectRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit, bool bCheckVisibleUnits = true)
 {
 	local name AvailableCode;
 	local float Scale;
@@ -363,9 +362,6 @@ function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XC
 	local StateObjectReference UnitRef;
 	local XComGameState_Unit OtherUnit;
 	local XComGameStateHistory History;
-
-	if (!bHideWhenNotRelevant)
-		return true;
 
 	History = `XCOMHISTORY;
 
@@ -381,24 +377,27 @@ function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XC
 			bHasAsShooterEffects = true;
 	}
 
-	class'X2TacticalVisibilityHelpers'.static.GetAllVisibleEnemyUnitsForUnit(TargetUnit.ObjectID, VisibleUnits);
-	foreach VisibleUnits(UnitRef)
+	if (bCheckVisibleUnits)
 	{
-		OtherUnit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-		if (OtherUnit != none)
+		class'X2TacticalVisibilityHelpers'.static.GetAllVisibleEnemyUnitsForUnit(TargetUnit.ObjectID, VisibleUnits);
+		foreach VisibleUnits(UnitRef)
 		{
-			if (bHasAsShooterEffects)
+			OtherUnit = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+			if (OtherUnit != none)
 			{
-				AvailableCode = ValidateAttack(EffectGameState, TargetUnit, OtherUnit, none);
-				if (AvailableCode == 'AA_Success')
-					return true;
-			}
+				if (bHasAsShooterEffects)
+				{
+					AvailableCode = ValidateAttack(EffectGameState, TargetUnit, OtherUnit, none);
+					if (AvailableCode == 'AA_Success')
+						return true;
+				}
 
-			if (bHasAsTargetEffects)
-			{
-				AvailableCode = ValidateAttack(EffectGameState, OtherUnit, TargetUnit, none, true);
-				if (AvailableCode == 'AA_Success')
-					return true;
+				if (bHasAsTargetEffects)
+				{
+					AvailableCode = ValidateAttack(EffectGameState, OtherUnit, TargetUnit, none, true);
+					if (AvailableCode == 'AA_Success')
+						return true;
+				}
 			}
 		}
 	}
@@ -411,11 +410,62 @@ function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XC
 			if (AvailableCode == 'AA_Success')
 				return true;
 		}
+
+		if (bHasAsTargetEffects && AbilityTargetConditionsAsTarget.Length == 0 && AbilityShooterConditionsAsTarget.Length == 0)
+			return true;
 	}
 
 	return false;
 }
 
+// From X2Effect_Persistent.
+function bool IsEffectCurrentlyRelevant(XComGameState_Effect EffectGameState, XComGameState_Unit TargetUnit)
+{
+	if (!bHideWhenNotRelevant)
+		return true;
+
+	return IsEffectRelevant(EffectGameState, TargetUnit);
+}
+
+// From X2Effect_Persistent
+function ModifyUISummaryUnitStats(XComGameState_Effect EffectState, XComGameState_Unit UnitState, const ECharStatType Stat, out int StatValue)
+{
+	local name Tag;
+	local EAbilityHitResult HitResult;
+	local ExtShotModifierInfo ExtModInfo;
+	local float ResultMultiplier;
+
+	ResultMultiplier = 1;
+
+	switch (stat)
+	{
+		case eStat_Offense:		Tag = 'ToHit';			HitResult = eHit_Success;							break;
+		case eStat_Defense:		Tag = 'ToHitAsTarget';	HitResult = eHit_Success;	ResultMultiplier *= -1;	break;
+		case eStat_Dodge:		Tag = 'ToHitAsTarget';	HitResult = eHit_Graze;								break;
+		case eStat_CritChance:	Tag = 'ToHit';			HitResult = eHit_Crit;								break;
+
+		default: return;
+	}
+
+	if (!IsEffectRelevant(EffectState, UnitState, false))
+		return;
+
+	ResultMultiplier *= GetScaleByValue(EffectState, UnitState, none, none);
+
+	foreach Modifiers(ExtModInfo)
+	{
+		if (ExtModInfo.Type != Tag)
+			continue;
+
+		if (ExtModInfo.ModInfo.ModType != HitResult)
+			continue;
+
+		if (ExtModInfo.WeaponTech != '')
+			continue;
+
+		StatValue += int(ExtModInfo.ModInfo.Value * ResultMultiplier);
+	}
+}
 
 // From XMBEffectInterface. Checks whether this effect handles a particular ability tag, such as
 // "<Ability:ToHit/>", and gets the value of the tag if it's handled. This function knows which
