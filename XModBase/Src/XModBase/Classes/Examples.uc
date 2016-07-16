@@ -71,6 +71,10 @@ static function X2AbilityTemplate AbsolutelyCritical()
 	return Passive('XMBExample_AbsolutelyCritical', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+// Perk name:		Adrenaline Surge
+// Perk effect:		When you get a kill, you and nearby friendly units get +10 Crit chance and +3 Mobility until the end of your turn.
+// Localized text:	"When you get a kill, you and nearby friendly units get <Ability:+Crit/> Crit chance and <Ability:+Mobility/> Mobility until the end of your turn."
+// Config:			(AbilityName="XMBExample_AdrenalineSurge")
 static function X2AbilityTemplate AdrenalineSurge()
 {
 	local X2Effect_PersistentStatChange Effect;
@@ -105,6 +109,10 @@ static function X2AbilityTemplate AdrenalineSurge()
 	return Template;
 }
 
+// Perk name:		Arctic Warrior
+// Perk effect:		You gain +10 Defense and +3 Mobility in cold climates.
+// Localized text:	"You gain <Ability:+Defense/> Defense and <Ability:+Mobility/> Mobility in cold climates."
+// Config:			(AbilityName="XMBExample_ArcticWarrior")
 static function X2AbilityTemplate ArcticWarrior()
 {
 	local X2AbilityTemplate Template;
@@ -408,6 +416,10 @@ static function X2AbilityTemplate DeepCover()
 	return Template;
 }
 
+// Perk name:		Esprit de Corps
+// Perk effect:		Squad receives +5 Will and +5 Defense in battle.
+// Localized text:	"Squad receives <Ability:+Will/> Will and <Ability:+Defense/> Defense in battle."
+// Config:			(AbilityName="XMBExample_EspritDeCorps")
 static function X2AbilityTemplate EspritDeCorps()
 {
 	local X2Effect_PersistentStatChange Effect;
@@ -432,6 +444,10 @@ static function X2AbilityTemplate EspritDeCorps()
 	return Template;
 }
 
+// Perk name:		Focus
+// Perk effect:		Your first reaction shot each turn always hits.
+// Localized text:	"Your first reaction shot each turn always hits."
+// Config:			(AbilityName="XMBExample_Focus")
 static function X2AbilityTemplate Focus()
 {
 	local XMBEffect_ChangeHitResultForAttacker Effect;
@@ -455,6 +471,7 @@ static function X2AbilityTemplate Focus()
 	return Template;
 }
 
+// This is a part of the Focus effect, above. It counts the number of reaction shots the unit makes each turn.
 static function X2AbilityTemplate FocusCount()
 {
 	local X2Effect_IncrementUnitValue Effect;
@@ -734,6 +751,10 @@ static function X2AbilityTemplate ReverseEngineering()
 	return Template;
 }
 
+// Perk name:		Rocketeer
+// Perk effect:		Your equipped heavy weapon gets an additional use.
+// Localized text:	"Your equipped heavy weapon gets an additional use."
+// Config:			(AbilityName="XMBExample_Rocketeer")
 static function X2AbilityTemplate Rocketeer()
 {
 	local XMBEffect_AddItemChargesBySlot Effect;
@@ -806,6 +827,10 @@ static function X2AbilityTemplate Sprint()
 	return Template;
 }
 
+// Perk name:		Survival Instinct
+// Perk effect:		Gain +20 Defense and +10 Crit chance while injured.
+// Localized text:	"Gain <Ability:+Defense/> Defense and <Ability:+Crit/> Crit chance while injured."
+// Config:			(AbilityName="XMBExample_SurvivalInstinct")
 static function X2AbilityTemplate SurvivalInstinct()
 {
 	local XMBEffect_ConditionalBonus Effect;
@@ -823,6 +848,10 @@ static function X2AbilityTemplate SurvivalInstinct()
 	return Passive('XMBExample_SurvivalInstinct', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+// Perk name:		Tactical Sense
+// Perk effect:		You get +10 Dodge per visible enemy, to a max of +50.
+// Localized text:	"You get <Ability:+Dodge/> Dodge per visible enemy, to a max of <Ability:+MaxDodge/>."
+// Config:			(AbilityName="XMBExample_TacticalSense")
 static function X2AbilityTemplate TacticalSense()
 {
 	local XMBEffect_ConditionalBonus Effect;
@@ -860,6 +889,10 @@ static function X2AbilityTemplate Weaponmaster()
 	return Passive('XMBExample_Weaponmaster', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
+// Perk name:		Zero In
+// Perk effect:		When you miss a shot, you get +20 Aim on your next attack.
+// Localized text:	"When you miss a shot, you get <Ability:+ToHit/> Aim on your next attack."
+// Config:			(AbilityName="XMBExample_ZeroIn")
 static function X2AbilityTemplate ZeroIn()
 {
 	local X2AbilityTemplate Template;
@@ -890,6 +923,7 @@ static function X2AbilityTemplate ZeroIn()
 	return Template;
 }
 
+// This is a part of the Zero In effect, above. It counts the number of missed shots by the unit.
 static function X2AbilityTemplate ZeroInMiss()
 {
 	local X2AbilityTemplate Template;
@@ -912,6 +946,7 @@ static function X2AbilityTemplate ZeroInMiss()
 	return Template;
 }
 
+// This is a part of the Zero In effect, above. It resets the missed shot count when the unit gets a hit.
 static function X2AbilityTemplate ZeroInHit()
 {
 	local X2AbilityTemplate Template;
