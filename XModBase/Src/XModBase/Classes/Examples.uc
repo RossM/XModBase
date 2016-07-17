@@ -18,7 +18,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Assassin());
 	Templates.AddItem(BulletSwarm());
 	Templates.AddItem(BullRush());
-	Templates.AddItem(BullRushTrigger());
 	Templates.AddItem(CloseAndPersonal());
 	Templates.AddItem(CloseCombatSpecialist());
 	Templates.AddItem(DamnGoodGround());
@@ -29,12 +28,10 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(FocusCount());
 	Templates.AddItem(HitAndRun());
 	Templates.AddItem(InspireAgility());
-	Templates.AddItem(InspireAgilityTrigger());
 	Templates.AddItem(LightningHands());
 	Templates.AddItem(Magnum());
 	Templates.AddItem(MovingTarget());
 	Templates.AddItem(PowerShot());
-	Templates.AddItem(PowerShotBonuses());
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(ReverseEngineering());
 	Templates.AddItem(Rocketeer());
@@ -44,8 +41,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(TacticalSense());
 	Templates.AddItem(Weaponmaster());
 	Templates.AddItem(ZeroIn());
-	Templates.AddItem(ZeroInHit());
-	Templates.AddItem(ZeroInMiss());
 
 	return Templates;
 }
@@ -81,29 +76,46 @@ static function X2AbilityTemplate AdrenalineSurge()
 	local X2AbilityTemplate Template;
 	local X2AbilityMultiTarget_Radius RadiusMultiTarget;
 
+	// Create a persistent stat change effect
 	Effect = new class'X2Effect_PersistentStatChange';
 	Effect.EffectName = 'AdrenalineSurge';
+
+	// The effect lasts until the end of the player's turn
+	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
+
+	// If the effect is added multiple times, it refreshes the duration of the existing effect
 	Effect.DuplicateResponse = eDupe_Refresh;
 
+	// The effect provides +3 Mobility and +10 Crit chance
 	Effect.AddPersistentStatChange(eStat_Mobility, 3);
 	Effect.AddPersistentStatChange(eStat_CritChance, 10);
 
-	Effect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
-
+	// The effect only applies to living, friendly targets
 	Effect.TargetConditions.AddItem(default.LivingFriendlyTargetProperty);
 
+	// Show a flyover over the target unit when the effect is added
 	Effect.VisualizationFn = EffectFlyOver_Visualization;
 
+	// Create the template using a helper function. This ability triggers when we kill another unit.
 	Template = SelfTargetTrigger('XMBExample_AdrenalineSurge', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, 'KillMail');
 
 	// Trigger abilities don't appear as passives. Add a passive ability icon.
 	AddIconPassive(Template);
 
+	// The ability targets the unit that has it, but also effects all nearby units that meet
+	// the conditions on the multitarget effect.
 	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
+
+	// Affect units within a range of 12m (8 tiles)
 	RadiusMultiTarget.fTargetRadius = 12;
+
+	// Affect units even through walls
 	RadiusMultiTarget.bIgnoreBlockingCover = true;
+
+	// Add the multitarget to the ability
 	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
 
+	// The multitargets are also affected by the persistent effect we created
 	Template.AddMultiTargetEffect(Effect);
 
 	return Template;
@@ -119,20 +131,29 @@ static function X2AbilityTemplate ArcticWarrior()
 	local X2Effect_PersistentStatChange Effect;
 	local X2Condition_MapProperty Condition;
 	
+	// Create the template as a passive with no effect. This ensures we have an ability icon all the time.
 	Template = Passive('XMBExample_ArcticWarrior', "img:///UILibrary_PerkIcons.UIPerk_command", true, none);
 
+	// Create a persistent stat change effect
 	Effect = new class'X2Effect_PersistentStatChange';
 	Effect.EffectName = 'ArcticWarrior';
+
+	// The effect doesn't expire
 	Effect.BuildPersistentEffect(1, true, false, false);
 
+	// The effect gives +10 Defense and +3 Mobility
 	Effect.AddPersistentStatChange(eStat_Defense, 10);
 	Effect.AddPersistentStatChange(eStat_Mobility, 3);
 
+	// Create a condition that only applies the stat change when in the Tundra biome
 	Condition = new class'X2Condition_MapProperty';
 	Condition.AllowedBiomes.AddItem("Tundra");
 
+	// Add the condition to the stat change effect
 	Effect.TargetConditions.AddItem(Condition);
 
+	// Add the stat change as a secondary effect of the passive. It will be applied at the start
+	// of battle, but only if it meets the condition.
 	AddSecondaryEffect(Template, Effect);
 
 	return Template;
@@ -187,9 +208,11 @@ static function X2AbilityTemplate BulletSwarm()
 {
 	local XMBEffect_DoNotConsumeAllPoints Effect;
 
+	// Create an effect that causes standard attacks to not end the turn (as the first action)
 	Effect = new class'XMBEffect_DoNotConsumeAllPoints';
 	Effect.AbilityNames.AddItem('StandardShot');
 
+	// Create the template using a helper function
 	return Passive('XMBExample_BulletSwarm', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 }
 
@@ -236,7 +259,7 @@ static function X2AbilityTemplate BullRush()
 	Template.CustomFireAnim = 'FF_Melee';
 
 	// Add a secondary ability that will reset the cooldown when the unit takes damage
-	Template.AdditionalAbilities.AddItem('XMBExample_BullRushTrigger');
+	AddSecondaryAbility(Template, BullRushTrigger());
 
 	return Template;
 }
@@ -425,20 +448,26 @@ static function X2AbilityTemplate EspritDeCorps()
 	local X2Effect_PersistentStatChange Effect;
 	local X2AbilityTemplate Template;
 
+	// Create the template as a passive with no effect. This ensures we have an ability icon all the time.
 	Template = Passive('XMBExample_EspritDeCorps', "img:///UILibrary_PerkIcons.UIPerk_command", true);
 
+	// Create a persistent stat change effect
 	Effect = new class'X2Effect_PersistentStatChange';
 	Effect.EffectName = 'EspritDeCorps';
 
+	// The effect adds +5 Will and +5 Defense
 	Effect.AddPersistentStatChange(eStat_Will, 5);
 	Effect.AddPersistentStatChange(eStat_Defense, 5);
 
-	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true, , Template.AbilitySourceName);
+	// Normally, XMB helper functions such as Passive handle setting up the display info for an effect.
+	// Since we're not using a helper function to add this effect, we need to set up the display info
+	// ourselves.
+	Effect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true, , Template.AbilitySourceName);
 
 	// Set the template to affect all allied units
 	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
 
-	// Add the effect
+	// Add the stat change effect
 	Template.AddMultiTargetEffect(Effect);
 
 	return Template;
@@ -454,19 +483,36 @@ static function X2AbilityTemplate Focus()
 	local X2Condition_UnitValue UnitValueCondition;
 	local X2AbilityTemplate Template;
 
+	// Create a condition that checks a unit value. Unit values are just a way of storing a number
+	// on a unit that we can change to track whatever we need.
 	UnitValueCondition = new class'X2Condition_UnitValue';
+
+	// The condition checks that the unit hasn't made any reaction fire attacks yet this turn,
+	// which we will count in the ReactionFireAttacks unit variable.
 	UnitValueCondition.AddCheckValue('ReactionFireAttacks', 1, eCheck_LessThan);
 
+	// Create an effect that will change attack hit results
 	Effect = new class'XMBEffect_ChangeHitResultForAttacker';
 	Effect.EffectName = 'Focus';
+
+	// The effect only affects reaction fire shots
 	Effect.AbilityTargetConditions.AddItem(default.ReactionFireCondition);
+
+	// The effect only works on the first reaction shot each turn
 	Effect.AbilityShooterConditions.AddItem(UnitValueCondition);
+
+	// Only change the hit result if it would have been a miss
 	Effect.bRequireMiss = true;
+
+	// Change the hit result to a hit
 	Effect.NewResult = eHit_Success;
 
+	// Create the template using a helper function
 	Template = Passive('XMBExample_Focus', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 
-	Template.AdditionalAbilities.AddItem('XMBExample_FocusCount');
+	// The game doesn't automatically track the number of reaction fire attacks a unit makes each
+	// turn, so we need to add a secondary ability to do the counting.
+	AddSecondaryAbility(Template, FocusCount());
 
 	return Template;
 }
@@ -477,13 +523,22 @@ static function X2AbilityTemplate FocusCount()
 	local X2Effect_IncrementUnitValue Effect;
 	local X2AbilityTemplate Template;
 
+	// Create an effect that will increment the unit value
 	Effect = new class'X2Effect_IncrementUnitValue';
+
+	// Affect the ReactionFireAttacks unit value. I didn't name this property.
 	Effect.UnitName = 'ReactionFireAttacks';
+
+	// Increment the value by 1. I didn't name this one either.
 	Effect.NewValueToSet = 1;
+
+	// The count should be reset to 0 at the beginning of each turn.
 	Effect.CleanupType = eCleanup_BeginTurn;
 
+	// Trigger the increment effect whenever the unit activates an ability ...
 	Template = SelfTargetTrigger('XMBExample_FocusCount', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated', eFilter_Unit);
 
+	// ... but only for reaction fire abilities.
 	AddTriggerTargetCondition(Template, default.ReactionFireCondition);
 
 	return Template;
@@ -564,7 +619,7 @@ static function X2AbilityTemplate InspireAgility()
 	PreventStackingEffects(Template);
 
 	// Add a secondary ability that will grant the bonus charges on kills
-	Template.AdditionalAbilities.AddItem('XMBExample_InspireAgilityTrigger');
+	AddSecondaryAbility(Template, InspireAgilityTrigger());
 
 	return Template;
 }
@@ -652,10 +707,13 @@ static function X2AbilityTemplate PowerShot()
 
 	// Create the template using a helper function
 	Template = Attack('XMBExample_PowerShot', "img:///UILibrary_PerkIcons.UIPerk_command", true, none, class'UIUtilities_Tactical'.const.CLASS_SERGEANT_PRIORITY, eCost_WeaponConsumeAll, 1);
+
+	// Add a cooldown. The internal cooldown numbers include the turn the cooldown is applied, so
+	// this is actually a 2 turn cooldown.
 	AddCooldown(Template, 3);
 
 	// Add a secondary ability to provide bonuses on the shot
-	Template.AdditionalAbilities.AddItem('XMBExample_PowerShotBonuses');
+	AddSecondaryAbility(Template, PowerShotBonuses());
 
 	return Template;
 }
@@ -800,6 +858,9 @@ static function X2AbilityTemplate SlamFire()
 
 	// Create the template for an activated ability using a helper function.
 	Template = SelfTargetActivated('XMBExample_SlamFire', "img:///UILibrary_PerkIcons.UIPerk_command", true, SlamFireEffect, class'UIUtilities_Tactical'.const.CLASS_COLONEL_PRIORITY, eCost_Free);
+
+	// Add a cooldown. The internal cooldown numbers include the turn the cooldown is applied, so
+	// this is actually a 3 turn cooldown.
 	AddCooldown(Template, 4);
 
 	// Don't allow multiple ability-refunding abilities to be used in the same turn (e.g. Slam Fire and Serial)
@@ -817,11 +878,22 @@ static function X2AbilityTemplate Sprint()
 	local X2Effect_GrantActionPoints Effect;
 	local X2AbilityTemplate Template;
 
+	// Create an effect that will grant a bonus action point
 	Effect = new class'X2Effect_GrantActionPoints';
-	Effect.NumActionPoints = 1;
-	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
 
+	// The effect grants one action point. You have to set this, it doesn't default to 0.
+	Effect.NumActionPoints = 1;
+
+	// Grant a move action point, which can only be used for moving. Other common action
+	// point types are StandardActionPoint which can be used for anything, and
+	// RunAndGunActionPoint which can be used for anything except moving.
+	Effect.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
+	
+	// Create the template as a helper function. This is an activated ability that doesn't cost an action.
 	Template = SelfTargetActivated('XMBExample_Sprint', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect, class'UIUtilities_Tactical'.const.CLASS_LIEUTENANT_PRIORITY, eCost_Free);
+
+	// Add a cooldown. The internal cooldown numbers include the turn the cooldown is applied, so
+	// this is actually a 2 turn cooldown.
 	AddCooldown(Template, 3);
 
 	return Template;
@@ -836,15 +908,24 @@ static function X2AbilityTemplate SurvivalInstinct()
 	local XMBEffect_ConditionalBonus Effect;
 	local X2Condition_UnitStatCheck Condition;
 
+	// Create a condition that checks that the unit is at less than 100% HP.
+	// X2Condition_UnitStatCheck can also check absolute values rather than percentages, by
+	// using "false" instead of "true" for the last argument.
 	Condition = new class'X2Condition_UnitStatCheck';
 	Condition.AddCheckStat(eStat_HP, 100, eCheck_LessThan,,, true);
 
+	// Create a conditional bonus effect
 	Effect = new class'XMBEffect_ConditionalBonus';
+
+	// The effect grants +10 Crit chance and +20 Defense
 	Effect.AddToHitModifier(10, eHit_Crit);
 	Effect.AddToHitAsTargetModifier(-20, eHit_Success);
+
+	// The effect only applies while wounded
 	EFfect.AbilityShooterConditions.AddItem(Condition);
 	Effect.AbilityTargetConditionsAsTarget.AddItem(Condition);
-
+	
+	// Create the template using a helper function
 	return Passive('XMBExample_SurvivalInstinct', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
@@ -857,14 +938,23 @@ static function X2AbilityTemplate TacticalSense()
 	local XMBEffect_ConditionalBonus Effect;
 	local XMBValue_Visibility Value;
 	 
+	// Create a value that will count the number of visible units
 	Value = new class'XMBValue_Visibility';
+
+	// Only count enemy units
 	Value.bCountEnemies = true;
 
+	// Create a conditional bonus effect
 	Effect = new class'XMBEffect_ConditionalBonus';
-	Effect.ScaleValue = Value;
-	Effect.ScaleMax = 5;
+
+	// The effect adds +10 Dodge per enemy unit
 	Effect.AddToHitAsTargetModifier(10, eHit_Graze);
 
+	// The effect scales with the number of visible enemy units, to a maximum of 5 (for +50 Dodge).
+	Effect.ScaleValue = Value;
+	Effect.ScaleMax = 5;
+
+	// Create the template using a helper function
 	return Passive('XMBExample_TacticalSense', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
@@ -898,27 +988,45 @@ static function X2AbilityTemplate ZeroIn()
 	local X2AbilityTemplate Template;
 	local XMBEffect_ConditionalBonus Effect;
 	local XMBValue_UnitValue Value;
-	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+	local XMBCondition_AbilityProperty Condition;
 
-	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
-	AbilityPropertyCondition.bRequireActivated = true;
-	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
+	// Create a condition that checks something about another ability.
+	Condition = new class'XMBCondition_AbilityProperty';
 
+	// The condition requires that the ability is an activated attack.
+	Condition.bRequireActivated = true;
+	Condition.IncludeHostility.AddItem(eHostility_Offensive);
+
+	// Create a value that uses a unit value.
 	Value = new class'XMBValue_UnitValue';
+	
+	// The value will be using the ConsecutiveMisses unit value, which we will be using to track
+	// the number of consecutive misses this unit has gotten.
 	Value.UnitValueName = 'ConsecutiveMisses';
 
+	// Create a conditional bonus effect
 	Effect = new class'XMBEffect_ConditionalBonus';
 	Effect.EffectName = 'ZeroIn';
 
+	// The effect adds +20 Aim per consecutive miss
+	Effect.AddToHitModifier(20, eHit_Success);
+
+	// The effect scales with the number of consecutive misses, to a maximum of 1 (for a +20 bonus).
 	Effect.ScaleValue = Value;
 	Effect.ScaleMax = 1;
-	Effect.AddToHitModifier(20, eHit_Success);
-	Effect.AbilityTargetConditions.AddItem(AbilityPropertyCondition);
 
+	// Add the condition on the bonus. Conditions on the ability as a whole, or on the relation
+	// between the shooter and the target, are considered target conditions.
+	Effect.AbilityTargetConditions.AddItem(Condition);
+
+	// Create the template using a helper function
 	Template = Passive('XMBExample_ZeroIn', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 
-	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInMiss');
-	Template.AdditionalAbilities.AddItem('XMBExample_ZeroInHit');
+	// The game doesn't track the number of consecutive misses, so we need a pair of secondary
+	// abilities to track it: one to count the number of misses, and one to reset the count on
+	// a hit.
+	AddSecondaryAbility(Template, ZeroInMiss());
+	AddSecondaryAbility(Template, ZeroInHit());
 
 	return Template;
 }
@@ -928,19 +1036,35 @@ static function X2AbilityTemplate ZeroInMiss()
 {
 	local X2AbilityTemplate Template;
 	local X2Effect_IncrementUnitValue Effect;
-	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+	local XMBCondition_AbilityProperty Condition;
 
+	// Create an effect that will increment the unit value
 	Effect = new class'X2Effect_IncrementUnitValue';
+
+	// Affect the ConsecutiveMisses unit value. I didn't name this property.
 	Effect.UnitName = 'ConsecutiveMisses';
+
+	// Increment the value by 1. I didn't name this one either.
 	Effect.NewValueToSet = 1;
+
+	// The count should be reset to 0 at the beginning of each mission.
 	Effect.CleanupType = eCleanup_BeginTactical;
 
+	// Create the template using a helper function
 	Template = SelfTargetTrigger('XMBExample_ZeroInMiss', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
 
-	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
-	AbilityPropertyCondition.bRequireActivated = true;
-	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
-	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
+	// Create a condition that checks something about another ability.
+	Condition = new class'XMBCondition_AbilityProperty';
+
+	// The condition requires that the ability is an activated attack.
+	Condition.bRequireActivated = true;
+	Condition.IncludeHostility.AddItem(eHostility_Offensive);
+
+	// Add the condition. Conditions on the ability as a whole, or on the relation
+	// between the shooter and the target, are considered target conditions.
+	AddTriggerTargetCondition(Template, Condition);
+
+	// Only count misses
 	AddTriggerTargetCondition(Template, default.MissCondition);
 
 	return Template;
@@ -951,19 +1075,35 @@ static function X2AbilityTemplate ZeroInHit()
 {
 	local X2AbilityTemplate Template;
 	local X2Effect_SetUnitValue Effect;
-	local XMBCondition_AbilityProperty AbilityPropertyCondition;
+	local XMBCondition_AbilityProperty Condition;
 
+	// Create an effect that will increment the unit value
 	Effect = new class'X2Effect_SetUnitValue';
+
+	// Create an effect that will increment the unit value
 	Effect.UnitName = 'ConsecutiveMisses';
+
+	// Set the value to 0
 	Effect.NewValueToSet = 0;
+
+	// The count should be reset to 0 at the beginning of each mission.
 	Effect.CleanupType = eCleanup_BeginTactical;
 
+	// Create the template using a helper function
 	Template = SelfTargetTrigger('XMBExample_ZeroInHit', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect, 'AbilityActivated');
 
-	AbilityPropertyCondition = new class'XMBCondition_AbilityProperty';
-	AbilityPropertyCondition.bRequireActivated = true;
-	AbilityPropertyCondition.IncludeHostility.AddItem(eHostility_Offensive);
-	AddTriggerTargetCondition(Template, AbilityPropertyCondition);
+	// Create a condition that checks something about another ability.
+	Condition = new class'XMBCondition_AbilityProperty';
+
+	// The condition requires that the ability is an activated attack.
+	Condition.bRequireActivated = true;
+	Condition.IncludeHostility.AddItem(eHostility_Offensive);
+
+	// Add the condition. Conditions on the ability as a whole, or on the relation
+	// between the shooter and the target, are considered target conditions.
+	AddTriggerTargetCondition(Template, Condition);
+
+	// Only count hits
 	AddTriggerTargetCondition(Template, default.HitCondition);
 
 	return Template;

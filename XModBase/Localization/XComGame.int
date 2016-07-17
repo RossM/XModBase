@@ -72,7 +72,7 @@ LocLongDescription="If you did not attack this turn, hunker down automatically."
 [XMBExample_EspritDeCorps X2AbilityTemplate]
 LocFriendlyName="Esprit de Corps"
 LocFlyOverText="Esprit de Corps"
-LocHelpText="Squad receives <Ability:+Will/> Will and <Ability:+Defense/> Defense in battle."
+LocHelpText="<Ability:+Will/> Will and <Ability:+Defense/> Defense."
 LocLongDescription="Squad receives <Ability:+Will/> Will and <Ability:+Defense/> Defense in battle."
 
 [XMBExample_Focus X2AbilityTemplate]
@@ -112,12 +112,6 @@ LocHelpText="You get an additional <Ability:+Defense/> Defense and <Ability:+Dod
 LocLongDescription="You get an additional <Ability:+Defense/> Defense and <Ability:+Dodge/> Dodge against reaction fire."
 
 [XMBExample_PowerShot X2AbilityTemplate]
-LocFriendlyName="Power Shot"
-LocFlyOverText="Power Shot"
-LocHelpText="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
-LocLongDescription="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
-
-[XMBExample_PowerShotBonuses X2AbilityTemplate]
 LocFriendlyName="Power Shot"
 LocFlyOverText="Power Shot"
 LocHelpText="Make an attack that has <Ability:+Crit:XMBExample_PowerShotBonuses/> crit chance and deals <Ability:+CritDamage:XMBExample_PowerShotBonuses/> damage on crit."
