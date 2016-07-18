@@ -21,14 +21,30 @@
 //---------------------------------------------------------------------------------------
 class XMBEffect_ChangeHitResultForAttacker extends X2Effect_Persistent;
 
-var array<X2Condition> AbilityTargetConditions;
-var array<X2Condition> AbilityShooterConditions;
 
-var array<EAbilityHitResult> IncludeHitResults;
-var array<EAbilityHitResult> ExcludeHitResults;
-var bool bRequireHit, bRequireMiss;
+///////////////////////
+// Effect properties //
+///////////////////////
 
-var EAbilityHitResult NewResult;
+var array<EAbilityHitResult> IncludeHitResults;		// Hit results which will be changed
+var array<EAbilityHitResult> ExcludeHitResults;		// Hit results which will not be changed
+var bool bRequireHit;								// Set true to only change hits
+var bool bRequireMiss;								// Set true to only change misses
+
+var EAbilityHitResult NewResult;					// The hit result to change to
+
+
+//////////////////////////
+// Condition properties //
+//////////////////////////
+
+var array<X2Condition> AbilityTargetConditions;		// Conditions on the target of the ability being changed
+var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of the ability being changed
+
+
+////////////////////
+// Implementation //
+////////////////////
 
 function bool ChangeHitResultForAttacker(XComGameState_Unit Attacker, XComGameState_Unit TargetUnit, XComGameState_Ability AbilityState, const EAbilityHitResult CurrentResult, out EAbilityHitResult NewHitResult)
 {
