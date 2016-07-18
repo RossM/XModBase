@@ -23,10 +23,17 @@
 //---------------------------------------------------------------------------------------
 class XMBCondition_AbilityCost extends X2Condition;
 
-var bool bRequireMinimumPointsSpent, bRequireMaximumPointsSpent;
-var int MinimumPointsSpent, MaximumPointsSpent;
-var bool bRequireMinimumCost, bRequireMaximumCost;
-var int MinimumCost, MaximumCost;
+var bool bRequireMinimumPointsSpent;	// If true, require at least MinimumPointsSpent action points are spent
+var int MinimumPointsSpent;				// Minimum number of action points that must have been actually spent
+
+var bool bRequireMaximumPointsSpent;	// If true, require at most MaximumPointsSpent action points are spent
+var int MaximumPointsSpent;				// Maximum number of action points that must have been actually spent
+
+var bool bRequireMinimumCost;			// If true, require that the ability normally cost at least MinimumCost action points
+var int MinimumCost;					// Minimum number of action points the ability normally costs
+
+var bool bRequireMaximumCost;			// If true, require that the ability normally cost at most MaximumCost action points
+var int MaximumCost;					// Maximum number of action points the ability normally costs
 
 event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameState_BaseObject kTarget)
 {

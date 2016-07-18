@@ -2,6 +2,7 @@
 //  FILE:    XMBCondition_AbilityProperty.uc
 //  AUTHOR:  xylthixlm
 //
+//  Various conditions relating to an ability's template.
 //
 //  USAGE
 //
@@ -22,15 +23,15 @@
 //---------------------------------------------------------------------------------------
 class XMBCondition_AbilityProperty extends X2Condition;
 
-var bool bRequireActivated;
-var bool bExcludeActivated;
-var bool bRequirePassive;
-var bool bExcludePassive;
-var bool bRequireMelee;
-var bool bExcludeMelee;
+var bool bRequireActivated;						// If true, only include abilities directly activated by the player
+var bool bExcludeActivated;						// If true, don't include abilities directly activated by the player
+var bool bRequirePassive;						// If true, only include passive abilities that trigger at the start of battle
+var bool bExcludePassive;						// If true, don't include passive abilities that trigger at the start of battle
+var bool bRequireMelee;							// If true, only include melee attacks
+var bool bExcludeMelee;							// If true, don't include melee attacks
 
-var array<EAbilityHostility> IncludeHostility;
-var array<EAbilityHostility> ExcludeHostility;
+var array<EAbilityHostility> IncludeHostility;	// Only include these hostilities
+var array<EAbilityHostility> ExcludeHostility;	// Don't include these hostilities
 
 event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameState_BaseObject kTarget)
 {

@@ -4,7 +4,7 @@
 //
 //  A condition that checks that another ability was used with the same weapon as the 
 //  ability with this condition. This is used in effects that apply bonuses to a specific
-//  weapon slot. This only works with other XModBase classes that take condutions, such
+//  weapon slot. This only works with other XModBase classes that take conditions, such
 //  as XMBEffect_AbilityCostRefund, XMBEffect_ConditionalBonus, and
 //  XMBAbilityTrigger_EventListener.
 //

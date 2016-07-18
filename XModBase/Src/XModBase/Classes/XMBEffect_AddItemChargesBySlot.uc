@@ -66,7 +66,6 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Unit NewUnit;
 	local XComGameState_Item ItemState, InnerItemState;
 	local XComGameStateHistory History;
-	local XComGameState_BattleData BattleData;
 	local int i, j, modifier;
 
 	NewUnit = XComGameState_Unit(kNewTargetState);
@@ -75,10 +74,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	History = `XCOMHISTORY;
 
-	// Don't add the extra item if this is a direct mission transfer. It will have been already 
-	// added in the first non-transfer mission.
-	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-	if (BattleData.DirectTransferInfo.IsDirectMissionTransfer && class'XMBEffectUtilities'.static.IsPostBeginPlayTrigger(ApplyEffectParameters))
+	if (class'XMBEffectUtilities'.static.SkipForDirectMissionTransfer(ApplyEffectParameters))
 		return;
 
 	for (i = 0; i < NewUnit.InventoryItems.Length; ++i)
