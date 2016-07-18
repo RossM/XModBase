@@ -2,7 +2,7 @@
 //  FILE:    XMBEffect_ChangeHitResultForAttacker.uc
 //  AUTHOR:  xylthixlm
 //
-//
+//  Changes the result of an attack after all other hit calculations.
 //
 //  EXAMPLES
 //

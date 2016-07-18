@@ -47,7 +47,7 @@ Src
 	  LWTuple.uc
   XModBase_Core_1_2_0
     Classes
-	  XMBAbilityMultiTarget_SoldierBonusRadius
+	  XMBAbilityMultiTarget_Radius
 	  XMBAbilityTag
 	  XMBAbilityToHitCalc_StandardAim
 	  XMBConfig
@@ -80,14 +80,16 @@ The most versatile class in XModBase is XMBEffect_ConditionalBonus. It can provi
 
 XModBase provides additional effects that are either commonly useful or hard to do. Here's a list of the available effects:
 
-XMBEffect_AbilityCostRefund			Passively refunds ability costs based on conditions
-XMBEffect_AddAbilityCharges			Adds extra charges to an ability or abilities
-XMBEffect_AddItemChargesBySlot		Adds extra charges to items in certain slots, like Heavy Ordnance but more general
-XMBEffect_AddUtilityItem			Adds a bonus utility item that lasts for the duration of the mission then disappears
-XMBEffect_BonusDamageByDamageType	Grants bonus damage on attacks and damage-over-time of a specific elemental damage type
-XMBEffect_BonusRadius				Increases the radius of grenades of a specific type, or of all grenades
-XMBEffect_ConditionalBonus			Grants attack and/or defense bonuses based on conditions
-XMBEffect_PermanentStatChange		Permanently changes the base stats of a unit
-XMBEffect_Extended					Base class for defining your own X2Effects with additional functions to override
-XMBEffect_RevealUnit				Makes a unit visible on the map
-XMBEffect_ToHitModifierByRange		Modifies to-hit based on range to target and conditions
+XMBEffect_AbilityCostRefund				Passively refunds ability costs based on conditions
+XMBEffect_AddAbilityCharges				Adds extra charges to an ability or abilities
+XMBEffect_AddItemChargesBySlot			Adds extra charges to items in certain slots, like Heavy Ordnance but more general
+XMBEffect_AddUtilityItem				Adds a bonus utility item that lasts for the duration of the mission then disappears
+XMBEffect_BonusDamageByDamageType		Grants bonus damage on attacks and damage-over-time of a specific elemental damage type
+XMBEffect_BonusRadius					Increases the radius of grenades of a specific type, or of all grenades
+XMBEffect_ChangeHitResultForAttacker	Changes the result of an attack after all other hit calculations
+XMBEffect_ConditionalBonus				Grants attack and/or defense bonuses based on conditions
+XMBEffect_DoNotConsumeAllPoints			Makes another ability not end the turn when used
+XMBEffect_PermanentStatChange			Permanently changes the base stats of a unit
+XMBEffect_Extended						Base class for defining your own X2Effects with additional functions to override
+XMBEffect_RevealUnit					Makes a unit visible on the map
+XMBEffect_ToHitModifierByRange			Modifies to-hit based on range to target and conditions
