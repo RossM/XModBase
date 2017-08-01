@@ -1,3 +1,22 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    XMBGameState_EventTarget.uc
+//  AUTHOR:  xylthixlm
+//
+//  USAGE
+//
+//  EXAMPLES
+//
+//  The following examples in Examples.uc use this class:
+//
+//  INSTALLATION
+//
+//  Install the XModBase core as described in readme.txt. Copy this file, and any files 
+//  listed as dependencies, into your mod's Classes/ folder. You may edit this file.
+//
+//  DEPENDENCIES
+//
+//  None.
+//---------------------------------------------------------------------------------------
 class XMBTemplateUtilities extends object;
 
 static function X2SoldierAbilityUnlockTemplate AddClassUnlock(name DataName, name ClassName, name AbilityName, string Image = "img:///UILibrary_StrategyImages.GTS.GTS_FNG")
