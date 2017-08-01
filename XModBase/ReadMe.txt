@@ -21,7 +21,7 @@ Easy installation will make it possible to build and run your mod using XModBase
 [UnrealEd.EditorEngine]
 +ModEditPackages=LW_Tuple
 +ModEditPackages=XModBase_Interfaces
-+ModEditPackages=XModBase_Core_1_2_0
++ModEditPackages=XModBase_Core_1_3_0
 
 COMPLETE INSTALLATION
 
@@ -34,7 +34,7 @@ Complete installation will include the XModBase libraries in your mod, so you ca
 Src
   LW_Tuple
     Classes
-  XModBase_Core_1_2_0
+  XModBase_Core_1_3_0
     Classes
   XModBase_Interfaces
     Classes
@@ -45,7 +45,7 @@ Src
   LW_Tuple
     Classes
 	  LWTuple.uc
-  XModBase_Core_1_2_0
+  XModBase_Core_1_3_0
     Classes
 	  XMBAbilityMultiTarget_Radius
 	  XMBAbilityTag
@@ -63,12 +63,12 @@ Src
 [Engine.ScriptPackages]
 +NonNativePackages=LW_Tuple
 +NonNativePackages=XModBase_Interfaces
-+NonNativePackages=XModBase_Core_1_2_0
++NonNativePackages=XModBase_Core_1_3_0
 
 [UnrealEd.EditorEngine]
 +ModEditPackages=LW_Tuple
 +ModEditPackages=XModBase_Interfaces
-+ModEditPackages=XModBase_Core_1_2_0
++ModEditPackages=XModBase_Core_1_3_0
 
 USING XMODBASE
 
