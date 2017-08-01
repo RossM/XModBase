@@ -32,6 +32,7 @@ var name DataName;							// The name of the item template to grant.
 var int BaseCharges;						// Number of charges of the item to add.
 var int BonusCharges;						// Number of extra charges of the item to add for each item of that type already in the inventory.
 var bool bUseHighestAvailableUpgrade;		// If true, grant the highest available upgraded version of the item.
+var array<name> SkipAbilities;				// List of abilities to not add
 
 
 ////////////////////
@@ -41,10 +42,31 @@ var bool bUseHighestAvailableUpgrade;		// If true, grant the highest available u
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
 	local X2ItemTemplate ItemTemplate;
-	local X2EquipmentTemplate EquipmentTemplate;
-	local X2WeaponTemplate WeaponTemplate;
 	local X2ItemTemplateManager ItemTemplateMgr;
 	local XComGameState_Unit NewUnit;
+
+	NewUnit = XComGameState_Unit(kNewTargetState);
+	if (NewUnit == none)
+		return;
+
+	if (class'XMBEffectUtilities'.static.SkipForDirectMissionTransfer(ApplyEffectParameters))
+		return;
+
+	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	ItemTemplate = ItemTemplateMgr.FindItemTemplate(DataName);
+	
+	// Use the highest upgraded available version of the item
+	if (bUseHighestAvailableUpgrade)
+		`XCOMHQ.UpdateItemTemplateToHighestAvailableUpgrade(ItemTemplate);
+
+	AddUtilityItem(NewUnit, ItemTemplate, NewGameState, NewEffectState);
+}
+
+simulated function AddUtilityItem(XComGameState_Unit NewUnit, X2ItemTemplate ItemTemplate, XComGameState NewGameState, XComGameState_Effect NewEffectState)
+{
+	local X2EquipmentTemplate EquipmentTemplate;
+	local X2WeaponTemplate WeaponTemplate;
 	local XComGameState_Item ItemState;
 	local X2AbilityTemplateManager AbilityTemplateMan;
 	local X2AbilityTemplate AbilityTemplate;
@@ -54,23 +76,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XGUnit UnitVisualizer;
 	local int idx;
 
-	NewUnit = XComGameState_Unit(kNewTargetState);
-	if (NewUnit == none)
-		return;
-
 	History = `XCOMHISTORY;
 
-	if (class'XMBEffectUtilities'.static.SkipForDirectMissionTransfer(ApplyEffectParameters))
-		return;
-
-	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 	AbilityTemplateMan = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
-
-	ItemTemplate = ItemTemplateMgr.FindItemTemplate(DataName);
-	
-	// Use the highest upgraded available version of the item
-	if (bUseHighestAvailableUpgrade)
-		`XCOMHQ.UpdateItemTemplateToHighestAvailableUpgrade(ItemTemplate);
 
 	EquipmentTemplate = X2EquipmentTemplate(ItemTemplate);
 	if (EquipmentTemplate == none)
@@ -127,6 +135,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		AbilityName = EarnedSoldierAbilities[idx].AbilityName;
 		AbilityTemplate = AbilityTemplateMan.FindAbilityTemplate(AbilityName);
 
+		if (SkipAbilities.Find(AbilityName) != INDEX_NONE)
+			continue;
+
 		// Add utility-item abilities
 		if (EarnedSoldierAbilities[idx].ApplyToWeaponSlot == eInvSlot_Utility &&
 			EarnedSoldierAbilities[idx].UtilityCat == ItemState.GetWeaponCategory())
@@ -144,6 +155,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	// Add abilities from the equipment item itself. Add these last in case they're overridden by soldier abilities.
 	foreach EquipmentTemplate.Abilities(AbilityName)
 	{
+		if (SkipAbilities.Find(AbilityName) != INDEX_NONE)
+			continue;
+
 		AbilityTemplate = AbilityTemplateMan.FindAbilityTemplate(AbilityName);
 		InitAbility(AbilityTemplate, NewUnit, NewGameState, ItemState.GetReference());
 	}

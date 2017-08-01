@@ -48,6 +48,7 @@ struct ExtShotModifierInfo
 	var ShotModifierInfo ModInfo;
 	var name WeaponTech;
 	var name Type;
+	var bool bPercent;
 };
 
 
@@ -121,6 +122,20 @@ function AddDamageModifier(int Value, optional EAbilityHitResult ModType = eHit_
 	Modifiers.AddItem(ExtModInfo);
 }	
 
+// Adds a modifier to the damage of attacks made by the unit with the effect.
+function AddPercentDamageModifier(int Value, optional EAbilityHitResult ModType = eHit_Success, optional name WeaponTech = '')
+{
+	local ExtShotModifierInfo ExtModInfo;
+
+	ExtModInfo.ModInfo.ModType = ModType;
+	ExtModInfo.ModInfo.Reason = FriendlyName;
+	ExtModInfo.ModInfo.Value = Value;
+	ExtModInfo.WeaponTech = WeaponTech;
+	ExtModInfo.Type = 'Damage';
+	ExtModInfo.bPercent = true;
+	Modifiers.AddItem(ExtModInfo);
+}	
+
 // Adds a modifier to the armor shredding amount of attacks made by the unit with the effect.
 function AddShredModifier(int Value, optional EAbilityHitResult ModType = eHit_Success, optional name WeaponTech = '')
 {
@@ -165,7 +180,7 @@ function private float GetScaleByValue(XComGameState_Effect EffectState, XComGam
 	return Scale;
 }
 
-function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
+function protected name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, bool bAsTarget = false)
 {
 	local name AvailableCode;
 
@@ -232,7 +247,10 @@ function int GetAttackingDamageModifier(XComGameState_Effect EffectState, XComGa
 		if ((ExtModInfo.ModInfo.ModType == eHit_Success && class'XComGameStateContext_Ability'.static.IsHitResultHit(AppliedData.AbilityResultContext.HitResult)) ||
 			ExtModInfo.ModInfo.ModType == AppliedData.AbilityResultContext.HitResult)
 		{
-			BonusDamage += ExtModInfo.ModInfo.Value;
+			if (ExtModInfo.bPercent)
+				BonusDamage += ExtModInfo.ModInfo.Value * CurrentDamage / 100;
+			else
+				BonusDamage += ExtModInfo.ModInfo.Value;
 		}
 	}
 
@@ -353,7 +371,7 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 	return true;
 }
 
-function private bool AllConditionsAreUnitConditions(array<X2Condition> Conditions)
+function static bool AllConditionsAreUnitConditions(array<X2Condition> Conditions)
 {
 	local X2Condition Condition;
 
@@ -506,10 +524,10 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 	local EAbilityHitResult HitResult;
 	local float ResultMultiplier;
 	local XComGameState_Unit UnitState;
+	local X2AbilityTag AbilityTag;
 	local int idx;
 
 	ResultMultiplier = 1;
-	TechResults.Length = class'X2ItemTemplateManager'.default.WeaponTechCategories.Length;
 
 	if (left(Tag, 3) ~= "Max")
 	{
@@ -522,10 +540,15 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 		if (AbilityState != none)
 		{
 			UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(AbilityState.OwnerStateObject.ObjectID));
-			if (UnitState != none)
-			{
-				ResultMultiplier *= GetScaleByValue(none, UnitState, none, none);
-			}
+		}
+		if (UnitState == none)
+		{
+			AbilityTag = X2AbilityTag(`XEXPANDCONTEXT.FindTag("Ability"));
+			UnitState = XComGameState_Unit(AbilityTag.StrategyParseObj);
+		}
+		if (UnitState != none)
+		{
+			ResultMultiplier *= GetScaleByValue(none, UnitState, none, none);
 		}
 	}
 
@@ -578,7 +601,7 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 		if (idx != INDEX_NONE)
 		{
 			// Track the results for each tech category
-			TechResults[idx] += ExtModInfo.ModInfo.Value;
+			TechResults.AddItem(ExtModInfo.ModInfo.Value);
 			ValidTechModifiers++;
 		}
 
@@ -596,7 +619,7 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 	if (ValidModifiers == 0 && ValidTechModifiers > 0)
 	{
 		TagValue = "";
-		for (idx = 0; idx < TechResults.Length && idx < 3; idx++)  // HACK
+		for (idx = 0; idx < TechResults.Length; idx++)
 		{
 			if (idx > 0) TagValue $= "/";
 			TagValue $= string(int(TechResults[idx] * ResultMultiplier));

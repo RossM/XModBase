@@ -20,6 +20,13 @@
 class XMBEffect_Extended extends X2Effect_Persistent implements(XMBEffectInterface);
 
 
+////////////////////////
+// Internal variables //
+////////////////////////
+
+var bool HandledOnPostTemplatesCreated;
+
+
 ////////////////////////////
 // Overrideable functions //
 ////////////////////////////
@@ -40,6 +47,9 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 // breakdown, so they won't see the effects of other GetFinalToHitModifiers overrides.
 function GetFinalToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, ShotBreakdown ShotBreakdown, out array<ShotModifierInfo> ShotModifiers);
 
+function bool ChangeHitResultForTarget(XComGameState_Unit Attacker, XComGameState_Unit TargetUnit, XComGameState_Ability AbilityState, const EAbilityHitResult CurrentResult, out EAbilityHitResult NewHitResult) { return false; }
+
+function OnPostTemplatesCreated();
 
 ////////////////////
 // Implementation //
@@ -47,7 +57,32 @@ function GetFinalToHitModifiers(XComGameState_Effect EffectState, XComGameState_
 
 // From XMBEffectInterface
 function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out string TagValue) { return false; }
-function bool GetExtValue(LWTuple Data) { return false; }
+
+function bool GetExtValue(LWTuple Data) 
+{ 
+	local EAbilityHitResult ChangeResult;
+
+	switch (Data.Id)
+	{
+	case 'ChangeHitResultForTarget':
+		if (ChangeHitResultForTarget(XComGameState_Unit(Data.Data[0].o), XComGameState_Unit(Data.Data[1].o), XComGameState_Ability(Data.Data[2].o), EAbilityHitResult(Data.Data[3].i), ChangeResult))
+		{
+			Data.Data[3].i = ChangeResult;
+			return true;
+		}
+		else
+			return false;
+
+	case 'OnPostTemplatesCreated':
+		if (HandledOnPostTemplatesCreated)
+			return false;
+		OnPostTemplatesCreated();
+		HandledOnPostTemplatesCreated = true;
+		return true;
+	}
+
+	return false; 
+}
 
 // From XMBEffectInterface. XMBAbilityToHitCalc_StandardAim uses this to find which modifiers it should apply.
 function bool GetExtModifiers(name Type, XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, ShotBreakdown ShotBreakdown, out array<ShotModifierInfo> ShotModifiers)

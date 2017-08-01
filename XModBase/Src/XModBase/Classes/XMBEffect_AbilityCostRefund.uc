@@ -22,7 +22,7 @@
 //
 //  XMBEffectUtilities.uc
 //---------------------------------------------------------------------------------------
-class XMBEffect_AbilityCostRefund extends X2Effect_Persistent config(GameData_SoldierSkills);
+class XMBEffect_AbilityCostRefund extends X2Effect_Persistent implements(XMBEffectInterface);
 
 
 ///////////////////////
@@ -33,6 +33,8 @@ var name TriggeredEvent;							// An event that will be triggered when this effe
 var bool bShowFlyOver;								// Show a flyover when this effect refunds an ability cost. Requires TriggeredEvent to be set.
 var name CountValueName;							// Name of the unit value to use to count the number of actions refunded per turn.
 var int MaxRefundsPerTurn;							// Maximum number of actions to refund per turn. Requires CountUnitValue to be set.
+var bool bFreeCost;									// Make the ability usable without any action points if the conditions are met.
+													// Not compatible with any conditions that depend on the target or result of the ability.
 
 
 //////////////////////////
@@ -84,7 +86,7 @@ function bool PostAbilityCostPaid(XComGameState_Effect EffectState, XComGameStat
 		return false;
 
 	//  restore the pre cost action points to fully refund this action
-	if (SourceUnit.ActionPoints.Length != PreCostActionPoints.Length)
+	if (bFreeCost || SourceUnit.ActionPoints.Length != PreCostActionPoints.Length)
 	{
 		AbilityState = XComGameState_Ability(`XCOMHISTORY.GetGameStateForObjectID(EffectState.ApplyEffectParameters.AbilityStateObjectRef.ObjectID));
 		if (AbilityState != none)
@@ -122,6 +124,46 @@ function private name ValidateAttack(XComGameState_Effect EffectState, XComGameS
 		return AvailableCode;
 		
 	return 'AA_Success';
+}
+
+////////////////////////
+// XMBEffectInterface //
+////////////////////////
+
+function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out string TagValue);
+function bool GetExtModifiers(name Type, XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, optional ShotBreakdown ShotBreakdown, optional out array<ShotModifierInfo> ShotModifiers);
+
+function bool GetExtValue(LWTuple Data)
+{
+	local XComGameState_Unit SourceUnit;
+	local XComGameState_Ability AbilityState;
+	local XComGameState_Effect EffectState;
+	local UnitValue CountUnitValue;
+
+	if (bFreeCost)
+	{
+		if (Data.Id == 'GetActionPointCost')
+		{
+			SourceUnit = XComGameState_Unit(Data.Data[0].o);
+			AbilityState = XComGameState_Ability(Data.Data[1].o);
+			EffectState = XComGameState_Effect(Data.Data[2].o);
+
+			if (CountValueName != '')
+			{
+				SourceUnit.GetUnitValue(CountValueName, CountUnitValue);
+				if (MaxRefundsPerTurn >= 0 && CountUnitValue.fValue >= MaxRefundsPerTurn)
+					return false;
+			}
+
+			if (ValidateAttack(EffectState, SourceUnit, none, AbilityState) == 'AA_Success')
+			{
+				Data.Data[3].i = 0;
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 DefaultProperties

@@ -76,6 +76,9 @@ var const XMBCondition_AbilityHitResult GrazeCondition;				// The ability grazes
 var const XMBCondition_MatchingWeapon MatchingWeaponCondition;		// The ability matches the weapon of the 
 																	// ability defining the condition
 
+var const XMBCondition_AbilityProperty MeleeCondition;
+var const XMBCondition_AbilityProperty RangedCondition;
+
 // Unit property conditions.
 var const X2Condition_UnitProperty LivingFriendlyTargetProperty;	// The target is alive and an ally.
 
@@ -83,12 +86,27 @@ var const X2Condition_UnitProperty LivingFriendlyTargetProperty;	// The target i
 var const int AUTO_PRIORITY;
 
 
+// Checks if a conditional effect shouldn't have a bonus marker when active because it will always be active.
+static function bool AlwaysRelevant(XMBEffect_ConditionalBonus Effect)
+{
+	if (Effect.AbilityTargetConditions.Length > 0 && class'XMBEffect_ConditionalBonus'.static.AllConditionsAreUnitConditions(Effect.AbilityTargetConditions))
+		return false;
+	if (Effect.AbilityShooterConditions.Length > 0)
+		return false;
+	if (Effect.ScaleValue != none)
+		return false;
+
+	return true;
+}
+
 // Helper method for quickly defining a non-pure passive. Works like PurePassive, except it also 
 // takes an X2Effect_Persistent.
-static function X2AbilityTemplate Passive(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect_Persistent Effect = none)
+static function X2AbilityTemplate Passive(name DataName, string IconImage, optional bool bCrossClassEligible = false, optional X2Effect Effect = none)
 {
 	local X2AbilityTemplate Template;
-	local XMBEffect_ConditionalBonus ConditionalEffect;
+	local XMBEffect_ConditionalBonus ConditionalBonusEffect;
+	local XMBEffect_ConditionalStatChange ConditionalStatChangeEffect;
+	local X2Effect_Persistent PersistentEffect;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
 	Template.IconImage = IconImage;
@@ -101,27 +119,38 @@ static function X2AbilityTemplate Passive(name DataName, string IconImage, optio
 	Template.AbilityTargetStyle = default.SelfTarget;
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 
-	if (Effect == none)
-		Effect = new class'X2Effect_Persistent';
+	PersistentEffect = X2Effect_Persistent(Effect);
+	ConditionalBonusEffect = XMBEffect_ConditionalBonus(Effect);
+	ConditionalStatChangeEffect = XMBEffect_ConditionalStatChange(Effect);
 
-	ConditionalEffect = XMBEffect_ConditionalBonus(Effect);
-
-	if (ConditionalEffect != none && (ConditionalEffect.AbilityTargetConditions.Length > 0 ||
-									  ConditionalEffect.AbilityShooterConditions.Length > 0 ||
-									  ConditionalEffect.ScaleValue != none))
+	if (ConditionalBonusEffect != none && !AlwaysRelevant(ConditionalBonusEffect))
 	{
-		ConditionalEffect.BuildPersistentEffect(1, true, false, false);
-		ConditionalEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true,,Template.AbilitySourceName);
-		ConditionalEffect.bHideWhenNotRelevant = true;
-		Template.AddTargetEffect(ConditionalEffect);
+		ConditionalBonusEffect.BuildPersistentEffect(1, true, false, false);
+		ConditionalBonusEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true,,Template.AbilitySourceName);
+		ConditionalBonusEffect.bHideWhenNotRelevant = true;
 
-		Effect = new class'X2Effect_Persistent';
-		Effect.EffectName = name(DataName $ "_Passive");
+		PersistentEffect = new class'X2Effect_Persistent';
+		PersistentEffect.EffectName = name(DataName $ "_Passive");
+	}
+	else if (ConditionalStatChangeEffect != none)
+	{
+		ConditionalStatChangeEffect.BuildPersistentEffect(1, true, false, false);
+		ConditionalStatChangeEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.LocHelpText, Template.IconImage, true,,Template.AbilitySourceName);
+
+		PersistentEffect = new class'X2Effect_Persistent';
+		PersistentEffect.EffectName = name(DataName $ "_Passive");
+	}
+	else if (PersistentEffect == none)
+	{
+		PersistentEffect = new class'X2Effect_Persistent';
 	}
 
-	Effect.BuildPersistentEffect(1, true, false, false);
-	Effect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,,Template.AbilitySourceName);
-	Template.AddTargetEffect(Effect);
+	PersistentEffect.BuildPersistentEffect(1, true, false, false);
+	PersistentEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,,Template.AbilitySourceName);
+	Template.AddTargetEffect(PersistentEffect);
+
+	if (Effect != PersistentEffect && Effect != none)
+		Template.AddTargetEffect(Effect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	//  NOTE: No visualization on purpose!
@@ -233,12 +262,12 @@ static function X2AbilityTemplate Attack(name DataName, string IconImage, option
 	`CREATE_X2ABILITY_TEMPLATE(Template, DataName);
 
 	// Icon Properties
-	Template.bDontDisplayInAbilitySummary = true;
 	Template.IconImage = IconImage;
 	Template.ShotHUDPriority = ShotHUDPriority;
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 	Template.DisplayTargetHitChance = true;
 	Template.AbilitySourceName = 'eAbilitySource_Perk'; 
+	Template.Hostility = eHostility_Offensive;
 
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 
@@ -393,8 +422,6 @@ static function X2AbilityTemplate TargetedDebuff(name DataName, string IconImage
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 	Template.AbilityTargetConditions.AddItem(default.LivingHostileTargetProperty);
 
-	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-
 	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
 	Template.AddShooterEffectExclusions();
 
@@ -446,13 +473,15 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 
 	Template.AbilityTargetConditions.AddItem(default.LivingFriendlyTargetProperty);
 
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
 	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
 	Template.AddShooterEffectExclusions();
 
 	// 100% chance to hit
 	Template.AbilityToHitCalc = default.DeadEye;
 
-	Template.AbilityTargetStyle = default.SingleTargetWithSelf;
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
 
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 
@@ -471,6 +500,55 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 	Template.CustomFireAnim = 'HL_SignalPoint';
 	
 	Template.bCrossClassEligible = bCrossClassEligible;
+
+	return Template;
+}
+
+// Helper function for creating an ability that affects all friendly units.
+static function X2AbilityTemplate SquadPassive(name DataName, string IconImage, bool bCrossClassEligible, X2Effect_Persistent Effect)
+{
+	local X2AbilityTemplate	Template, TriggerTemplate;
+	local X2Condition_UnitEffectsWithAbilitySource Condition;
+	local XMBAbilityTrigger_EventListener EventListener;
+
+	// Create a normal passive, which triggers when the unit enters play. This
+	// also provides the icon for the ability.
+	Template = Passive(DataName, IconImage, bCrossClassEligible, none);
+
+	Effect.BuildPersistentEffect(1, true, false, false);
+
+	// The passive applies the effect to all friendly units at the start of play.
+	Template.AbilityMultiTargetStyle = new class'X2AbilityMultiTarget_AllAllies';
+	Template.AddMultiTargetEffect(Effect);
+	 
+	Condition = new class'X2Condition_UnitEffectsWithAbilitySource';
+	Condition.AddExcludeEffect(Effect.EffectName, 'AA_UnitIsImmune');
+	Effect.TargetConditions.AddItem(Condition);
+
+	// Create a triggered ability which will apply the effect to friendly units
+	// that are created after play begins.
+	TriggerTemplate = TargetedBuff(name(DataName $ "_OnUnitBeginPlay"), IconImage, false, Effect,, eCost_None);
+
+	// The triggered ability shouldn't have a fire visualization added
+	TriggerTemplate.bSkipFireAction = true;
+
+	// Remove the default input trigger added by TargetedBuff()
+	TriggerTemplate.AbilityTriggers.Length = 0;
+
+	// Don't show the ability as activatable in the HUD
+	TriggerTemplate.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+
+	// Set up a trigger that will fire whenever another unit enters the battle
+	// XMBAbilityTrigger_EventListener doesn't use ListenerData.EventFn
+	EventListener = new class'XMBAbilityTrigger_EventListener';
+	EventListener.ListenerData.Deferral = ELD_OnStateSubmitted;
+	EventListener.ListenerData.EventID = 'OnUnitBeginPlay';
+	EventListener.ListenerData.Filter = eFilter_None;
+	EventListener.bSelfTarget = false;
+	TriggerTemplate.AbilityTriggers.AddItem(EventListener);
+
+	// Add the triggered ability as a secondary ability
+	AddSecondaryAbility(Template, TriggerTemplate);
 
 	return Template;
 }
@@ -719,6 +797,25 @@ static function AddSecondaryAbility(X2AbilityTemplate Template, X2AbilityTemplat
 	class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().AddAbilityTemplate(SecondaryTemplate);
 }
 
+static function XMBEffect_ConditionalBonus AddBonusPassive(X2AbilityTemplate Template, name DataName = name(Template.DataName $ "_Bonuses"))
+{
+	local X2AbilityTemplate PassiveTemplate;
+	local XMBEffect_ConditionalBonus BonusEffect;
+	local XMBCondition_AbilityName Condition;
+
+	BonusEffect = new class'XMBEffect_ConditionalBonus';
+	Condition = new class'XMBCondition_AbilityName';
+
+	Condition.IncludeAbilityNames.AddItem(Template.DataName);
+	BonusEffect.AbilityTargetConditions.AddItem(Condition);
+
+	PassiveTemplate = Passive(DataName, Template.IconImage, false, BonusEffect);
+	AddSecondaryAbility(Template, PassiveTemplate);
+	HidePerkIcon(PassiveTemplate);
+
+	return BonusEffect;
+}
+
 // Helper function for creating an X2Condition that requires a maximum distance between shooter and target.
 simulated static function X2Condition_UnitProperty TargetWithinTiles(int Tiles)
 {
@@ -826,11 +923,22 @@ defaultproperties
 	End Object
 	MatchingWeaponCondition = DefaultMatchingWeaponCondition
 
+	Begin Object Class=XMBCondition_AbilityProperty Name=DefaultMeleeCondition
+		bRequireMelee = true
+	End Object
+	MeleeCondition = DefaultMeleeCondition
+
+	Begin Object Class=XMBCondition_AbilityProperty Name=DefaultRangedCondition
+		bExcludeMelee = true
+	End Object
+	RangedCondition = DefaultRangedCondition
+
 	Begin Object Class=X2Condition_UnitProperty Name=DefaultLivingFriendlyTargetProperty
 		ExcludeAlive=false
 		ExcludeDead=true
 		ExcludeFriendlyToSource=false
 		ExcludeHostileToSource=true
+		RequireSquadmates=true
 		FailOnNonUnits=true
 	End Object
 	LivingFriendlyTargetProperty = DefaultLivingFriendlyTargetProperty

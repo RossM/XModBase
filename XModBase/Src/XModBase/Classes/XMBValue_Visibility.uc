@@ -24,6 +24,7 @@
 class XMBValue_Visibility extends XMBValue;
 
 var bool bCountEnemies, bCountAllies, bCountNeutrals;
+var bool bSquadsight;
 
 var array<X2Condition> RequiredConditions;		// A filter for which units will be counted. By
 												// default, counts living visible units. Other
@@ -46,7 +47,10 @@ simulated function int CountVisibleUnitsForUnit(XComGameState_Unit SourceState, 
 		RequiredConditions = class'X2TacticalVisibilityHelpers'.default.LivingGameplayVisibleFilter;
 	}
 
-	VisibilityMgr.GetAllVisibleToSource(SourceState.ObjectID, VisibleUnits, class'XComGameState_Unit', HistoryIndex, RequiredConditions);
+	if (bSquadsight)
+		class'X2TacticalVisibilityHelpers'.static.GetAllVisibleObjectsForPlayer(SourceState.ControllingPlayer.ObjectID, VisibleUnits, RequiredConditions, HistoryIndex);
+	else
+		VisibilityMgr.GetAllVisibleToSource(SourceState.ObjectID, VisibleUnits, class'XComGameState_Unit', HistoryIndex, RequiredConditions);
 
 	foreach VisibleUnits(UnitRef)
 	{

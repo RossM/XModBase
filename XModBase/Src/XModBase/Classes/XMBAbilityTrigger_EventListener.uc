@@ -43,6 +43,7 @@ class XMBAbilityTrigger_EventListener extends X2AbilityTrigger_EventListener;
 ////////////////////////
 
 var bool bSelfTarget;
+var bool bAsTarget;
 
 //////////////////////////
 // Condition properties //
@@ -103,6 +104,9 @@ function name ValidateAttack(XComGameState_Ability SourceAbilityState, XComGameS
 	local StateObjectReference ItemRef;
 	local name AvailableCode;
 		
+	if (bAsTarget && Target.ObjectID != SourceAbilityState.OwnerStateObject.ObjectID)
+		return 'AA_UnknownError';
+
 	foreach AbilityTargetConditions(kCondition)
 	{
 		if (kCondition.IsA('XMBCondition_MatchingWeapon'))

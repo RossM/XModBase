@@ -28,58 +28,63 @@ class XMBEffect_DoNotConsumeAllPoints extends X2Effect_Persistent implements(XMB
 
 var array<name> AbilityNames;		// The abilities which will not end the turn as first action
 
+//////////////////////////
+// Condition properties //
+//////////////////////////
+
+var array<X2Condition> AbilityTargetConditions;		// Conditions on the target of the ability.
+var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of the ability.
 
 ////////////////////
 // Implementation //
 ////////////////////
 
-var bool HandledOnPostTemplatesCreated;
-
-// From XMBEffectInterface
-function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out string TagValue) { return false; }
-function bool GetExtModifiers(name Type, XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, optional ShotBreakdown ShotBreakdown, optional out array<ShotModifierInfo> ShotModifiers) { return false; }
-
-// From XMBEffectInterface
-function bool GetExtValue(LWTuple Tuple)
+function private name ValidateAttack(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
 {
-	local name Ability;
-	local X2AbilityTemplate AbilityTemplate;
-	local X2AbilityTemplateManager AbilityMgr;
-	local X2AbilityCost_ActionPoints ActionPointCost;
-	local int i;
+	local name AvailableCode;
 
-	if (Tuple.id != 'OnPostTemplatesCreated')
-		return false;
+	if (AbilityNames.Length > 0 && AbilityNames.Find(AbilityState.GetMyTemplateName()) == INDEX_NONE)
+		return 'AA_InvalidAbilityName';
 
-	if (HandledOnPostTemplatesCreated)
-		return false;
+	AvailableCode = class'XMBEffectUtilities'.static.CheckTargetConditions(AbilityTargetConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
+		
+	AvailableCode = class'XMBEffectUtilities'.static.CheckShooterConditions(AbilityShooterConditions, EffectState, Attacker, Target, AbilityState);
+	if (AvailableCode != 'AA_Success')
+		return AvailableCode;
+		
+	return 'AA_Success';
+}
 
-	AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+////////////////////////
+// XMBEffectInterface //
+////////////////////////
 
-	foreach AbilityNames(Ability)
+function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out string TagValue);
+function bool GetExtModifiers(name Type, XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, optional ShotBreakdown ShotBreakdown, optional out array<ShotModifierInfo> ShotModifiers);
+
+function bool GetExtValue(LWTuple Data)
+{
+	local XComGameState_Unit SourceUnit;
+	local XComGameState_Ability AbilityState;
+	local XComGameState_Effect EffectState;
+	local name ValidationResult;
+
+	if (Data.Id == 'GetConsumeAllPoints')
 	{
-		AbilityTemplate = AbilityMgr.FindAbilityTemplate(Ability);
-		if (AbilityTemplate == none)
-		{
-			`Log(EffectName $ ": Could not find ability template '" $ Ability $ "'");
-			continue;
-		}
+		SourceUnit = XComGameState_Unit(Data.Data[0].o);
+		AbilityState = XComGameState_Ability(Data.Data[1].o);
+		EffectState = XComGameState_Effect(Data.Data[2].o);
 
-		for (i = 0; i < AbilityTemplate.AbilityCosts.Length; i++)
+		ValidationResult = ValidateAttack(EffectState, SourceUnit, none, AbilityState);
+		if (ValidationResult == 'AA_Success')
 		{
-			ActionPointCost = X2AbilityCost_ActionPoints(AbilityTemplate.AbilityCosts[i]);
-			if (ActionPointCost != none && ActionPointCost.DoNotConsumeAllEffects.Find(EffectName) == INDEX_NONE)
-			{
-				// Action point costs may be shared between effects. We don't want to accidentally modify a shared
-				// object, so make a copy.
-				ActionPointCost = new ActionPointCost.class(ActionPointCost);
-				AbilityTemplate.AbilityCosts[i] = ActionPointCost;
-					
-				ActionPointCost.DoNotConsumeAllEffects.AddItem(EffectName);
-			}
+			Data.Data[3].i = int(false);
+			return true;
 		}
 	}
 
-	HandledOnPostTemplatesCreated = true;
-	return true;
+	return false;
 }
+

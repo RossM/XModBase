@@ -12,6 +12,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	local X2AbilityTrigger Trigger;
 	local XMBAbilityTrigger_EventListener EventListener;
 	local name AvailableCode;
+	local bool bSuccess;
 
 	History = `XCOMHISTORY;
 
@@ -51,14 +52,28 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 				{
 					AvailableCode = EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState);
 
-					`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID $ ":" @ AbilityState.GetMyTemplate().DataName @ "=" @ AvailableCode);
+					if (AbilityState != none)
+					{
+					`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "(" $ AbilityState.GetMyTemplate().DataName $ ") =" @ AvailableCode);
+					}
+					else if (TargetUnit != none)
+					{
+					`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "(" $ TargetUnit $ ") =" @ AvailableCode);
+					}
+					else
+					{
+					`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "=" @ AvailableCode);
+					}
 
 					if (AvailableCode == 'AA_Success')
 					{
 						if (EventListener.bSelfTarget)
-							SourceAbilityState.AbilityTriggerAgainstSingleTarget(SourceUnit.GetReference(), false);
+							bSuccess = SourceAbilityState.AbilityTriggerAgainstSingleTarget(SourceUnit.GetReference(), false);
 						else
-							SourceAbilityState.AbilityTriggerAgainstSingleTarget(TargetUnit.GetReference(), false);
+							bSuccess = SourceAbilityState.AbilityTriggerAgainstSingleTarget(TargetUnit.GetReference(), false);
+
+						if (!bSuccess)
+							`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ ": Activation failed! (" $ SourceAbilityState.CanActivateAbility(SourceUnit) $ ")");
 					}
 				}
 
