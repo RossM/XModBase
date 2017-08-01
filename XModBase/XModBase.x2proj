@@ -40,122 +40,14 @@
     <Content Include="Src\LW_Tuple\Classes\LWTuple.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XComGame\Classes\*.uc" />
-    <Content Include="Src\XModBase\Classes\Examples.uc">
+    <None Include="Src\XComGame\Classes\*.uc" />
+    <Content Include="Src\XModBase\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_AbilityProperty.uc">
+    <Content Include="Src\XModBase_Core_1_3_0\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffectUtilities.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_ChangeHitResultForAttacker.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_DoNotConsumeAllPoints.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBAbility.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBAbilityTrigger_EventListener.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBAction_ForceVisibility.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_AbilityCost.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_AbilityHitResult.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_AbilityName.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_CoverType.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_Dead.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_HeightAdvantage.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_MatchingWeapon.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBCondition_ReactionFire.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_AbilityCostRefund.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_AddAbilityCharges.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_AddItemChargesBySlot.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_AddUtilityItem.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_BonusDamageByDamageType.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_BonusRadius.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_ConditionalBonus.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_Extended.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_PermanentStatChange.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_RevealUnit.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBEffect_ToHitModifierByRange.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBGameState_EventTarget.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBValue.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBValue_UnitValue.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase\Classes\XMBValue_Visibility.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBAbilityMultiTarget_Radius.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBAbilityTag.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBAbilityToHitCalc_StandardAim.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBConfig.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBDownloadableContentInfo_XModBase.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\XMBTargetingMethod_Grenade.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Interfaces\Classes\XMBEffectInterface.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\XModBase_Interfaces\Classes\XMBOverrideInterface.uc">
+    <Content Include="Src\XModBase_Interfaces\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
