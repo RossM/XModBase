@@ -446,15 +446,13 @@ static function X2AbilityTemplate TargetedBuff(name DataName, string IconImage, 
 
 	Template.AbilityTargetConditions.AddItem(default.LivingFriendlyTargetProperty);
 
-	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-
 	// Don't allow the ability to be used while the unit is disoriented, burning, unconscious, etc.
 	Template.AddShooterEffectExclusions();
 
 	// 100% chance to hit
 	Template.AbilityToHitCalc = default.DeadEye;
 
-	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.AbilityTargetStyle = default.SingleTargetWithSelf;
 
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 
