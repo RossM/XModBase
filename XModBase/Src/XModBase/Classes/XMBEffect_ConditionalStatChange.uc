@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    XMBEffect_AddAbility.uc
+//  FILE:    XMBEffect_ConditionalStatChange.uc
 //  AUTHOR:  xylthixlm
 //
 //  USAGE

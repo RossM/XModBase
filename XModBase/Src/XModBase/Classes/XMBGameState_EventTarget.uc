@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    XMBGameState_EventProxy.uc
+//  FILE:    XMBGameState_EventTarget.uc
 //  AUTHOR:  xylthixlm
 //
 //  USAGE

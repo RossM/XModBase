@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    XMBGameState_EventTarget.uc
+//  FILE:    XMBTemplateUtilities.uc
 //  AUTHOR:  xylthixlm
 //
 //  USAGE
