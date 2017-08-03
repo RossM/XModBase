@@ -1026,6 +1026,31 @@ static function X2AbilityTemplate SlamFire()
 	return Template;
 }
 
+static function X2AbilityTemplate SmokeAndMirrors()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_DoNotConsumeAllPoints CostEffect;
+	local XMBEffect_AddItemCharges BonusItemEffect;
+	local XMBCondition_WeaponName Condition;
+
+	CostEffect = new class'XMBEffect_DoNotConsumeAllPoints';
+	CostEffect.AbilityNames = class'TemplateEditors_CombatEngineer'.default.GrenadeAbilities;
+	Condition = new class'XMBCondition_WeaponName';
+	Condition.IncludeWeaponNames = class'X2AbilityCost_GrenadeActionPoints'.default.SmokeGrenadeTemplates;
+	Condition.bCheckAmmo = true;
+	CostEffect.AbilityTargetConditions.AddItem(Condition);
+
+	Template = Passive('XMBExample_SmokeAndMirrors', "img:///UILibrary_PerkIcons.UIPerk_command", false, CostEffect);
+
+	BonusItemEffect = new class'XMBEffect_AddItemCharges';
+	BonusItemEffect.PerItemBonus = 1;
+	BonusItemEffect.ApplyToNames.AddItem('SmokeGrenade');
+	BonusItemEffect.ApplyToNames.AddItem('SmokeGrenadeMk2');
+	AddSecondaryEffect(Template, BonusItemEffect);
+
+	return Template;
+}
+
 // Perk name:		Sprint
 // Perk effect:		Gain a bonus move action.
 // Localized text:	"Gain a bonus move action."

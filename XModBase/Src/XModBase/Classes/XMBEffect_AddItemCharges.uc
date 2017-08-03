@@ -10,7 +10,9 @@
 //
 //  The following examples in Examples.uc use this class:
 //
+//  Packmaster
 //  Rocketeer
+//  SmokeAndMirrors
 //
 //  INSTALLATION
 //

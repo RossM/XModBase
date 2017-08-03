@@ -15,10 +15,13 @@
 //  The following examples in Examples.uc use this class:
 //
 //  AbsolutelyCritical
+//  AgainstTheOdds
 //  DamnGoodGround
 //  Magnum
 //  MovingTarget
 //  PowerShot
+//  Precision
+//  Saboteur
 //  SurvivalInstinct
 //  TacticalSense
 //  Weaponmaster

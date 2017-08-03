@@ -11,8 +11,10 @@
 //  The following examples in Examples.uc use this class:
 //
 //  CloseAndPersonal
+//  Fastball
 //  HitAndRun
 //  PowerShot
+//  Saboteur
 //
 //  INSTALLATION
 //

@@ -10,6 +10,7 @@
 //  The following examples in Examples.uc use this class:
 //
 //  BulletSwarm
+//  SmokeAndMirrors
 //
 //  INSTALLATION
 //
