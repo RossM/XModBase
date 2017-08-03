@@ -1034,9 +1034,11 @@ static function X2AbilityTemplate SmokeAndMirrors()
 	local XMBCondition_WeaponName Condition;
 
 	CostEffect = new class'XMBEffect_DoNotConsumeAllPoints';
-	CostEffect.AbilityNames = class'TemplateEditors_CombatEngineer'.default.GrenadeAbilities;
+	CostEffect.AbilityNames.AddItem('ThrowGrenade');
+	CostEffect.AbilityNames.AddItem('LaunchGrenade');
 	Condition = new class'XMBCondition_WeaponName';
-	Condition.IncludeWeaponNames = class'X2AbilityCost_GrenadeActionPoints'.default.SmokeGrenadeTemplates;
+	Condition.IncludeWeaponNames.AddItem('SmokeGrenade');
+	Condition.IncludeWeaponNames.AddItem('SmokeGrenadeMk2');
 	Condition.bCheckAmmo = true;
 	CostEffect.AbilityTargetConditions.AddItem(Condition);
 
