@@ -14,29 +14,38 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(AbsolutelyCritical());
 	Templates.AddItem(AdrenalineSurge());
+	Templates.AddItem(AgainstTheOdds());
 	Templates.AddItem(ArcticWarrior());
 	Templates.AddItem(Assassin());
 	Templates.AddItem(BulletSwarm());
 	Templates.AddItem(BullRush());
 	Templates.AddItem(CloseAndPersonal());
 	Templates.AddItem(CloseCombatSpecialist());
+	Templates.AddItem(CoverMe());
 	Templates.AddItem(DamnGoodGround());
 	Templates.AddItem(DangerZone());
 	Templates.AddItem(DeepCover());
 	Templates.AddItem(EspritDeCorps());
+	Templates.AddItem(Fastball());
 	Templates.AddItem(Focus());
-	Templates.AddItem(FocusCount());
 	Templates.AddItem(HitAndRun());
+	Templates.AddItem(Inspiration());
 	Templates.AddItem(InspireAgility());
 	Templates.AddItem(LightningHands());
+	Templates.AddItem(Liquidator());
 	Templates.AddItem(Magnum());
 	Templates.AddItem(MovingTarget());
+	Templates.AddItem(Packmaster());
 	Templates.AddItem(PowerShot());
+	Templates.AddItem(Precision());
 	Templates.AddItem(Pyromaniac());
 	Templates.AddItem(ReverseEngineering());
 	Templates.AddItem(Rocketeer());
+	Templates.AddItem(Saboteur());
+	Templates.AddItem(Scout());
 	Templates.AddItem(SlamFire());
 	Templates.AddItem(Sprint());
+	Templates.AddItem(Stalker());
 	Templates.AddItem(SurvivalInstinct());
 	Templates.AddItem(TacticalSense());
 	Templates.AddItem(Weaponmaster());
@@ -119,6 +128,23 @@ static function X2AbilityTemplate AdrenalineSurge()
 	Template.AddMultiTargetEffect(Effect);
 
 	return Template;
+}
+
+static function X2AbilityTemplate AgainstTheOdds()
+{
+	local XMBEffect_ConditionalBonus Effect;
+	local XMBValue_Visibility Value;
+	 
+	Value = new class'XMBValue_Visibility';
+	Value.bCountEnemies = true;
+	Value.bSquadsight = true;
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.AddToHitModifier(2, eHit_Success);
+	Effect.ScaleValue = Value;
+	Effect.ScaleMax = 20 / 2;
+
+	return Passive('XMBExample_AgainstTheOdds', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
 // Perk name:		Arctic Warrior
@@ -349,6 +375,28 @@ static function X2AbilityTemplate CloseCombatSpecialist()
 	return Template;
 }
 
+static function X2AbilityTemplate CoverMe()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_AddAbility CoolUnderPressureEffect;
+	local XMBEffect_GrantReserveActionPoint ActionPointEffect;
+
+	CoolUnderPressureEffect = new class'XMBEffect_AddAbility';
+	CoolUnderPressureEffect.AbilityName = 'CoolUnderPressure';
+	CoolUnderPressureEffect.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnBegin);
+	CoolUnderPressureEffect.VisualizationFn = EffectFlyOver_Visualization;
+
+	Template = TargetedBuff('XMBEffect_CoverMe', "img:///UILibrary_PerkIcons.UIPerk_command", true, CoolUnderPressureEffect,, eCost_SingleConsumeAll);
+
+	ActionPointEffect = new class'XMBEffect_GrantReserveActionPoint';
+	ActionPointEffect.ImmediateActionPoint = class'X2CharacterTemplateManager'.default.OverwatchReserveActionPoint;
+	Template.AddTargetEffect(ActionPointEffect);
+
+	AddCooldown(Template, 4);
+
+	return Template;
+}
+
 // Perk name:		Damn Good Ground
 // Perk effect:		You get an additional +10 Aim and +10 Defense against targets at lower elevation.
 // Localized text:	"You get an additional <Ability:+ToHit/> Aim and <Ability:+Defense/> Defense against targets at lower elevation."
@@ -473,6 +521,31 @@ static function X2AbilityTemplate EspritDeCorps()
 	return Template;
 }
 
+static function X2AbilityTemplate Fastball()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_AbilityCostRefund Effect;
+	local XMBCondition_AbilityName NameCondition;
+
+	Effect = new class'XMBEffect_AbilityCostRefund';
+	Effect.TriggeredEvent = 'Fastball';
+	Effect.bShowFlyOver = true;
+	Effect.CountValueName = 'FastballUses';
+	Effect.MaxRefundsPerTurn = 1;
+	Effect.bFreeCost = true;
+	Effect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
+
+	NameCondition = new class'XMBCondition_AbilityName';
+	NameCondition.IncludeAbilityNames.AddItem('ThrowGrenade');
+	NameCondition.IncludeAbilityNames.AddItem('LaunchGrenade');
+	Effect.AbilityTargetConditions.AddItem(NameCondition);
+
+	Template = SelfTargetActivated('XMBExample_Fastball', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect,, eCost_Free);
+	AddCooldown(Template, 4);
+
+	return Template;
+}
+
 // Perk name:		Focus
 // Perk effect:		Your first reaction shot each turn always hits.
 // Localized text:	"Your first reaction shot each turn always hits."
@@ -585,6 +658,25 @@ static function X2AbilityTemplate HitAndRun()
 	return Template;
 }
 
+static function X2AbilityTemplate Inspiration()
+{
+	local X2AbilityTemplate Template;
+	local XMBEffect_ConditionalStatChange Effect;
+
+	Effect = new class'XMBEffect_ConditionalStatChange';
+	Effect.EffectName = 'Inspiration';
+	Effect.DuplicateResponse = eDupe_Allow;
+	Effect.AddPersistentStatChange(eStat_Dodge, 10);
+	Effect.AddPersistentStatChange(eStat_Will, 10);
+	Effect.Conditions.AddItem(TargetWithinTiles(12));
+
+	Template = SquadPassive('XMBExample_Inspiration', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.DodgeLabel, eStat_Dodge, 10);
+	Template.SetUIStatMarkup(class'XLocalizedData'.default.WillLabel, eStat_Will, 10);
+
+	return Template;
+}
+
 // Perk name:		Inspire Agility
 // Perk effect:		Give a friendly unit +50 Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge.
 // Localized text:	"Give a friendly unit <Ability:+Dodge/> Dodge until the start of your next turn. Whenever you kill an enemy, you gain an extra charge."
@@ -656,6 +748,18 @@ static function X2AbilityTemplate LightningHands()
 	return Template;
 }
 
+static function X2AbilityTemplate Liquidator()
+{
+	local XMBEffect_AbilityCostRefund Effect;
+
+	Effect = new class'XMBEffect_AbilityCostRefund';
+	Effect.TriggeredEvent = 'Liquidator';
+	Effect.AbilityTargetConditions.AddItem(default.DeadCondition);
+	Effect.AbilityTargetConditions.AddItem(default.MatchingWeaponCondition);
+
+	return Passive('XMBExample_Liquidator', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+}
+
 // Perk name:		Magnum
 // Perk effect:		Your pistol attacks get +10 Aim and deal +1 damage.
 // Localized text:	"Your pistol attacks get <Ability:+ToHit/> Aim and deal <Ability:+Damage/> damage."
@@ -695,6 +799,16 @@ static function X2AbilityTemplate MovingTarget()
 
 	// Create the template using a helper function
 	return Passive('XMBExample_MovingTarget', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+}
+
+static function X2AbilityTemplate Packmaster()
+{
+	local XMBEffect_AddItemCharges Effect;
+
+	Effect = new class'XMBEffect_AddItemCharges';
+	Effect.ApplyToSlots.AddItem(eInvSlot_Utility);
+
+	return Passive('XMBExample_Packmaster', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
 }
 
 // Perk name:		Power Shot
@@ -749,6 +863,17 @@ static function X2AbilityTemplate PowerShotBonuses()
 	HidePerkIcon(Template);
 
 	return Template;
+}
+
+static function X2AbilityTemplate Precision()
+{
+	local XMBEffect_ConditionalBonus Effect;
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.AbilityTargetConditions.AddItem(default.FullCoverCondition);
+	Effect.AddToHitModifier(20);
+
+	return Passive('XMBExample_Precision', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
 // Perk name:		Pyromaniac
@@ -833,6 +958,38 @@ static function X2AbilityTemplate Rocketeer()
 	return Template;
 }
 
+static function X2AbilityTemplate Saboteur()
+{
+	local XMBEffect_ConditionalBonus Effect;
+	local X2Condition_UnitProperty UnitPropertyCondition;
+	local XMBCondition_AbilityName AbilityNameCondition;
+
+	Effect = new class'XMBEffect_ConditionalBonus';
+	Effect.AddPercentDamageModifier(50);
+
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.ExcludeAlive = true;
+	UnitPropertyCondition.ExcludeDead = true;
+	UnitPropertyCondition.FailOnNonUnits = false;
+	Effect.AbilityTargetConditions.AddItem(UnitPropertyCondition);
+
+	AbilityNameCondition = new class'XMBCondition_AbilityName';
+	AbilityNameCondition.IncludeAbilityNames.AddItem('StandardShot');
+	Effect.AbilityTargetConditions.AddItem(AbilityNameCondition);
+
+	return Passive('XMBExample_Saboteur', "img:///UILibrary_PerkIcons.UIPerk_command", false, Effect);
+}
+
+static function X2AbilityTemplate Scout()
+{
+	local XMBEffect_AddUtilityItem Effect;
+
+	Effect = new class'XMBEffect_AddUtilityItem';
+	Effect.DataName = 'BattleScanner';
+
+	return Passive('XMBExample_Scout', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
+}
+
 // Perk name:		Slam Fire
 // Perk effect:		For the rest of the turn, whenever you get a critical hit with your primary weapon, your actions are refunded.
 // Localized text:	"For the rest of the turn, whenever you get a critical hit with your <Ability:WeaponName/>, your actions are refunded."
@@ -897,6 +1054,18 @@ static function X2AbilityTemplate Sprint()
 	AddCooldown(Template, 3);
 
 	return Template;
+}
+
+static function X2AbilityTemplate Stalker()
+{
+	local XMBEffect_ConditionalStatChange Effect;
+
+	Effect = new class'XMBEffect_ConditionalStatChange';
+	Effect.AddPersistentStatChange(eStat_Mobility, 3);
+	Effect.AddPersistentStatChange(eStat_Offense, 10);
+	Effect.Conditions.AddItem(new class'XMBCondition_Concealed');
+
+	return Passive('XMBExample_Stalker', "img:///UILibrary_PerkIcons.UIPerk_command", true, Effect);
 }
 
 // Perk name:		Survival Instinct
