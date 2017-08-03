@@ -44,6 +44,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Saboteur());
 	Templates.AddItem(Scout());
 	Templates.AddItem(SlamFire());
+	Templates.AddItem(SmokeAndMirrors());
 	Templates.AddItem(Sprint());
 	Templates.AddItem(Stalker());
 	Templates.AddItem(SurvivalInstinct());
