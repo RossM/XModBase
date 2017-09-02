@@ -20,7 +20,7 @@ class XMBAbilityToHitCalc_StandardAim extends X2AbilityToHitCalc_StandardAim imp
 var int MajorVersion, MinorVersion, PatchVersion;
 
 // Copied from X2AbilityToHitCalc and modified.
-function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarget kTarget, const out AbilityResultContext ResultContext, out EAbilityHitResult Result, out ArmorMitigationResults ArmorMitigated, out int HitChance)
+function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarget kTarget, bool bIsPrimaryTarget, const out AbilityResultContext ResultContext, out EAbilityHitResult Result, out ArmorMitigationResults ArmorMitigated, out int HitChance)
 {
 	local int i, RandRoll, Current, ModifiedHitChance;
 	local EAbilityHitResult DebugResult, ChangeResult;
@@ -30,12 +30,11 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 	local XComGameStateHistory History;
 	local StateObjectReference EffectRef;
 	local XComGameState_Effect EffectState;
-	local X2Effect_Persistent PersistentEffect;
-	local XMBEffectInterface XModBaseEffect;
 	local bool bRolledResultIsAMiss, bModHitRoll;
 	local bool HitsAreCrits;
 	local string LogMsg;
-	local LWTuple Tuple;
+	local ETeam CurrentPlayerTeam;
+	local ShotBreakdown m_ShotBreakdown;
 
 	History = `XCOMHISTORY;
 
@@ -59,15 +58,19 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 		}
 		if (`CHEATMGR.bDeadEye)
 		{
-			`log("DeadEye cheat forcing a hit.", true, 'XCom_HitRolls');
-			Result = eHit_Success;
-			if (HitsAreCrits)
-				Result = eHit_Crit;
-			return;
+			UnitState = XComGameState_Unit(History.GetGameStateForObjectID(kAbility.OwnerStateObject.ObjectID));
+			if( !`CHEATMGR.bXComOnlyDeadEye || !UnitState.ControllingPlayerIsAI() )
+			{
+				`log("DeadEye cheat forcing a hit.", true, 'XCom_HitRolls');
+				Result = eHit_Success;
+				if (HitsAreCrits)
+					Result = eHit_Crit;
+				return;
+			}
 		}
 	}
 
-	HitChance = GetHitChance(kAbility, kTarget, true);
+	HitChance = GetHitChance(kAbility, kTarget, m_ShotBreakdown, true);
 	RandRoll = `SYNC_RAND_TYPED(100, ESyncRandType_Generic);
 	Result = eHit_Miss;
 
@@ -99,13 +102,16 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 	//  reaction  fire shots and guaranteed hits do not get adjusted for difficulty
 	if( UnitState != None &&
 		!bReactionFire &&
-		!bGuaranteedHit)
+		!bGuaranteedHit && 
+		m_ShotBreakdown.SpecialGuaranteedHit == '')
 	{
 		PlayerState = XComGameState_Player(History.GetGameStateForObjectID(UnitState.GetAssociatedPlayerID()));
 		
-		if( bRolledResultIsAMiss && PlayerState.GetTeam() == eTeam_XCom )
+		CurrentPlayerTeam = PlayerState.GetTeam();
+
+		if( bRolledResultIsAMiss && CurrentPlayerTeam == eTeam_XCom )
 		{
-			ModifiedHitChance = GetModifiedHitChanceForCurrentDifficulty(PlayerState, HitChance);
+			ModifiedHitChance = GetModifiedHitChanceForCurrentDifficulty(PlayerState, TargetState, HitChance);
 
 			if( RandRoll < ModifiedHitChance )
 			{
@@ -114,9 +120,9 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 				`log("*** AIM ASSIST forcing an XCom MISS to become a HIT!", true, 'XCom_HitRolls');
 			}
 		}
-		else if( !bRolledResultIsAMiss && PlayerState.GetTeam() == eTeam_Alien )
+		else if( !bRolledResultIsAMiss && (CurrentPlayerTeam == eTeam_Alien || CurrentPlayerTeam == eTeam_TheLost) )
 		{
-			ModifiedHitChance = GetModifiedHitChanceForCurrentDifficulty(PlayerState, HitChance);
+			ModifiedHitChance = GetModifiedHitChanceForCurrentDifficulty(PlayerState, TargetState, HitChance);
 
 			if( RandRoll >= ModifiedHitChance )
 			{
@@ -142,39 +148,23 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 				}
 			}
 		}
-	}
-	
-	// XModBase: Check for hit modification by target.
-	if (TargetState != none)
-	{
-		foreach TargetState.AffectedByEffects(EffectRef)
+		if (TargetState != none)
 		{
-			EffectState = XComGameState_Effect(History.GetGameStateForObjectID(EffectRef.ObjectID));
-			PersistentEffect = EffectState.GetX2Effect();
-			XModBaseEffect = XMBEffectInterface(PersistentEffect);
-			if (XModBaseEffect != none)
+			foreach TargetState.AffectedByEffects(EffectRef)
 			{
-				Tuple = new class'LWTuple';
-				Tuple.Id = 'ChangeHitResultForTarget';
-				Tuple.Data.Length = 4;
-				Tuple.Data[0].kind = LWTVObject;
-				Tuple.Data[0].o = UnitState;
-				Tuple.Data[1].kind = LWTVObject;
-				Tuple.Data[1].o = TargetState;
-				Tuple.Data[2].kind = LWTVObject;
-				Tuple.Data[2].o = kAbility;
-				Tuple.Data[3].kind = LWTVInt;
-				Tuple.Data[3].i = Result;
-				if (XModBaseEffect.GetExtValue(Tuple))
+				EffectState = XComGameState_Effect(History.GetGameStateForObjectID(EffectRef.ObjectID));
+				if (EffectState != none)
 				{
-					ChangeResult = EAbilityHitResult(Tuple.Data[3].i);
-					`log("Effect" @ EffectState.GetX2Effect().FriendlyName @ "changing hit result for target:" @ ChangeResult, true,'XCom_HitRolls');
-					Result = ChangeResult;
+					if (EffectState.GetX2Effect().ChangeHitResultForTarget(EffectState, UnitState, TargetState, kAbility, bIsPrimaryTarget, Result, ChangeResult))
+					{
+						`log("Effect" @ EffectState.GetX2Effect().FriendlyName @ "changing hit result for target:" @ ChangeResult, true, 'XCom_HitRolls');
+						Result = ChangeResult;
+					}
 				}
 			}
 		}
 	}
-
+	
 	`log("***HIT" @ Result, !bRolledResultIsAMiss, 'XCom_HitRolls');
 	`log("***MISS" @ Result, bRolledResultIsAMiss, 'XCom_HitRolls');
 
@@ -202,7 +192,7 @@ function InternalRollForAbilityHit(XComGameState_Ability kAbility, AvailableTarg
 }
 
 // Copied from X2AbilityToHitCalc and modified.
-protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTarget kTarget, optional bool bDebugLog=false)
+protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTarget kTarget, optional out ShotBreakdown m_ShotBreakdown, optional bool bDebugLog = false)
 {
 	local XComGameState_Unit UnitState, TargetState;
 	local XComGameState_Item SourceWeapon;
@@ -227,10 +217,8 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 	local TTile UnitTileLocation, TargetTileLocation;
 	local ECoverType NextTileOverCoverType;
 	local int TileDistance;
-	local ShotModifierInfo Mod;
 
 	`log("=" $ GetFuncName() $ "=", bDebugLog, 'XCom_HitRolls');
-	m_bDebugModifiers = bDebugLog;
 
 	//  @TODO gameplay handle non-unit targets
 	History = `XCOMHISTORY;
@@ -244,31 +232,32 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 
 	//  reset shot breakdown
 	m_ShotBreakdown = EmptyShotBreakdown;
-	//  add all of the built-in modifiers
-	if (bGuaranteedHit)
-	{
-		Mod.Value = 100;
-		Mod.Reason = AbilityTemplate.LocFriendlyName;
-		Mod.ModType = eHit_Success;
-		m_ShotBreakdown.Modifiers.AddItem(Mod);
-		m_ShotBreakdown.ResultTable[Mod.ModType] += Mod.Value;
-		m_ShotBreakdown.FinalHitChance = m_ShotBreakdown.ResultTable[eHit_Success];
-	}
-	AddModifier(BuiltInHitMod, AbilityTemplate.LocFriendlyName, eHit_Success);
-	AddModifier(BuiltInCritMod, AbilityTemplate.LocFriendlyName, eHit_Crit);
 
-	if (bIndirectFire)
+	//  check for a special guaranteed hit
+	m_ShotBreakdown.SpecialGuaranteedHit = UnitState.CheckSpecialGuaranteedHit(kAbility, SourceWeapon, TargetState);
+	m_ShotBreakdown.SpecialCritLabel = UnitState.CheckSpecialCritLabel(kAbility, SourceWeapon, TargetState);
+
+	//  add all of the built-in modifiers
+	if (bGuaranteedHit || m_ShotBreakdown.SpecialGuaranteedHit != '')
+	{
+		//  call the super version to bypass our check to ignore success mods for guaranteed hits
+		super(X2AbilityToHitCalc).AddModifier(100, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
+	}
+	else if (bIndirectFire)
 	{
 		m_ShotBreakdown.HideShotBreakdown = true;
-		AddModifier(100, AbilityTemplate.LocFriendlyName, eHit_Success);
+		AddModifier(100, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 	}
+
+	AddModifier(BuiltInHitMod, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
+	AddModifier(BuiltInCritMod, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Crit, bDebugLog);
 
 	if (UnitState != none && TargetState == none)
 	{
 		// when targeting non-units, we have a 100% chance to hit. They can't dodge or otherwise
 		// mess up our shots
 		m_ShotBreakdown.HideShotBreakdown = true;
-		AddModifier(100, class'XLocalizedData'.default.OffenseStat);
+		AddModifier(100, class'XLocalizedData'.default.OffenseStat, m_ShotBreakdown, eHit_Success, bDebugLog);
 	}
 	else if (UnitState != none && TargetState != none)
 	{				
@@ -302,16 +291,16 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 				}
 
 				//  Add basic offense and defense values
-				AddModifier(UnitState.GetBaseStat(eStat_Offense), class'XLocalizedData'.default.OffenseStat);			
+				AddModifier(UnitState.GetBaseStat(eStat_Offense), class'XLocalizedData'.default.OffenseStat, m_ShotBreakdown, eHit_Success, bDebugLog);			
 				UnitState.GetStatModifiers(eStat_Offense, StatMods, StatModValues);
 				for (i = 0; i < StatMods.Length; ++i)
 				{
-					AddModifier(int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName);
+					AddModifier(int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}
 				//  Flanking bonus (do not apply to overwatch shots)
 				if (bFlanking && !bReactionFire && !bMeleeAttack)
 				{
-					AddModifier(UnitState.GetCurrentStat(eStat_FlankingAimBonus), class'XLocalizedData'.default.FlankingAimBonus);
+					AddModifier(UnitState.GetCurrentStat(eStat_FlankingAimBonus), class'XLocalizedData'.default.FlankingAimBonus, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}
 				//  Squadsight penalty
 				if (bSquadsight)
@@ -320,14 +309,16 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 					//  remove number of tiles within visible range (which is in meters, so convert to units, and divide that by tile size)
 					Tiles -= UnitState.GetVisibilityRadius() * class'XComWorldData'.const.WORLD_METERS_TO_UNITS_MULTIPLIER / class'XComWorldData'.const.WORLD_StepSize;
 					if (Tiles > 0)      //  pretty much should be since a squadsight target is by definition beyond sight range. but... 
-						AddModifier(default.SQUADSIGHT_DISTANCE_MOD * Tiles, class'XLocalizedData'.default.SquadsightMod);
+						AddModifier(default.SQUADSIGHT_DISTANCE_MOD * Tiles, class'XLocalizedData'.default.SquadsightMod, m_ShotBreakdown, eHit_Success, bDebugLog);
+					else if (Tiles == 0)	//	right at the boundary, but squadsight IS being used so treat it like one tile
+						AddModifier(default.SQUADSIGHT_DISTANCE_MOD, class'XLocalizedData'.default.SquadsightMod, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}
 
 				//  Check for modifier from weapon 				
 				if (SourceWeapon != none)
 				{
 					iWeaponMod = SourceWeapon.GetItemAimModifier();
-					AddModifier(iWeaponMod, class'XLocalizedData'.default.WeaponAimBonus);
+					AddModifier(iWeaponMod, class'XLocalizedData'.default.WeaponAimBonus, m_ShotBreakdown, eHit_Success, bDebugLog);
 
 					WeaponUpgrades = SourceWeapon.GetMyWeaponUpgradeTemplates();
 					for (i = 0; i < WeaponUpgrades.Length; ++i)
@@ -336,7 +327,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 						{
 							if (WeaponUpgrades[i].AddHitChanceModifierFn(WeaponUpgrades[i], VisInfo, iWeaponMod))
 							{
-								AddModifier(iWeaponMod, WeaponUpgrades[i].GetItemFriendlyName());
+								AddModifier(iWeaponMod, WeaponUpgrades[i].GetItemFriendlyName(), m_ShotBreakdown, eHit_Success, bDebugLog);
 							}
 						}
 					}
@@ -344,23 +335,23 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 				//  Target defense
 				//  XModBase: Defensive modifiers are broken out separately in the shot breakdown.
 				//            Vanilla rolls them all into one "Defense" modifier.
-				AddModifier(-TargetState.GetBaseStat(eStat_Defense), class'XLocalizedData'.default.DefenseStat);			
+				AddModifier(-TargetState.GetBaseStat(eStat_Defense), class'XLocalizedData'.default.DefenseStat, m_ShotBreakdown, eHit_Success, bDebugLog);			
 				TargetState.GetStatModifiers(eStat_Defense, StatMods, StatModValues);
 				for (i = 0; i < StatMods.Length; ++i)
 				{
-					AddModifier(-int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName);
+					AddModifier(-int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}
 				
 				//  Add weapon range
 				if (SourceWeapon != none)
 				{
 					iRangeModifier = GetWeaponRangeModifier(UnitState, TargetState, SourceWeapon);
-					AddModifier(iRangeModifier, class'XLocalizedData'.default.WeaponRange);
+					AddModifier(iRangeModifier, class'XLocalizedData'.default.WeaponRange, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}			
 				//  Cover modifiers
 				if (bMeleeAttack)
 				{
-					AddModifier(MELEE_HIT_BONUS, class'XLocalizedData'.default.MeleeBonus, eHit_Success);
+					AddModifier(MELEE_HIT_BONUS, class'XLocalizedData'.default.MeleeBonus, m_ShotBreakdown, eHit_Success, bDebugLog);
 				}
 				else
 				{
@@ -368,16 +359,16 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 					if (TargetState.CanTakeCover())
 					{
 						// if any cover is being taken, factor in the angle to attack
-						if( VisInfo.TargetCover != CT_None )
+						if( VisInfo.TargetCover != CT_None && !bIgnoreCoverBonus )
 						{
 							switch( VisInfo.TargetCover )
 							{
 							case CT_MidLevel:           //  half cover
-								AddModifier(-LOW_COVER_BONUS, class'XLocalizedData'.default.TargetLowCover);
+								AddModifier(-LOW_COVER_BONUS, class'XLocalizedData'.default.TargetLowCover, m_ShotBreakdown, eHit_Success, bDebugLog);
 								CoverValue = LOW_COVER_BONUS;
 								break;
 							case CT_Standing:           //  full cover
-								AddModifier(-HIGH_COVER_BONUS, class'XLocalizedData'.default.TargetHighCover);
+								AddModifier(-HIGH_COVER_BONUS, class'XLocalizedData'.default.TargetHighCover, m_ShotBreakdown, eHit_Success, bDebugLog);
 								CoverValue = HIGH_COVER_BONUS;
 								break;
 							}
@@ -414,7 +405,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 										AngleToCoverModifier = Lerp(MAX_ANGLE_PENALTY,
 											MIN_ANGLE_PENALTY,
 											Alpha);
-										AddModifier(Round(-1.0 * AngleToCoverModifier), class'XLocalizedData'.default.BadAngleToTargetCover);
+										AddModifier(Round(-1.0 * AngleToCoverModifier), class'XLocalizedData'.default.BadAngleToTargetCover, m_ShotBreakdown, eHit_Success, bDebugLog);
 									}
 								}
 
@@ -424,7 +415,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 									AngleToCoverModifier = Lerp(MAX_ANGLE_BONUS_MOD,
 																MIN_ANGLE_BONUS_MOD,
 																Alpha);
-									AddModifier(Round(CoverValue * AngleToCoverModifier), class'XLocalizedData'.default.AngleToTargetCover);
+									AddModifier(Round(CoverValue * AngleToCoverModifier), class'XLocalizedData'.default.AngleToTargetCover, m_ShotBreakdown, eHit_Success, bDebugLog);
 								}
 							}
 						}
@@ -432,13 +423,13 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 					//  Add height advantage
 					if (UnitState.HasHeightAdvantageOver(TargetState, true))
 					{
-						AddModifier(class'X2TacticalGameRuleset'.default.UnitHeightAdvantageBonus, class'XLocalizedData'.default.HeightAdvantage);
+						AddModifier(class'X2TacticalGameRuleset'.default.UnitHeightAdvantageBonus, class'XLocalizedData'.default.HeightAdvantage, m_ShotBreakdown, eHit_Success, bDebugLog);
 					}
 
 					//  Check for height disadvantage
 					if (TargetState.HasHeightAdvantageOver(UnitState, false))
 					{
-						AddModifier(class'X2TacticalGameRuleset'.default.UnitHeightDisadvantagePenalty, class'XLocalizedData'.default.HeightDisadvantage);
+						AddModifier(class'X2TacticalGameRuleset'.default.UnitHeightDisadvantagePenalty, class'XLocalizedData'.default.HeightDisadvantage, m_ShotBreakdown, eHit_Success, bDebugLog);
 					}
 				}
 			}
@@ -450,37 +441,46 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 			else
 			{
 				if (SourceWeapon == none || SourceWeapon.CanWeaponBeDodged())
-					AddModifier(TargetState.GetCurrentStat(eStat_Dodge), class'XLocalizedData'.default.DodgeStat, eHit_Graze);
+				{
+					if (TargetState.CanDodge(UnitState, kAbility))
+					{
+						AddModifier(TargetState.GetCurrentStat(eStat_Dodge), class'XLocalizedData'.default.DodgeStat, m_ShotBreakdown, eHit_Graze, bDebugLog);
+					}
+					else
+					{
+						`log("Target cannot dodge due to some gameplay effect.", bDebugLog, 'XCom_HitRolls');
+					}
+				}
 			}
 		}					
 
 		//  Now check for critical chances.
 		if (bAllowCrit)
 		{
-			AddModifier(UnitState.GetBaseStat(eStat_CritChance), class'XLocalizedData'.default.CharCritChance, eHit_Crit);
+			AddModifier(UnitState.GetBaseStat(eStat_CritChance), class'XLocalizedData'.default.CharCritChance, m_ShotBreakdown, eHit_Crit, bDebugLog);
 			UnitState.GetStatModifiers(eStat_CritChance, StatMods, StatModValues);
 			for (i = 0; i < StatMods.Length; ++i)
 			{
-				AddModifier(int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName, eHit_Crit);
+				AddModifier(int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName, m_ShotBreakdown, eHit_Crit, bDebugLog);
 			}
 			if (bSquadsight)
 			{
-				AddModifier(default.SQUADSIGHT_CRIT_MOD, class'XLocalizedData'.default.SquadsightMod, eHit_Crit);
+				AddModifier(default.SQUADSIGHT_CRIT_MOD, class'XLocalizedData'.default.SquadsightMod, m_ShotBreakdown, eHit_Crit, bDebugLog);
 			}
 
 			if (SourceWeapon !=  none)
 			{
-				AddModifier(SourceWeapon.GetItemCritChance(), class'XLocalizedData'.default.WeaponCritBonus, eHit_Crit);
+				AddModifier(SourceWeapon.GetItemCritChance(), class'XLocalizedData'.default.WeaponCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
 			}
 			if (bFlanking && !bMeleeAttack)
 			{
 				if (`XENGINE.IsMultiplayerGame())
 				{
-					AddModifier(default.MP_FLANKING_CRIT_BONUS, class'XLocalizedData'.default.FlankingCritBonus, eHit_Crit);
+					AddModifier(default.MP_FLANKING_CRIT_BONUS, class'XLocalizedData'.default.FlankingCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
 				}				
 				else
 				{
-					AddModifier(UnitState.GetCurrentStat(eStat_FlankingCritChance), class'XLocalizedData'.default.FlankingCritBonus, eHit_Crit);
+					AddModifier(UnitState.GetCurrentStat(eStat_FlankingCritChance), class'XLocalizedData'.default.FlankingCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
 				}
 			}
 		}
@@ -488,7 +488,13 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		{
 			EffectModifiers.Length = 0;
 			EffectState = XComGameState_Effect(History.GetGameStateForObjectID(EffectRef.ObjectID));
+			if (EffectState == none)
+				continue;
+
 			PersistentEffect = EffectState.GetX2Effect();
+			if (PersistentEffect == none)
+				continue;
+
 			if (UniqueToHitEffects.Find(PersistentEffect) != INDEX_NONE)
 				continue;
 
@@ -505,7 +511,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 						if (!PersistentEffect.AllowCritOverride())
 							continue;
 					}
-					AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, EffectModifiers[i].ModType);
+					AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, m_ShotBreakdown, EffectModifiers[i].ModType, bDebugLog);
 				}
 			}
 			if (PersistentEffect.ShotsCannotGraze())
@@ -521,7 +527,13 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 			{
 				EffectModifiers.Length = 0;
 				EffectState = XComGameState_Effect(History.GetGameStateForObjectID(EffectRef.ObjectID));
+				if (EffectState == none)
+					continue;
+
 				PersistentEffect = EffectState.GetX2Effect();
+				if (PersistentEffect == none)
+					continue;
+
 				if (UniqueToHitEffects.Find(PersistentEffect) != INDEX_NONE)
 					continue;
 
@@ -535,7 +547,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 					{
 						if (!bAllowCrit && EffectModifiers[i].ModType == eHit_Crit)
 							continue;
-						AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, EffectModifiers[i].ModType);
+						AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, m_ShotBreakdown, EffectModifiers[i].ModType, bDebugLog);
 					}
 				}
 	
@@ -554,31 +566,31 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		//  Remove graze if shooter ignores graze chance.
 		if (bIgnoreGraze)
 		{
-			AddModifier(-m_ShotBreakdown.ResultTable[eHit_Graze], IgnoreGrazeReason, eHit_Graze);
+			AddModifier(-m_ShotBreakdown.ResultTable[eHit_Graze], IgnoreGrazeReason, m_ShotBreakdown, eHit_Graze, bDebugLog);
 		}
 		//  Remove crit if target is immune.
 		if (bIgnoreCrit)
 		{
-			AddModifier(-m_ShotBreakdown.ResultTable[eHit_Crit], IgnoreCritReason, eHit_Crit);
+			AddModifier(-m_ShotBreakdown.ResultTable[eHit_Crit], IgnoreCritReason, m_ShotBreakdown, eHit_Crit, bDebugLog);
 		}
 		//  Remove crit from reaction fire. Must be done last to remove all crit.
 		if (bReactionFire)
 		{
-			AddReactionCritModifier(UnitState, TargetState);
+			AddReactionCritModifier(UnitState, TargetState, m_ShotBreakdown, bDebugLog);
 		}
 	}
 
 	//  Final multiplier based on end Success chance
-	if (bReactionFire)
+	if (bReactionFire && !bGuaranteedHit)
 	{
 		FinalAdjust = m_ShotBreakdown.ResultTable[eHit_Success] * GetReactionAdjust(UnitState, TargetState);
-		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName);
-		AddReactionFlatModifier(UnitState, TargetState);
+		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
+		AddReactionFlatModifier(UnitState, TargetState, m_ShotBreakdown, bDebugLog);
 	}
 	else if (FinalMultiplier != 1.0f)
 	{
 		FinalAdjust = m_ShotBreakdown.ResultTable[eHit_Success] * FinalMultiplier;
-		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName);
+		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 	}
 
 	// XModBase: Apply final modifiers. These can read the whole shot breakdown. To avoid ordering 
@@ -612,15 +624,14 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 	}
 	for (i = 0; i < FinalEffectModifiers.Length; ++i)
 	{
-		AddModifier(FinalEffectModifiers[i].Value, FinalEffectModifiers[i].Reason, FinalEffectModifiers[i].ModType);
+		AddModifier(FinalEffectModifiers[i].Value, FinalEffectModifiers[i].Reason, m_ShotBreakdown, FinalEffectModifiers[i].ModType, bDebugLog);
 	}
 
-	FinalizeHitChance();
-	m_bDebugModifiers = false;
+	FinalizeHitChance(m_ShotBreakdown, bDebugLog);
 	return m_ShotBreakdown.FinalHitChance;
 }
 
-protected function AddModifier(const int ModValue, const string ModReason, optional EAbilityHitResult ModType=eHit_Success)
+protected function AddModifier(const int ModValue, const string ModReason, out ShotBreakdown m_ShotBreakdown, EAbilityHitResult ModType = eHit_Success, bool bDebugLog = false)
 {
 	local int i;
 
@@ -636,7 +647,7 @@ protected function AddModifier(const int ModValue, const string ModReason, optio
 		}
 	}
 
-	super.AddModifier(ModValue, ModReason, ModType);
+	super.AddModifier(ModValue, ModReason, m_ShotBreakdown, ModType, bDebugLog);
 }
 
 // XMBOverrideInterace

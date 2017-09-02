@@ -47,8 +47,6 @@ function bool IgnoreSquadsightPenalty(XComGameState_Effect EffectState, XComGame
 // breakdown, so they won't see the effects of other GetFinalToHitModifiers overrides.
 function GetFinalToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState, class<X2AbilityToHitCalc> ToHitType, bool bMelee, bool bFlanking, bool bIndirectFire, ShotBreakdown ShotBreakdown, out array<ShotModifierInfo> ShotModifiers);
 
-function bool ChangeHitResultForTarget(XComGameState_Unit Attacker, XComGameState_Unit TargetUnit, XComGameState_Ability AbilityState, const EAbilityHitResult CurrentResult, out EAbilityHitResult NewHitResult) { return false; }
-
 function OnPostTemplatesCreated();
 
 ////////////////////
@@ -64,15 +62,6 @@ function bool GetExtValue(LWTuple Data)
 
 	switch (Data.Id)
 	{
-	case 'ChangeHitResultForTarget':
-		if (ChangeHitResultForTarget(XComGameState_Unit(Data.Data[0].o), XComGameState_Unit(Data.Data[1].o), XComGameState_Ability(Data.Data[2].o), EAbilityHitResult(Data.Data[3].i), ChangeResult))
-		{
-			Data.Data[3].i = ChangeResult;
-			return true;
-		}
-		else
-			return false;
-
 	case 'OnPostTemplatesCreated':
 		if (HandledOnPostTemplatesCreated)
 			return false;
@@ -125,7 +114,7 @@ function GetToHitModifiers(XComGameState_Effect EffectState, XComGameState_Unit 
 		return;
 
 	// We want to make sure that other XMBEffect_Extended's effects are not included in our 
-	// calculation. Luckily, A2AbilityToHitCalc.HitModifiers is unused, so we use it as a flag to 
+	// calculation. Luckily, X2AbilityToHitCalc.HitModifiers is unused, so we use it as a flag to 
 	// indicate we are in a sub-calculation.
 	if (ToHitCalc.HitModifiers.Length > 0)
 		return;

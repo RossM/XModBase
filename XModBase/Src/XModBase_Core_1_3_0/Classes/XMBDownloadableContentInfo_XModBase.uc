@@ -335,9 +335,10 @@ static function int FindShotHUDPriority(name AbilityName)
 	local X2SoldierClassTemplateManager SoldierClassManager;
 	local array<X2SoldierClassTemplate> AllTemplates;
 	local X2SoldierClassTemplate Template;
-	local array<SoldierClassAbilityType> AbilityTree;
+	local array<SoldierClassAbilitySlot> AbilitySlots;
 	local int HighestLevel;
-	local int rank;
+	local int rank, i;
+	local bool bFound;
 
 	SoldierClassManager = class'X2SoldierClassTemplateManager'.static.GetSoldierClassTemplateManager();
 
@@ -351,8 +352,17 @@ static function int FindShotHUDPriority(name AbilityName)
 			if (rank <= HighestLevel)
 				continue;
 
-			AbilityTree = Template.GetAbilityTree(rank);
-			if (AbilityTree.Find('AbilityName', AbilityName) != INDEX_NONE)
+			bFound = false;
+			AbilitySlots = Template.GetAbilitySlots(rank);
+			for (i = 0; i < AbilitySlots.Length; i++)
+			{
+				if (AbilitySlots[i].AbilityType.AbilityName == AbilityName)
+				{
+					bFound = true;
+					break;
+				}
+			}
+			if (bFound)
 				HighestLevel = rank;
 		}
 	}
