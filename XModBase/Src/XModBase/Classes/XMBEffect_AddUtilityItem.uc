@@ -99,9 +99,8 @@ simulated function AddUtilityItem(XComGameState_Unit NewUnit, X2ItemTemplate Ite
 				ItemState = XComGameState_Item(History.GetGameStateForObjectID(NewUnit.InventoryItems[idx].ObjectID));
 			if (ItemState != none && !ItemState.bMergedOut && ItemState.GetMyTemplate() == WeaponTemplate)
 			{
-				ItemState = XComGameState_Item(NewGameState.CreateStateObject(ItemState.Class, ItemState.ObjectID));
+				ItemState = XComGameState_Item(NewGameState.ModifyStateObject(ItemState.class, ItemState.ObjectID));
 				ItemState.Ammo += BaseCharges + ItemState.MergedItemCount * BonusCharges;
-				NewGameState.AddStateObject(ItemState);
 				return;
 			}
 		}
@@ -114,7 +113,6 @@ simulated function AddUtilityItem(XComGameState_Unit NewUnit, X2ItemTemplate Ite
 	ItemState = EquipmentTemplate.CreateInstanceFromTemplate(NewGameState);
 	ItemState.Ammo = BaseCharges;
 	ItemState.Quantity = 0;  // Flag as not a real item
-	NewGameState.AddStateObject(ItemState);
 
 	// Temporarily turn off equipment restrictions so we can add the item to the unit's inventory
 	NewUnit.bIgnoreItemEquipRestrictions = true;

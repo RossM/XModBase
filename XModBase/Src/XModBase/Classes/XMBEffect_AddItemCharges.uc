@@ -105,9 +105,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 			if (modifier != 0)
 			{
-				ItemState = XComGameState_Item(NewGameState.CreateStateObject(ItemState.Class, ItemState.ObjectID));
+				ItemState = XComGameState_Item(NewGameState.ModifyStateObject(ItemState.class, ItemState.ObjectID));
 				ItemState.Ammo += modifier;
-				NewGameState.AddStateObject(ItemState);
 			}
 		}
 	}

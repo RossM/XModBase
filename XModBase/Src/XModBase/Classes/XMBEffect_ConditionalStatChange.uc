@@ -68,11 +68,8 @@ static function EventListenerReturn EventHandler(Object EventData, Object EventS
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Conditional Stat Change");
 
-		NewUnitState = XComGameState_Unit(NewGameState.CreateStateObject(class'XComGameState_Unit', UnitState.ObjectID));
-		NewEffectState = XComGameState_Effect(NewGameState.CreateStateObject(class'XComGameState_Effect', EffectState.ObjectID));
-
-		NewGameState.AddStateObject(NewUnitState);
-		NewGameState.AddStateObject(NewEffectState);
+		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+		NewEffectState = XComGameState_Effect(NewGameState.ModifyStateObject(class'XComGameState_Effect', EffectState.ObjectID));
 
 		if (bNewApplicable)
 		{

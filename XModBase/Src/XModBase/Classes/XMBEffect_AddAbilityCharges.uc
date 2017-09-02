@@ -87,9 +87,8 @@ simulated function AddCharges(XComGameState_Ability Ability, int Charges, XComGa
 			Weapon = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(Ability.SourceAmmo.ObjectID));
 			if (Weapon != none)
 			{
-				Weapon = XComGameState_Item(NewGameState.CreateStateObject(Weapon.class, Weapon.ObjectID));
+				Weapon = XComGameState_Item(NewGameState.ModifyStateObject(Weapon.class, Weapon.ObjectID));
 				Weapon.Ammo += Charges * Template.iAmmoAsChargesDivisor;
-				NewGameState.AddStateObject(Weapon);
 			}
 		}
 		else
@@ -97,17 +96,15 @@ simulated function AddCharges(XComGameState_Ability Ability, int Charges, XComGa
 			Weapon = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(Ability.SourceWeapon.ObjectID));
 			if (Weapon != none)
 			{
-				Weapon = XComGameState_Item(NewGameState.CreateStateObject(Weapon.class, Weapon.ObjectID));
+				Weapon = XComGameState_Item(NewGameState.ModifyStateObject(Weapon.class, Weapon.ObjectID));
 				Weapon.Ammo += Charges * Template.iAmmoAsChargesDivisor;
-				NewGameState.AddStateObject(Weapon);
 			}
 		}
 	}
 	else
 	{
-		Ability = XComGameState_Ability(NewGameState.CreateStateObject(Ability.class, Ability.ObjectID));
+		Ability = XComGameState_Ability(NewGameState.ModifyStateObject(Ability.class, Ability.ObjectID));
 		Ability.iCharges += Charges;
-		NewGameState.AddStateObject(Ability);
 	}
 }
 

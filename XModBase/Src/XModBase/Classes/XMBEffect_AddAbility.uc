@@ -51,8 +51,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 
 	History = `XCOMHISTORY;
 
-	OwnerUnitState = XComGameState_Unit(NewGameState.CreateStateObject(class'XComGameState_Unit', RemovedEffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
-	NewGameState.AddStateObject(OwnerUnitState);
+	OwnerUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', RemovedEffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 
 	foreach OwnerUnitState.AffectedByEffects(EffectRef)
 	{

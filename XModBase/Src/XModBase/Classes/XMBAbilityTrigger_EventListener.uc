@@ -75,19 +75,14 @@ simulated function RegisterListener(XComGameState_Ability AbilityState, Object F
 	Target = XMBGameState_EventTarget(Parent.FindComponentObject(class'XMBGameState_EventTarget', false));
 	if (Target == none)
 	{
-		Target = XMBGameState_EventTarget(NewGameState.CreateStateObject(class'XMBGameState_EventTarget'));
-		Parent = NewGameState.CreateStateObject(Parent.class, Parent.ObjectID);
+		Target = XMBGameState_EventTarget(NewGameState.CreateNewStateObject(class'XMBGameState_EventTarget'));
+		Parent = NewGameState.ModifyStateObject(Parent.class, Parent.ObjectID);
 
 		Parent.AddComponentObject(Target);
-
-		NewGameState.AddStateObject(Parent);
-		NewGameState.AddStateObject(Target);
 	}
 	else
 	{
-		Target = XMBGameState_EventTarget(NewGameState.CreateStateObject(Target.class, Target.ObjectID));
-
-		NewGameState.AddStateObject(Target);
+		Target = XMBGameState_EventTarget(NewGameState.ModifyStateObject(Target.class, Target.ObjectID));
 	}
 
 	Target.TriggeredAbilities.AddItem(AbilityState.GetReference());
