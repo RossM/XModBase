@@ -41,7 +41,10 @@
       <SubType>Content</SubType>
     </Content>
     <None Include="Src\XComGame\Classes\*.uc" />
-    <Content Include="Src\XModBase\Classes\*.uc">
+	  <None Include="Src\DLC_1\Classes\*.uc" />
+	  <None Include="Src\DLC_2\Classes\*.uc" />
+	  <None Include="Src\DLC_3\Classes\*.uc" />
+	  <Content Include="Src\XModBase\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase_Core_1_3_0\Classes\*.uc">
