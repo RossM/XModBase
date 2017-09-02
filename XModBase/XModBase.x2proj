@@ -22,9 +22,9 @@
     <Folder Include="Src\DLC_3\Classes\" />
     <Folder Include="Src\LW_Tuple" />
     <Folder Include="Src\LW_Tuple\Classes" />
-    <Folder Include="Src\XModBase_Core_1_3_0\Classes" />
+    <Folder Include="Src\XModBase_Core_2_0_0\Classes" />
     <Folder Include="Src\XModBase_Interfaces" />
-    <Folder Include="Src\XModBase_Core_1_3_0" />
+    <Folder Include="Src\XModBase_Core_2_0_0" />
     <Folder Include="Src\XComGame\" />
     <Folder Include="Src\XComGame\Classes\" />
     <Folder Include="Src\XModBase\" />
@@ -53,7 +53,7 @@
     <Content Include="Src\XModBase\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\XModBase_Core_1_3_0\Classes\*.uc">
+    <Content Include="Src\XModBase_Core_2_0_0\Classes\*.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\XModBase_Interfaces\Classes\*.uc">
