@@ -28,26 +28,20 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local XComGameState_Unit UnitState;
 	local X2EventManager EventMgr;
-	local XMBGameState_EventProxy Proxy;
-	local XComGameState NewGameState;
 	local Object ListenerObj;
 
 	EventMgr = `XEVENTMGR;
 
-	NewGameState = EffectGameState.GetParentGameState();
 	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 
-	Proxy = class'XMBGameState_EventProxy'.static.CreateProxy(EffectGameState, NewGameState);
-
-	ListenerObj = Proxy;
+	ListenerObj = EffectGameState;
 
 	// Register to tick after EVERY action.
-	Proxy.OnEvent = EventHandler;
-	EventMgr.RegisterForEvent(ListenerObj, 'OnUnitBeginPlay', class'XMBGameState_EventProxy'.static.EventHandler, ELD_OnStateSubmitted, 25, UnitState);	
-	EventMgr.RegisterForEvent(ListenerObj, 'AbilityActivated', class'XMBGameState_EventProxy'.static.EventHandler, ELD_OnStateSubmitted, 25);	
+	EventMgr.RegisterForEvent(ListenerObj, 'OnUnitBeginPlay', EventHandler, ELD_OnStateSubmitted, 25, UnitState,, EffectGameState);	
+	EventMgr.RegisterForEvent(ListenerObj, 'AbilityActivated', EventHandler, ELD_OnStateSubmitted, 25,,, EffectGameState);	
 }
 
-static function EventListenerReturn EventHandler(XComGameState_BaseObject SourceState, Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData)
+static function EventListenerReturn EventHandler(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_Unit UnitState, SourceUnitState, NewUnitState;
 	local XComGameState_Effect NewEffectState;
@@ -57,7 +51,7 @@ static function EventListenerReturn EventHandler(XComGameState_BaseObject Source
 	local XComGameState_Effect EffectState;
 	local bool bOldApplicable, bNewApplicable;
 
-	EffectState = XComGameState_Effect(SourceState);
+	EffectState = XComGameState_Effect(CallbackData);
 	if (EffectState == none)
 		return ELR_NoInterrupt;
 
