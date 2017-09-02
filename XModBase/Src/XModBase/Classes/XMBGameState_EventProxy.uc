@@ -23,9 +23,9 @@ var StateObjectReference SourceRef;
 var delegate<ProxyOnEventDelegate> OnEvent;
 var bool bTriggerOnceOnly;
 
-delegate EventListenerReturn ProxyOnEventDelegate(XComGameState_BaseObject SourceState, Object EventData, Object EventSource, XComGameState GameState, Name EventID);
+delegate EventListenerReturn ProxyOnEventDelegate(XComGameState_BaseObject SourceState, Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData);
 
-function EventListenerReturn EventHandler(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+function EventListenerReturn EventHandler(Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData)
 {
 	local X2EventManager EventMgr;
 	local XComGameState_BaseObject SourceState;
@@ -41,7 +41,7 @@ function EventListenerReturn EventHandler(Object EventData, Object EventSource, 
 	if (bTriggerOnceOnly)
 		EventMgr.UnRegisterFromEvent(ListenerObj, EventID);
 
-	return OnEvent(SourceState, EventData, EventSource, GameState, EventID);
+	return OnEvent(SourceState, EventData, EventSource, GameState, EventID, CallbackData);
 }
 
 static function XMBGameState_EventProxy CreateProxy(XComGameState_BaseObject SourceState, XComGameState NewGameState)

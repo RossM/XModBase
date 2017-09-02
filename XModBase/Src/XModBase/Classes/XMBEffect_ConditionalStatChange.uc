@@ -47,7 +47,7 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	EventMgr.RegisterForEvent(ListenerObj, 'AbilityActivated', class'XMBGameState_EventProxy'.static.EventHandler, ELD_OnStateSubmitted, 25);	
 }
 
-static function EventListenerReturn EventHandler(XComGameState_BaseObject SourceState, Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+static function EventListenerReturn EventHandler(XComGameState_BaseObject SourceState, Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData)
 {
 	local XComGameState_Unit UnitState, SourceUnitState, NewUnitState;
 	local XComGameState_Effect NewEffectState;

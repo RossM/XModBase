@@ -28,15 +28,12 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local X2AbilityTemplateManager AbilityTemplateMgr;
 	local X2AbilityTemplate AbilityTemplate;
 	local StateObjectReference AbilityRef;
-	local XComGameState_Ability NewAbility;
 
 	AbilityTemplateMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 
 	AbilityTemplate = AbilityTemplateMgr.FindAbilityTemplate(AbilityName);
 
 	AbilityRef = `TACTICALRULES.InitAbilityForUnit(AbilityTemplate, XComGameState_Unit(kNewTargetState), NewGameState, ApplyEffectParameters.ItemStateObjectRef);
-	NewAbility = XComGameState_Ability(NewGameState.GetGameStateForObjectID(AbilityRef.ObjectID));
-	NewAbility.CheckForPostBeginPlayActivation();
 
 	NewEffectState.CreatedObjectReference = AbilityRef;
 }

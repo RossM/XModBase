@@ -58,8 +58,6 @@ function bool GetTagValue(name Tag, XComGameState_Ability AbilityState, out stri
 
 function bool GetExtValue(LWTuple Data) 
 { 
-	local EAbilityHitResult ChangeResult;
-
 	switch (Data.Id)
 	{
 	case 'OnPostTemplatesCreated':

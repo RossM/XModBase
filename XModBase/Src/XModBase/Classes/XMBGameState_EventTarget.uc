@@ -21,7 +21,7 @@ class XMBGameState_EventTarget extends XComGameState_BaseObject;
 
 var array<StateObjectReference> TriggeredAbilities;
 
-function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData)
 {
 	local XComGameState_Ability AbilityState, SourceAbilityState;
 	local XComGameStateContext_Ability AbilityContext;
@@ -104,7 +104,7 @@ function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComG
 	return ELR_NoInterrupt;
 }
 
-function OnEndTacticalPlay()
+function OnEndTacticalPlay(XComGameState NewGameState)
 {
 	TriggeredAbilities.Length = 0;
 }

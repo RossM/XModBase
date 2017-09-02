@@ -836,23 +836,28 @@ simulated static function X2Condition_UnitProperty TargetWithinTiles(int Tiles)
 }
 
 // Set this as the VisualizationFn on an X2Effect_Persistent to have it display a flyover over the target when applied.
-simulated static function EffectFlyOver_Visualization(XComGameState VisualizeGameState, out VisualizationTrack BuildTrack, const name EffectApplyResult)
+simulated static function EffectFlyOver_Visualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
 	local X2Action_PlaySoundAndFlyOver	SoundAndFlyOver;
 	local X2AbilityTemplate             AbilityTemplate;
 	local XComGameStateContext_Ability  Context;
 	local AbilityInputContext           AbilityContext;
 	local EWidgetColor					MessageColor;
+	local XComGameState_Unit			SourceUnit;
+	local bool							bGoodAbility;
 
 	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 	AbilityContext = Context.InputContext;
 	AbilityTemplate = class'XComGameState_Ability'.static.GetMyTemplateManager().FindAbilityTemplate(AbilityContext.AbilityTemplateName);
 	
-	MessageColor = AbilityTemplate.Hostility == eHostility_Offensive ? eColor_Bad : eColor_Good;
+	SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(AbilityContext.SourceObject.ObjectID));
 
-	if (EffectApplyResult == 'AA_Success' && XGUnit(BuildTrack.TrackActor).IsAlive())
+	bGoodAbility = SourceUnit.IsFriendlyToLocalPlayer();
+	MessageColor = bGoodAbility ? eColor_Good : eColor_Bad;
+
+	if (EffectApplyResult == 'AA_Success' && XGUnit(ActionMetadata.VisualizeActor).IsAlive())
 	{
-		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTrack(BuildTrack, VisualizeGameState.GetContext()));
+		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
 		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, AbilityTemplate.LocFlyOverText, '', MessageColor, AbilityTemplate.IconImage);
 	}
 }
