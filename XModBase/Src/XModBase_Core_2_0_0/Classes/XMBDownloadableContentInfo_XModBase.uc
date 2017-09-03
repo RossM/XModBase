@@ -49,6 +49,8 @@ static function ChainAbilityTag()
 	local XMBOverrideInterface Override;
 	local LWTuple Tuple;
 
+	`Log("XModBase" @ default.MajorVersion $ "." $ default.MinorVersion $ "." $ default.PatchVersion $ ": ChainAbilityTag");
+
 	Engine = `XENGINE;
 
 	OldAbilityTag = Engine.AbilityTag;
@@ -86,6 +88,8 @@ static function AddUniversalAbilities()
 	local X2CharacterTemplateManager CharacterMgr;
 	local array<name> TemplateNames;
 	local name TemplateName, AbilityName;
+
+	`Log("XModBase" @ default.MajorVersion $ "." $ default.MinorVersion $ "." $ default.PatchVersion $ ": AddUniversalAbilities");
 
 	CharacterMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
 
@@ -125,6 +129,8 @@ static function AddGtsUnlocks()
 	local X2DataTemplate DataTemplate;
 	local X2FacilityTemplate Template;
 	local name UnlockName;
+
+	`Log("XModBase" @ default.MajorVersion $ "." $ default.MinorVersion $ "." $ default.PatchVersion $ ": AddGtsUnlocks");
 
 	StrategyManager = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
 	StrategyManager.FindDataTemplateAllDifficulties('OfficerTrainingSchool', DataTemplateAllDifficulties);
@@ -275,6 +281,8 @@ static function UpdateAbilities()
 	local array<name>							TemplateNames;
 	local name									AbilityName;
 	local int i;
+
+	`Log("XModBase" @ default.MajorVersion $ "." $ default.MinorVersion $ "." $ default.PatchVersion $ ": UpdateAbilities");
 
 	AbilityManager = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 

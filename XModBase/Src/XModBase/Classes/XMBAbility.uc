@@ -85,6 +85,8 @@ var const X2Condition_UnitProperty LivingFriendlyTargetProperty;	// The target i
 // Use this for ShotHUDPriority to have the priority calculated automatically
 var const int AUTO_PRIORITY;
 
+// This is an implementation detail. It holds templates added via AddSecondaryAbility().
+var array<X2AbilityTemplate> ExtraTemplates;
 
 // Checks if a conditional effect shouldn't have a bonus marker when active because it will always be active.
 static function bool AlwaysRelevant(XMBEffect_ConditionalBonus Effect)
@@ -794,7 +796,7 @@ static function AddSecondaryAbility(X2AbilityTemplate Template, X2AbilityTemplat
 		PersistentEffect.FriendlyDescription = Template.LocHelpText;
 	}
 
-	class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().AddAbilityTemplate(SecondaryTemplate);
+	XMBAbility(class'XComEngine'.static.GetClassDefaultObject(default.class)).ExtraTemplates.AddItem(SecondaryTemplate);
 }
 
 static function XMBEffect_ConditionalBonus AddBonusPassive(X2AbilityTemplate Template, name DataName = name(Template.DataName $ "_Bonuses"))
@@ -860,6 +862,41 @@ simulated static function EffectFlyOver_Visualization(XComGameState VisualizeGam
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
 		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, AbilityTemplate.LocFlyOverText, '', MessageColor, AbilityTemplate.IconImage);
 	}
+}
+
+// This is an implementation detail. We replace X2DataSet.CreateTemplatesEvent() in order to add 
+// extra templates that come from AddSecondaryAbility() calls.
+static event array<X2DataTemplate> CreateTemplatesEvent()
+{
+	local array<X2DataTemplate> BaseTemplates, NewTemplates;
+	local X2DataTemplate CurrentBaseTemplate;
+	local int Index;
+
+	BaseTemplates = CreateTemplates();
+	for (Index = 0; Index < default.ExtraTemplates.Length; ++Index)
+		BaseTemplates.AddItem(default.ExtraTemplates[Index]);
+
+	for( Index = 0; Index < BaseTemplates.Length; ++Index )
+	{
+		CurrentBaseTemplate = BaseTemplates[Index];
+		CurrentBaseTemplate.ClassThatCreatedUs = default.Class;
+
+		if( default.bShouldCreateDifficultyVariants )
+		{
+			CurrentBaseTemplate.bShouldCreateDifficultyVariants = true;
+		}
+
+		if( CurrentBaseTemplate.bShouldCreateDifficultyVariants )
+		{
+			CurrentBaseTemplate.CreateDifficultyVariants(NewTemplates);
+		}
+		else
+		{
+			NewTemplates.AddItem(CurrentBaseTemplate);
+		}
+	}
+
+	return NewTemplates;
 }
 
 
