@@ -33,6 +33,11 @@ var bool bRequireMiss;								// Set true to only change misses
 
 var EAbilityHitResult NewResult;					// The hit result to change to
 
+var name TriggeredEvent;							// An event that will be triggered when this effect changes a hit result.
+var bool bShowFlyOver;								// Show a flyover when this effect changes a hit result. Requires TriggeredEvent to be set.
+var name CountValueName;							// Name of the unit value to use to count the number of hit results changed per turn.
+var int MaxChangesPerTurn;							// Maximum number of hit results to change per turn. Requires CountUnitValue to be set.
+
 
 //////////////////////////
 // Condition properties //
@@ -46,9 +51,26 @@ var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of
 // Implementation //
 ////////////////////
 
+function RegisterForEvents(XComGameState_Effect EffectGameState)
+{
+	local X2EventManager EventMgr;
+	local XComGameState_Unit UnitState;
+	local Object EffectObj;
+
+	EventMgr = `XEVENTMGR;
+
+	EffectObj = EffectGameState;
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.SourceStateObjectRef.ObjectID));
+
+	if (bShowFlyOver && TriggeredEvent != '')
+		EventMgr.RegisterForEvent(EffectObj, TriggeredEvent, EffectGameState.TriggerAbilityFlyover, ELD_OnStateSubmitted, , UnitState);
+}
+
 function bool ChangeHitResultForAttacker(XComGameState_Unit Attacker, XComGameState_Unit TargetUnit, XComGameState_Ability AbilityState, const EAbilityHitResult CurrentResult, out EAbilityHitResult NewHitResult)
 {
+	local X2EventManager EventMgr;
 	local XComGameState_Effect EffectState;
+	local UnitValue CountUnitValue;
 
 	EffectState = Attacker.GetUnitAffectedByEffectState(EffectName);
 
@@ -66,6 +88,21 @@ function bool ChangeHitResultForAttacker(XComGameState_Unit Attacker, XComGameSt
 		return false;
 	if (bRequireMiss && !class'XComGameStateContext_Ability'.static.IsHitResultMiss(CurrentResult))
 		return false;
+
+	if (CountValueName != '')
+	{
+		Attacker.GetUnitValue(CountValueName, CountUnitValue);
+		if (MaxChangesPerTurn >= 0 && CountUnitValue.fValue >= MaxChangesPerTurn)
+			return false;
+
+		Attacker.SetUnitFloatValue(CountValueName, CountUnitValue.fValue + 1, eCleanup_BeginTurn);
+	}
+
+	if (TriggeredEvent != '')
+	{
+		EventMgr = `XEVENTMGR;
+		EventMgr.TriggerEvent(TriggeredEvent, AbilityState, Attacker);
+	}
 
 	NewHitResult = NewResult;
 	return true;
