@@ -55,41 +55,89 @@ var array<X2Condition> AbilityShooterConditions;	// Conditions on the shooter of
 simulated function RegisterListener(XComGameState_Ability AbilityState, Object FilterObject)
 {
 	local object TargetObj;
-	local XMBGameState_EventTarget Target;
-	local XComGameState NewGameState;
-	local XComGameState_BaseObject Parent;
 
-	NewGameState = AbilityState.GetParentGameState();
+	TargetObj = AbilityState;
 
-	Parent = XComGameState_BaseObject(FilterObject);
-	if (Parent == none)
-		Parent = `XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData');
+	`XEVENTMGR.RegisterForEvent(TargetObj, ListenerData.EventID, OnEvent, ListenerData.Deferral, ListenerData.Priority, FilterObject,, AbilityState );
+}
 
-	// Because our listener function will trigger every XMBAbilityTrigger_EventListener on the
-	// unit with a given event, we need to make sure that the event manager only calls it once
-	// per unit for an event even if there are several abilities with the same trigger. We
-	// could put it on the unit directly, but units have a lot of listeners we might clobber.
-	// Instead, create a dummy state object and attach the event listener to it. We make the
-	// dummy object a component of the unit to ensure that we can find it easily when 
-	// registering more events.
-	Target = XMBGameState_EventTarget(Parent.FindComponentObject(class'XMBGameState_EventTarget', false));
-	if (Target == none)
+static function EventListenerReturn OnEvent(Object EventData, Object EventSource, XComGameState GameState, Name EventID, object CallbackData)
+{
+	local XComGameState_Ability AbilityState, SourceAbilityState;
+	local XComGameStateContext_Ability AbilityContext;
+	local XComGameState_Unit SourceUnit, TargetUnit;
+	local XComGameStateHistory History;
+	local X2AbilityTrigger Trigger;
+	local XMBAbilityTrigger_EventListener EventListener;
+	local name AvailableCode;
+	local bool bSuccess;
+
+	History = `XCOMHISTORY;
+
+	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
+	if (EventId == 'AbilityActivated' && (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt))
+		return ELR_NoInterrupt;
+
+	AbilityState = XComGameState_Ability(EventData);
+	if (AbilityState == none && AbilityContext != none)
 	{
-		Target = XMBGameState_EventTarget(NewGameState.CreateNewStateObject(class'XMBGameState_EventTarget'));
-		Parent = NewGameState.ModifyStateObject(Parent.class, Parent.ObjectID);
-
-		Parent.AddComponentObject(Target);
+		AbilityState = XComGameState_Ability(GameState.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+		if (AbilityState == none)
+			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
 	}
-	else
+
+	TargetUnit = XComGameState_Unit(EventData);
+	if (TargetUnit == none && AbilityContext != none)
 	{
-		Target = XMBGameState_EventTarget(NewGameState.ModifyStateObject(Target.class, Target.ObjectID));
+		TargetUnit = XComGameState_Unit(GameState.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
 	}
 
-	Target.TriggeredAbilities.AddItem(AbilityState.GetReference());
+	SourceAbilityState = XComGameState_Ability(CallbackData);
+	SourceAbilityState = XComGameState_Ability(History.GetGameStateForObjectID(SourceAbilityState.ObjectID));
+	if (SourceAbilityState == none)
+		return ELR_NoInterrupt;
 
-	TargetObj = Target;
+	SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(SourceAbilityState.OwnerStateObject.ObjectID));
 
-	`XEVENTMGR.RegisterForEvent(TargetObj, ListenerData.EventID, class'XMBGameState_EventTarget'.static.OnEvent, ListenerData.Deferral, ListenerData.Priority, FilterObject);
+	foreach SourceAbilityState.GetMyTemplate().AbilityTriggers(Trigger)
+	{
+		EventListener = XMBAbilityTrigger_EventListener(Trigger);
+		if (EventListener != none && EventListener.ListenerData.EventID == EventID)
+		{
+			if (TargetUnit != none || EventListener.bSelfTarget)
+			{
+				AvailableCode = EventListener.ValidateAttack(SourceAbilityState, SourceUnit, TargetUnit, AbilityState);
+
+				if (AbilityState != none)
+				{
+				`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "(" $ AbilityState.GetMyTemplate().DataName $ ") =" @ AvailableCode);
+				}
+				else if (TargetUnit != none)
+				{
+				`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "(" $ TargetUnit $ ") =" @ AvailableCode);
+				}
+				else
+				{
+				`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ "=" @ AvailableCode);
+				}
+
+				if (AvailableCode == 'AA_Success')
+				{
+					if (EventListener.bSelfTarget)
+						bSuccess = SourceAbilityState.AbilityTriggerAgainstSingleTarget(SourceUnit.GetReference(), false);
+					else
+						bSuccess = SourceAbilityState.AbilityTriggerAgainstSingleTarget(TargetUnit.GetReference(), false);
+
+					if (!bSuccess)
+						`Log(SourceAbilityState.GetMyTemplate().DataName @ "event" @ EventID @ ": Activation failed! (" $ SourceAbilityState.CanActivateAbility(SourceUnit) $ ")");
+				}
+			}
+
+			break;
+		}			
+	}
+
+	return ELR_NoInterrupt;
 }
 
 function name ValidateAttack(XComGameState_Ability SourceAbilityState, XComGameState_Unit Attacker, XComGameState_Unit Target, XComGameState_Ability AbilityState)
